@@ -71,6 +71,9 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
 </style>
 
 <div class="pmp">
+<div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px">mapping</div>
+<div class="presets" id="mappingBtns"></div>
+<div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px;margin-top:8px">preset</div>
 <div class="presets" id="presets"></div>
 <div class="seq-input-row">
   <input type="text" id="seqInput" placeholder="Amino acid sequence (one-letter codes)..." maxlength="200"/>
@@ -107,7 +110,10 @@ const PS=[
   {name:'insulin B',seq:'FVNQHLCGSHLVEALYLVCG',desc:'Insulin B-chain (20aa) — the hormone sequence that regulates blood sugar'},
   {name:'VHH CDR3',seq:'AAEGRTFGSYYSY',desc:'VHH CDR3 loop (13aa) — nanobody antigen-binding region'}
 ];
-const NA={};Object.entries(AM).forEach(([aa,n])=>NA[n]=aa);
+let NA={};
+function rebuildNA(){NA={};Object.entries(AM).forEach(([aa,n])=>NA[n]=aa);}
+rebuildNA();
+let activeMapping=MAPPINGS[0].id;
 const WW=40,BW=24,WH=148,BH=96;
 let seq=[],playing=false,timers=[],ctx=null,presetActive='',savedInfoHTML='';
 
@@ -248,7 +254,22 @@ function loadCustom(){
   renderPresets();renderSeq();renderMelody();
   document.getElementById('infoBar').textContent=seq.length?`${seq.length} amino acids loaded`:'no valid amino acids found';
 }
-renderPiano();renderLegend();renderPresets();loadPreset(PS[0]);
+function renderMappingBtns(){
+  const wrap=document.getElementById('mappingBtns');wrap.innerHTML='';
+  MAPPINGS.forEach(m=>{
+    const btn=document.createElement('button');
+    btn.textContent=m.name;btn.className=m.id===activeMapping?'active':'';
+    btn.title=m.desc;
+    btn.onclick=()=>switchMapping(m.id);
+    wrap.appendChild(btn);
+  });
+}
+function switchMapping(id){
+  stopPlay();activeMapping=id;setMapping(id);rebuildNA();
+  renderMappingBtns();renderPiano();renderMelody();
+  document.getElementById('infoBar').textContent=MAPPINGS.find(m=>m.id===id)?.desc||'';
+}
+renderMappingBtns();renderPiano();renderLegend();renderPresets();loadPreset(PS[0]);
 
 /* Keyboard-to-piano mapping (two octave rows) */
 const KB={

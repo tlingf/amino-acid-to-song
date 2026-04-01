@@ -4,15 +4,15 @@ Turn protein sequences into music. Each of the 20 standard amino acids is mapped
 
 ## How it works
 
-Amino acids are assigned to notes so that common AAs land on white (diatonic) keys, rare AAs on black keys, and residues that often bind together form consonant intervals (perfect 5ths, 4ths, and 3rds). The mapping is defined in [`aa_mapping.js`](aa_mapping.js) and can be edited independently.
+Amino acids are assigned to notes so that simple AAs (linear/small side chains) land on white keys, complex AAs (rings, sulfur, cyclic) on black keys, with common AAs in octave 4 and rare AAs in octave 5. Binding pairs form consonant intervals. The mapping is defined in [`aa_mapping.js`](aa_mapping.js) and can be edited independently.
 
 | Group | Residues | Notes | Colour |
 |---|---|---|---|
-| Aliphatic | G A V P L I M | G5, E4, F4, F5, C5, D5, G#4 | Orange |
-| Polar | S T C N Q | B4, E5, D#4, C#4, F#5 | Green |
-| Aromatic | F Y W | F#4, C#5, A#4 | Purple |
-| Basic (+) | H K R | D#5, G4, A4 | Red-orange |
-| Acidic (-) | D E | C4, D4 | Blue |
+| Aliphatic | G A V P L I M | G4, D4, E4, D#4, C4, B4, F#4 | Orange |
+| Polar | S T C N Q | A4, D5, F#5, E5, G5 | Green |
+| Aromatic | F Y W | C#4, G#4, C#5 | Purple |
+| Basic (+) | H K R | D#5, C5, A#4 | Red-orange |
+| Acidic (-) | D E | F5, F4 | Blue |
 
 Hydrophobic residues (G, A, V, P, L, I, M, F, W) are labeled with "HP" on the piano keys.
 

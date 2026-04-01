@@ -1,28 +1,63 @@
 /*
- * Amino Acid ↔ Note Mapping
+ * Amino Acid ↔ Note Mappings
  *
- * Each of the 20 standard amino acids is mapped to one chromatic semitone
- * across two octaves (C4–G5). The mapping is designed so that:
- *   1. Common AAs land on white (diatonic) keys, rare AAs on black keys
- *   2. Salt-bridge pairs (K↔D, K↔E, R↔D, R↔E) form perfect 5ths/4ths
- *   3. Aromatic-stacking pairs (F↔Y, F↔W, Y↔W) form 5ths and 3rds
- *   4. Hydrophobic pair L↔V forms a perfect 5th
+ * Multiple named mappings, each assigning the 20 standard amino acids to
+ * chromatic semitones across two octaves (C4–G5).
  *
- * AM  — one-letter AA code → note  (e.g. L → C5)
- * AN  — one-letter AA code → full name
- * GR  — one-letter AA code → property group key
- * GC  — group key → colour / label config
- * HP  — set of hydrophobic residues
- * FR  — note → frequency (Hz, equal temperament A4=440)
+ * MAPPINGS — array of { id, name, desc, map } objects
+ * AM       — the active aa→note map (mutable, changed by setMapping)
+ * AN       — one-letter AA code → full name
+ * GR       — one-letter AA code → property group key
+ * GC       — group key → colour / label config
+ * HP       — set of hydrophobic residues
+ * FR       — note → frequency (Hz, equal temperament A4=440)
  */
 
-/* Amino acid → note */
-const AM = {
-  D: 'C4',   N: 'C#4',  E: 'D4',   C: 'D#4',  A: 'E4',
-  V: 'F4',   F: 'F#4',  K: 'G4',   M: 'G#4',  R: 'A4',
-  W: 'A#4',  S: 'B4',   L: 'C5',   Y: 'C#5',  I: 'D5',
-  H: 'D#5',  T: 'E5',   P: 'F5',   Q: 'F#5',  G: 'G5'
-};
+const MAPPINGS = [
+  {
+    id: 'complexity',
+    name: 'Complexity',
+    desc: 'White keys = side-chain complexity ladder (G→K). Black keys = structural modifications (rings, sulfur, cyclic). Binding pairs harmonized.',
+    map: {
+      G: 'C4',   P: 'C#4',  A: 'D4',   C: 'D#4',  S: 'E4',
+      T: 'F4',   M: 'F#4',  V: 'G4',   R: 'G#4',  L: 'A4',
+      F: 'A#4',  I: 'B4',   D: 'C5',   Y: 'C#5',  N: 'D5',
+      H: 'D#5',  E: 'E5',   Q: 'F5',   W: 'F#5',  K: 'G5'
+    }
+  },
+  {
+    id: 'frequency',
+    name: 'Frequency',
+    desc: 'Common AAs on octave 4, rare on octave 5. Simple AAs on white keys, complex on black. Binding pairs harmonized.',
+    map: {
+      L: 'C4',   F: 'C#4',  A: 'D4',   P: 'D#4',  V: 'E4',
+      E: 'F4',   M: 'F#4',  G: 'G4',   Y: 'G#4',  S: 'A4',
+      R: 'A#4',  I: 'B4',   K: 'C5',   W: 'C#5',  T: 'D5',
+      H: 'D#5',  N: 'E5',   D: 'F5',   C: 'F#5',  Q: 'G5'
+    }
+  },
+  {
+    id: 'physicochemical',
+    name: 'Physicochemical',
+    desc: 'Residue size/polarity order — small nonpolar at low end, charged at high end.',
+    map: {
+      G: 'C4',   A: 'C#4',  V: 'D4',   P: 'D#4',  L: 'E4',
+      I: 'F4',   M: 'F#4',  S: 'G4',   T: 'G#4',  F: 'A4',
+      C: 'A#4',  N: 'B4',   Q: 'C5',   Y: 'C#5',  H: 'D5',
+      K: 'D#5',  W: 'E5',   D: 'F5',   E: 'F#5',  R: 'G5'
+    }
+  }
+];
+
+/* Active mapping (mutable) */
+let AM = { ...MAPPINGS[0].map };
+
+function setMapping(id) {
+  const m = MAPPINGS.find(m => m.id === id);
+  if (!m) return;
+  Object.keys(AM).forEach(k => delete AM[k]);
+  Object.assign(AM, m.map);
+}
 
 /* Amino acid → full name */
 const AN = {
