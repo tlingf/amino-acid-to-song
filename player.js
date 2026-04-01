@@ -505,4 +505,4 @@ function updateInfoPanelNow(idx) {
 
 /* ── Init ── */
 renderMappingBtns(); renderLegend(); renderPanelRef(); renderPiano();
-renderPresets(); renderHarmonyBtns(); loadPreset(PS[0]);
+renderPresets(); renderHarmonyBtns(); loadComplex(COMPLEXES[0]);
