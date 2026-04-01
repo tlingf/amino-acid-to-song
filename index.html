@@ -3,15 +3,16 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Protein Melody Player</title>
+<title>AA Melody Player</title>
 <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
-<h1>Protein Melody Player</h1>
+<h1>AA Melody Player</h1>
+<p class="blurb">Amino acids, <span class="blurb-accent">like notes in a song</span>, form sequences that fold and then bind to each other, <span class="blurb-accent">like harmony in music</span>, that create the machinery of life.</p>
 
 <div class="pmp">
 <div class="mapping-panel">
-  <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px">mapping</div>
+  <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px">key mapping</div>
   <div class="presets" id="mappingBtns"></div>
   <div class="legend" id="legend"></div>
   <div class="detail-toggle" id="detailToggle" onclick="toggleDetails()">show details</div>
@@ -26,7 +27,10 @@
     <input type="text" id="seqInput" placeholder="Amino acid sequence (one-letter codes)..." maxlength="200" onkeydown="if(event.key==='Enter')loadCustom()"/>
     <button type="button" onclick="loadCustom()">submit</button>
   </div>
-  <div class="seq-mel" id="seqMel"></div>
+  <div class="seq-mel-wrap">
+    <div class="seq-row-labels" id="seqRowLabels"></div>
+    <div class="seq-mel" id="seqMel"></div>
+  </div>
   <div class="controls">
     <button class="play-btn" id="playBtn" onclick="togglePlay()">play</button>
     <div class="tempo-row">
@@ -40,7 +44,7 @@
     <div class="key-tooltip" id="keyTooltip"></div>
     <div class="piano-scroll"><div class="piano-wrap" id="pianoWrap"></div></div>
   </div>
-  <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:4px">play with your keyboard — A&thinsp;S&thinsp;D&thinsp;F… for white keys, W&thinsp;E&thinsp;T&thinsp;Y… for black keys</div>
+  <div class="kb-hint" id="kbHint">play with your keyboard — A&thinsp;S&thinsp;D&thinsp;F… for white keys, W&thinsp;E&thinsp;T&thinsp;Y… for black keys</div>
   <div class="aa-display" id="aaDisplay"></div>
 </div>
 <div class="info-panel" id="infoPanel">

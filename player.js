@@ -31,7 +31,7 @@ const KB = {
 /* ── State ── */
 let NA = {};
 let activeMapping = MAPPINGS[0].id;
-let seq = [], playing = false, timers = [], ctx = null;
+let seq = [], playing = false, paused = false, playIdx = 0, timers = [], ctx = null;
 let presetActive = '', savedInfoHTML = '';
 let activeComplex = null, contactMap = new Map();
 let detailsOpen = false;
@@ -73,19 +73,27 @@ function playNote(freq, dur) {
 
 /* ── Playback ── */
 function stopPlay() {
-  playing = false; timers.forEach(clearTimeout); timers = [];
+  playing = false; paused = false; playIdx = 0;
+  timers.forEach(clearTimeout); timers = [];
   document.getElementById('playBtn').textContent = 'play'; setActive(-1);
 }
 
-function togglePlay() {
-  if (playing) { stopPlay(); return; }
-  if (!seq.length) return;
-  playing = true; document.getElementById('playBtn').textContent = 'stop';
+function pausePlay() {
+  paused = true; playing = false;
+  timers.forEach(clearTimeout); timers = [];
+  document.getElementById('playBtn').textContent = 'play';
+}
+
+function startFrom(startIdx) {
+  playing = true; paused = false;
+  document.getElementById('playBtn').textContent = 'pause';
   const bpm = parseInt(document.getElementById('tempoSlider').value);
   const nd = 60 / bpm;
-  seq.forEach((aa, i) => {
+  seq.slice(startIdx).forEach((aa, j) => {
+    const i = startIdx + j;
     const t = setTimeout(() => {
       if (!playing) return;
+      playIdx = i + 1;
       const note = AM[aa]; if (note) playNote(FR[note], nd * 0.85);
       const contact = contactMap.get(i);
       if (contact) {
@@ -94,9 +102,16 @@ function togglePlay() {
       }
       setActive(i);
       if (i === seq.length - 1) setTimeout(() => { if (playing) stopPlay(); }, nd * 900);
-    }, i * nd * 1000);
+    }, j * nd * 1000);
     timers.push(t);
   });
+}
+
+function togglePlay() {
+  if (playing) { pausePlay(); return; }
+  if (!seq.length) return;
+  if (paused) { startFrom(playIdx); return; }
+  playIdx = 0; startFrom(0);
 }
 
 /* ── Active highlight + info bar ── */
@@ -104,7 +119,6 @@ function setActive(idx) {
   document.querySelectorAll('.aa-badge').forEach((el, i) => el.classList.toggle('active', i === idx));
   document.querySelectorAll('.partner-badge').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.contact-dot').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.mbar').forEach((el, i) => el.classList.toggle('active', i === idx));
 
   if (idx >= 0 && idx < seq.length) {
     const aa = seq[idx], note = AM[aa], g = GR[aa];
@@ -181,37 +195,23 @@ function hideTooltip() {
 /* ── Rendering ── */
 function renderSeqMel() {
   const wrap = document.getElementById('seqMel'); wrap.innerHTML = '';
-  if (activeComplex) {
-    const labels = document.createElement('div');
-    labels.className = 'chain-labels';
-    labels.innerHTML = `<span class="chain-label">${activeComplex.chainA.name}</span>`;
-    if (contactMap.size > 0) labels.innerHTML += ` <span class="chain-label" style="opacity:0.6">${activeComplex.chainB.name}</span>`;
-    wrap.appendChild(labels);
+  const labelWrap = document.getElementById('seqRowLabels'); labelWrap.innerHTML = '';
+  if (activeComplex && contactMap.size > 0) {
+    labelWrap.innerHTML =
+      `<div class="seq-row-label">${activeComplex.chainA.name}</div>`
+      + `<div class="seq-row-label-dot"></div>`
+      + `<div class="seq-row-label-partner">${activeComplex.chainB.name}</div>`;
   }
   seq.forEach((aa, i) => {
     const g = GR[aa] || 'ali', c = GC[g];
-    const note = AM[aa], idx = note ? NI[note] : 0, pct = idx / 19, h = Math.round(8 + pct * 38);
+    const note = AM[aa];
     const unit = document.createElement('div');
     unit.className = 'seq-unit';
-    const bar = document.createElement('div');
-    bar.className = 'mbar'; bar.style.height = h + 'px';
-    bar.style.background = c.bg; bar.style.border = `1px solid ${c.bk}`;
-    const contact = contactMap.get(i);
-    if (contact) {
-      const pg = GR[contact.aa] || 'ali', pc = GC[pg];
-      const pNote = AM[contact.aa], pIdx = pNote ? NI[pNote] : 0, pH = Math.round(8 + pIdx / 19 * 38);
-      const pBar = document.createElement('div');
-      pBar.className = 'mbar'; pBar.style.height = pH + 'px';
-      pBar.style.background = pc.bg; pBar.style.border = `1px dashed ${pc.bk}`;
-      pBar.style.opacity = '0.5';
-      bar.style.marginTop = 'auto';
-      unit.appendChild(pBar);
-    }
     const badge = document.createElement('div');
     badge.className = 'aa-badge'; badge.style.background = c.bg; badge.style.color = c.tx;
     badge.textContent = aa; badge.title = AN[aa] || aa;
-    unit.appendChild(bar);
     unit.appendChild(badge);
+    const contact = contactMap.get(i);
     if (contact) {
       const dot = document.createElement('div');
       dot.className = 'contact-dot'; dot.dataset.idx = i;
@@ -416,6 +416,7 @@ document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
   const note = KB[e.key.toLowerCase()];
   if (!note || kbDown.has(e.key)) return;
+  const hint = document.getElementById('kbHint'); if (hint) hint.style.display = 'none';
   if (kbDown.size === 0) savedInfoHTML = document.getElementById('infoBar').innerHTML;
   kbDown.set(e.key, note);
   playNote(FR[note], 0.5);
