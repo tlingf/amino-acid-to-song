@@ -17,7 +17,18 @@ const MAPPINGS = [
   {
     id: 'complexity',
     name: 'Complexity',
-    desc: 'White keys = side-chain complexity ladder (G→K). Black keys = structural modifications (rings, sulfur, cyclic). Binding pairs harmonized.',
+    desc: 'White = complexity ladder (G→K). Black = modification of neighboring white key (e.g. C#4:P next to C4:G, D#4:C next to E4:S).',
+    map: {
+      G: 'C4',   P: 'C#4',  A: 'D4',   C: 'D#4',  S: 'E4',
+      T: 'F4',   M: 'F#4',  V: 'G4',   W: 'G#4',  L: 'A4',
+      F: 'A#4',  I: 'B4',   D: 'C5',   Y: 'C#5',  N: 'D5',
+      H: 'D#5',  E: 'E5',   Q: 'F5',   R: 'F#5',  K: 'G5'
+    }
+  },
+  {
+    id: 'complexity-harmony',
+    name: 'Complexity (harmony)',
+    desc: 'Same complexity ladder, but black keys placed for binding-pair consonance (salt bridges = perfect fifths/fourths, aromatics = thirds/fourths).',
     map: {
       G: 'C4',   P: 'C#4',  A: 'D4',   C: 'D#4',  S: 'E4',
       T: 'F4',   M: 'F#4',  V: 'G4',   R: 'G#4',  L: 'A4',
@@ -34,17 +45,6 @@ const MAPPINGS = [
       E: 'F4',   M: 'F#4',  G: 'G4',   Y: 'G#4',  S: 'A4',
       R: 'A#4',  I: 'B4',   K: 'C5',   W: 'C#5',  T: 'D5',
       H: 'D#5',  N: 'E5',   D: 'F5',   C: 'F#5',  Q: 'G5'
-    }
-  },
-  {
-    id: 'physicochemical',
-    name: 'Physicochemical',
-    desc: 'Residue size/polarity order — small nonpolar at low end, charged at high end.',
-    map: {
-      G: 'C4',   A: 'C#4',  V: 'D4',   P: 'D#4',  L: 'E4',
-      I: 'F4',   M: 'F#4',  S: 'G4',   T: 'G#4',  F: 'A4',
-      C: 'A#4',  N: 'B4',   Q: 'C5',   Y: 'C#5',  H: 'D5',
-      K: 'D#5',  W: 'E5',   D: 'F5',   E: 'F#5',  R: 'G5'
     }
   }
 ];
