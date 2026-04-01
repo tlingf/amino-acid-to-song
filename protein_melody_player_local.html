@@ -74,17 +74,31 @@
 .wkey.lit{filter:brightness(0.75)}
 .bkey.lit{filter:brightness(1.35)}
 .klabel{font-size:9px;font-weight:500;line-height:1.1;text-align:center;pointer-events:none}
-.klabel-note{font-size:8px;opacity:0.55;line-height:1}
 .key-tooltip{position:absolute;bottom:164px;left:50%;transform:translateX(-50%);background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:5px 10px;font-size:12px;white-space:nowrap;pointer-events:none;display:none;z-index:10;color:var(--color-text-primary);box-shadow:none}
 .key-tooltip span{color:var(--color-text-secondary);margin-left:4px;font-size:11px}
 .legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--color-text-secondary);margin-top:0.75rem}
 .leg{display:flex;align-items:center;gap:5px}
 .leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-.hp-tag{font-size:7px;letter-spacing:0.5px;opacity:0.55;line-height:1;margin-top:1px}
-.leg-line{width:9px;height:2px;border-radius:1px;flex-shrink:0}
+.aa-display{display:flex;gap:16px;justify-content:center;min-height:170px;margin:0.75rem 0;align-items:flex-start;flex-wrap:wrap}
+.aa-card{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 12px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:var(--color-background-secondary);min-width:140px}
+.aa-card-name{font-size:14px;font-weight:600;color:var(--color-text-primary)}
+.aa-card-code{font-size:11px;color:var(--color-text-tertiary)}
+.aa-card svg{display:block}
+.aa-card svg text{font-family:var(--font-sans);fill:var(--color-text-primary)}
+.aa-card svg .bond{stroke:var(--color-text-secondary);stroke-width:1.5;fill:none}
+.aa-card svg .dbond{stroke:var(--color-text-secondary);stroke-width:1.5;fill:none}
+.aa-card svg .ring{stroke:var(--color-text-secondary);stroke-width:1.5;fill:none}
+.aa-card svg .atom{font-size:10px;text-anchor:middle;dominant-baseline:central}
+.aa-card svg .atom-N{fill:#2563eb}
+.aa-card svg .atom-O{fill:#dc2626}
+.aa-card svg .atom-S{fill:#ca8a04}
+.aa-card svg .atom-bg{font-size:9px;fill:var(--color-text-tertiary);text-anchor:middle;dominant-baseline:central}
 </style>
 
 <div class="pmp">
+<div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px">mapping</div>
+<div class="presets" id="mappingBtns"></div>
+<div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px;margin-top:8px">preset</div>
 <div class="presets" id="presets"></div>
 <div class="seq-input-row">
   <input type="text" id="seqInput" placeholder="Amino acid sequence (one-letter codes)..." maxlength="200"/>
@@ -106,6 +120,7 @@
   <div class="piano-scroll"><div class="piano-wrap" id="pianoWrap"></div></div>
 </div>
 <div class="legend" id="legend"></div>
+<div class="aa-display" id="aaDisplay"></div>
 </div>
 
 <script src="aa_mapping.js"></script>
@@ -121,9 +136,11 @@ const PS=[
   {name:'insulin B',seq:'FVNQHLCGSHLVEALYLVCG',desc:'Insulin B-chain (20aa) — the hormone sequence that regulates blood sugar'},
   {name:'VHH CDR3',seq:'AAEGRTFGSYYSY',desc:'VHH CDR3 loop (13aa) — nanobody antigen-binding region'}
 ];
-const NA={};Object.entries(AM).forEach(([aa,n])=>NA[n]=aa);
+let NA={};
+function rebuildNA(){NA={};Object.entries(AM).forEach(([aa,n])=>NA[n]=aa);}
+rebuildNA();
 const WW=40,BW=24,WH=148,BH=96;
-let seq=[],playing=false,timers=[],ctx=null,presetActive='',savedInfoHTML='';
+let seq=[],playing=false,timers=[],ctx=null,presetActive='',savedInfoHTML='',activeMapping=MAPPINGS[0].id;
 
 function getCtx(){if(!ctx)ctx=new(window.AudioContext||window.webkitAudioContext)();return ctx;}
 function playNote(freq,dur){
@@ -160,8 +177,8 @@ function setActive(idx){
   document.querySelectorAll('.mbar').forEach((el,i)=>el.classList.toggle('active',i===idx));
   if(idx>=0&&idx<seq.length){
     const aa=seq[idx],note=AM[aa],g=GR[aa];
-    const hpInfo=HP.has(aa)?' &middot; hydrophobic':'';
-    document.getElementById('infoBar').innerHTML=`<span style="font-size:15px;font-weight:500;color:var(--color-text-primary)">${aa}</span><span style="color:var(--color-text-secondary)">${AN[aa]||aa}</span><span style="margin-left:auto;font-size:12px;color:var(--color-text-tertiary)">${note||'?'} &middot; ${GC[g]?.label?.split(' ')[0]||g}${hpInfo}</span>`;
+    document.getElementById('infoBar').innerHTML=`<span style="font-size:15px;font-weight:500;color:var(--color-text-primary)">${aa}</span><span style="color:var(--color-text-secondary)">${AN[aa]||aa}</span><span style="margin-left:auto;font-size:12px;color:var(--color-text-tertiary)">${note||'?'} &middot; ${GC[g]?.label?.split(' ')[0]||g}</span>`;
+    showAADisplay([aa]);
     if(note){
       const cls='piano-key-'+note.replace('#','s');
       document.querySelectorAll('.'+cls).forEach(el=>el.classList.add('lit'));
@@ -172,8 +189,7 @@ function setActive(idx){
 function showTooltip(el,aa,note){
   const tip=document.getElementById('keyTooltip');
   if(!aa){tip.style.display='none';return;}
-  const hpTip=HP.has(aa)?' &middot; hydrophobic':'';
-  tip.innerHTML=`${AN[aa]}<span>${aa} &middot; ${note}${hpTip}</span>`;
+  tip.innerHTML=`${AN[aa]}<span>${aa} &middot; ${note}</span>`;
   const pianoArea=document.querySelector('.piano-area');
   const areaRect=pianoArea.getBoundingClientRect();
   const keyRect=el.getBoundingClientRect();
@@ -213,8 +229,7 @@ function renderPiano(){
     const el=document.createElement('div');
     el.className='wkey piano-key-'+note.replace('#','s');
     el.style.cssText=`left:${i*WW}px;width:${WW-1}px;height:${WH}px;background:${c?c.bg:'var(--color-background-primary)'}`;
-    const hpw=aa&&HP.has(aa)?'<div class="hp-tag">HP</div>':'';
-    el.innerHTML=`<div class="klabel" style="color:${c?c.tx:'var(--color-text-tertiary)'}">${aa||''}${hpw}</div>`;
+    el.innerHTML=`<div class="klabel" style="color:${c?c.tx:'var(--color-text-tertiary)'}">${aa||''}</div>`;
     el.onclick=()=>{if(aa)playNote(FR[note],0.5);};
     el.onmouseenter=()=>showTooltip(el,aa,note);
     el.onmouseleave=hideTooltip;
@@ -227,8 +242,7 @@ function renderPiano(){
     const el=document.createElement('div');
     el.className='bkey piano-key-'+note.replace('#','s');
     el.style.cssText=`left:${left}px;width:${BW}px;height:${BH}px;background:${bkBg}`;
-    const hpb=aa&&HP.has(aa)?'<div class="hp-tag">HP</div>':'';
-    el.innerHTML=aa?`<div class="klabel" style="color:${bkTx}">${aa}${hpb}</div>`:'';
+    el.innerHTML=aa?`<div class="klabel" style="color:${bkTx}">${aa}</div>`:'';
     el.onclick=()=>{if(aa)playNote(FR[note],0.5);};
     el.onmouseenter=()=>showTooltip(el,aa,note);
     el.onmouseleave=hideTooltip;
@@ -243,9 +257,6 @@ function renderLegend(){
     el.innerHTML=`<div class="leg-dot" style="background:${c.bk}"></div><span>${c.label}</span>`;
     leg.appendChild(el);
   });
-  const hpEl=document.createElement('div');hpEl.className='leg';
-  hpEl.innerHTML=`<div class="leg-line" style="background:var(--color-text-secondary)"></div><span>HP = Hydrophobic (G A V L I P M F W)</span>`;
-  leg.appendChild(hpEl);
 }
 function renderPresets(){
   const wrap=document.getElementById('presets');wrap.innerHTML='';
@@ -269,7 +280,91 @@ function loadCustom(){
   renderPresets();renderSeq();renderMelody();
   document.getElementById('infoBar').textContent=seq.length?`${seq.length} amino acids loaded`:'no valid amino acids found';
 }
-renderPiano();renderLegend();renderPresets();loadPreset(PS[0]);
+/* Amino acid 2D structures — atoms:[{x,y,l,cls}], bonds:[{a,b,d}] d=1 single, d=2 double */
+/* Backbone: H₂N—Cα—C(=O)—OH with side chain hanging off Cα */
+function mkBB(){return{
+  atoms:[{x:10,y:44,l:'H₂N',cls:'N'},{x:42,y:44,l:'Cα',cls:''},{x:74,y:44,l:'C',cls:''},{x:74,y:18,l:'O',cls:'O'},{x:106,y:44,l:'OH',cls:'O'}],
+  bonds:[{a:0,b:1,d:1},{a:1,b:2,d:1},{a:2,b:3,d:2},{a:2,b:4,d:1}]
+};}
+const SC={
+  G:{a:[],b:[]},
+  A:{a:[{x:42,y:76,l:'CH₃'}],b:[{a:1,b:5,d:1}]},
+  V:{a:[{x:42,y:76,l:'CH'},{x:14,y:100,l:'CH₃'},{x:70,y:100,l:'CH₃'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:5,b:7,d:1}]},
+  L:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:106,l:'CH'},{x:14,y:130,l:'CH₃'},{x:70,y:130,l:'CH₃'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:1},{a:6,b:8,d:1}]},
+  I:{a:[{x:42,y:76,l:'CH'},{x:14,y:100,l:'CH₃'},{x:70,y:100,l:'CH₂'},{x:70,y:126,l:'CH₃'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:5,b:7,d:1},{a:7,b:8,d:1}]},
+  P:{a:[{x:42,y:74,l:'CH₂'},{x:18,y:90,l:'CH₂'},{x:10,y:62,l:'CH₂'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:1},{a:7,b:0,d:1}]},
+  M:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:104,l:'CH₂'},{x:42,y:132,l:'S',cls:'S'},{x:42,y:156,l:'CH₃'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:1},{a:7,b:8,d:1}]},
+  S:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:104,l:'OH',cls:'O'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1}]},
+  T:{a:[{x:42,y:76,l:'CH'},{x:14,y:100,l:'OH',cls:'O'},{x:70,y:100,l:'CH₃'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:5,b:7,d:1}]},
+  C:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:104,l:'SH',cls:'S'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1}]},
+  N:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:106,l:'C'},{x:14,y:130,l:'O',cls:'O'},{x:70,y:130,l:'NH₂',cls:'N'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:2},{a:6,b:8,d:1}]},
+  Q:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:104,l:'CH₂'},{x:42,y:132,l:'C'},{x:14,y:156,l:'O',cls:'O'},{x:70,y:156,l:'NH₂',cls:'N'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:1},{a:7,b:8,d:2},{a:7,b:9,d:1}]},
+  D:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:106,l:'C'},{x:14,y:130,l:'O',cls:'O'},{x:70,y:130,l:'O⁻',cls:'O'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:2},{a:6,b:8,d:1}]},
+  E:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:104,l:'CH₂'},{x:42,y:132,l:'C'},{x:14,y:156,l:'O',cls:'O'},{x:70,y:156,l:'O⁻',cls:'O'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:1},{a:7,b:8,d:2},{a:7,b:9,d:1}]},
+  K:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:100,l:'CH₂'},{x:42,y:124,l:'CH₂'},{x:42,y:148,l:'CH₂'},{x:42,y:172,l:'NH₃⁺',cls:'N'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:1},{a:7,b:8,d:1},{a:8,b:9,d:1}]},
+  R:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:100,l:'CH₂'},{x:42,y:124,l:'CH₂'},{x:42,y:148,l:'NH',cls:'N'},{x:42,y:172,l:'C'},{x:14,y:194,l:'NH₂',cls:'N'},{x:70,y:194,l:'NH₂⁺',cls:'N'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:1},{a:7,b:8,d:1},{a:8,b:9,d:1},{a:9,b:10,d:1},{a:9,b:11,d:2}]},
+  H:{a:[{x:42,y:76,l:'CH₂'},{x:30,y:104,l:''},{x:54,y:104,l:''},{x:20,y:130,l:'N',cls:'N'},{x:54,y:130,l:'C'},{x:30,y:148,l:'C'},{x:50,y:148,l:'NH',cls:'N'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:5,b:7,d:2},{a:6,b:8,d:1},{a:7,b:9,d:1},{a:8,b:10,d:2},{a:8,b:11,d:1},{a:9,b:11,d:1},{a:9,b:10,d:1}]},
+  F:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:106,l:''},{x:22,y:118,l:''},{x:62,y:118,l:''},{x:22,y:142,l:''},{x:62,y:142,l:''},{x:42,y:154,l:''}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:5,b:7,d:2},{a:6,b:8,d:2},{a:7,b:9,d:1},{a:8,b:10,d:1},{a:9,b:11,d:2},{a:10,b:11,d:1}]},
+  Y:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:106,l:''},{x:22,y:118,l:''},{x:62,y:118,l:''},{x:22,y:142,l:''},{x:62,y:142,l:''},{x:42,y:154,l:''},{x:42,y:176,l:'OH',cls:'O'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:5,b:7,d:2},{a:6,b:8,d:2},{a:7,b:9,d:1},{a:8,b:10,d:1},{a:9,b:11,d:2},{a:10,b:11,d:1},{a:11,b:12,d:1}]},
+  W:{a:[{x:42,y:76,l:'CH₂'},{x:34,y:104,l:''},{x:20,y:116,l:''},{x:50,y:116,l:''},{x:10,y:140,l:''},{x:34,y:140,l:''},{x:62,y:128,l:''},{x:76,y:140,l:''},{x:62,y:156,l:''},{x:20,y:152,l:'NH',cls:'N'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:5,b:7,d:2},{a:6,b:9,d:2},{a:7,b:10,d:1},{a:9,b:14,d:1},{a:7,b:11,d:1},{a:11,b:12,d:2},{a:12,b:13,d:1},{a:10,b:14,d:2},{a:10,b:9,d:1},{a:13,b:10,d:1}]}
+};
+
+function renderStructSVG(aa){
+  const bb=mkBB();const sc=SC[aa];if(!sc)return '';
+  const atoms=[...bb.atoms,...sc.a];
+  const bonds=[...bb.bonds,...sc.b];
+  let maxY=60;atoms.forEach(a=>{if(a.y>maxY)maxY=a.y;});
+  const h=maxY+20;
+  let svg=`<svg width="120" height="${h}" viewBox="0 0 120 ${h}" xmlns="http://www.w3.org/2000/svg">`;
+  bonds.forEach(b=>{
+    const a1=atoms[b.a],a2=atoms[b.b];
+    if(b.d===2){
+      const dx=a2.x-a1.x,dy=a2.y-a1.y,len=Math.sqrt(dx*dx+dy*dy)||1;
+      const ox=(-dy/len)*2,oy=(dx/len)*2;
+      svg+=`<line class="bond" x1="${a1.x+ox}" y1="${a1.y+oy}" x2="${a2.x+ox}" y2="${a2.y+oy}"/>`;
+      svg+=`<line class="bond" x1="${a1.x-ox}" y1="${a1.y-oy}" x2="${a2.x-ox}" y2="${a2.y-oy}"/>`;
+    } else {
+      svg+=`<line class="bond" x1="${a1.x}" y1="${a1.y}" x2="${a2.x}" y2="${a2.y}"/>`;
+    }
+  });
+  atoms.forEach(a=>{
+    if(!a.l)return;
+    const cls=a.cls?` atom-${a.cls}`:'';
+    svg+=`<text class="atom${cls}" x="${a.x}" y="${a.y}">${a.l}</text>`;
+  });
+  svg+=`</svg>`;
+  return svg;
+}
+
+function showAADisplay(aaCodes){
+  const disp=document.getElementById('aaDisplay');
+  if(!aaCodes||aaCodes.length===0){disp.innerHTML='';return;}
+  disp.innerHTML=aaCodes.map(aa=>{
+    const g=GR[aa],c=GC[g];
+    return `<div class="aa-card">
+      <div class="aa-card-name" style="color:${c?c.bk:'var(--color-text-primary)'}">${AN[aa]}</div>
+      <div class="aa-card-code">${aa} &middot; ${AM[aa]} &middot; ${c?c.label.split(' ')[0]:''}</div>
+      ${renderStructSVG(aa)}
+    </div>`;
+  }).join('');
+}
+
+function renderMappingBtns(){
+  const wrap=document.getElementById('mappingBtns');wrap.innerHTML='';
+  MAPPINGS.forEach(m=>{
+    const btn=document.createElement('button');
+    btn.textContent=m.name;btn.className=m.id===activeMapping?'active':'';
+    btn.title=m.desc;
+    btn.onclick=()=>switchMapping(m.id);
+    wrap.appendChild(btn);
+  });
+}
+function switchMapping(id){
+  stopPlay();activeMapping=id;setMapping(id);rebuildNA();
+  renderMappingBtns();renderPiano();renderMelody();
+  document.getElementById('infoBar').textContent=MAPPINGS.find(m=>m.id===id)?.desc||'';
+}
+renderMappingBtns();renderPiano();renderLegend();renderPresets();loadPreset(PS[0]);
 
 /* Keyboard-to-piano mapping (two octave rows) */
 const KB={
@@ -281,12 +376,14 @@ const KB={
 const kbDown=new Map();
 function updateKbInfo(){
   const bar=document.getElementById('infoBar');
-  if(kbDown.size===0){bar.innerHTML=savedInfoHTML;return;}
-  const parts=[...kbDown.values()].map(note=>{
+  if(kbDown.size===0){bar.innerHTML=savedInfoHTML;showAADisplay([]);return;}
+  const notes=[...kbDown.values()];
+  const aas=notes.map(n=>NA[n]).filter(Boolean);
+  showAADisplay(aas);
+  const parts=notes.map(note=>{
     const aa=NA[note],g=aa?GR[aa]:null,c=aa?GC[g]:null;
-    const hpTag=aa&&HP.has(aa)?' <span style="opacity:0.5">hydrophobic</span>':'';
     const color=c?c.bk:'var(--color-text-primary)';
-    return aa?`<span style="font-weight:500;color:${color}">${AN[aa]}</span> <span style="color:var(--color-text-tertiary)">(${aa} ${note}${hpTag})</span>`
+    return aa?`<span style="font-weight:500;color:${color}">${AN[aa]}</span> <span style="color:var(--color-text-tertiary)">(${aa})</span>`
       :`<span style="color:var(--color-text-tertiary)">${note}</span>`;
   });
   bar.innerHTML=parts.join(' &nbsp;&middot;&nbsp; ');

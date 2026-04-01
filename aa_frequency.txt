@@ -1,0 +1,58 @@
+Amino Acid Frequency in Proteome (UniProtKB/Swiss-Prot)
+=======================================================
+Sorted most → least common. Source: ExPASy ProtScale / Swiss-Prot.
+
+Rank  Code  3-Letter  Full Name          Freq %
+----  ----  --------  -----------------  ------
+ 1    L     Leu       Leucine             9.66
+ 2    A     Ala       Alanine             8.25
+ 3    G     Gly       Glycine             7.07
+ 4    V     Val       Valine              6.87
+ 5    E     Glu       Glutamic Acid       6.75
+ 6    S     Ser       Serine              6.56
+ 7    I     Ile       Isoleucine          5.96
+ 8    K     Lys       Lysine              5.84
+ 9    R     Arg       Arginine            5.53
+10    D     Asp       Aspartic Acid       5.45
+11    T     Thr       Threonine           5.34
+12    P     Pro       Proline             4.70
+13    N     Asn       Asparagine          4.06
+14    Q     Gln       Glutamine           3.93
+15    F     Phe       Phenylalanine       3.86
+16    Y     Tyr       Tyrosine            2.92
+17    M     Met       Methionine          2.42
+18    H     His       Histidine           2.27
+19    C     Cys       Cysteine            1.37
+20    W     Trp       Tryptophan          1.08
+
+
+Three available mappings (switchable from UI):
+=============================================
+
+1. COMPLEXITY (default)
+   White keys = side-chain complexity ladder, black keys = structural modifications.
+
+   White:  G→C4  A→D4  S→E4  T→F4  V→G4  L→A4  I→B4  D→C5  N→D5  E→E5  Q→F5  K→G5
+   Black:  P→C#4  C→D#4  M→F#4  R→G#4  F→A#4  Y→C#5  H→D#5  W→F#5
+
+   Salt bridges:  K(G5)↔D(C5) perfect fifth, K(G5)↔E(E5) minor third,
+                  R(G#4)↔D(C5) major third, R(G#4)↔E(E5) minor sixth
+   Aromatics:     F(A#4)↔Y(C#5) minor third, F(A#4)↔W(F#5) minor sixth,
+                  Y(C#5)↔W(F#5) perfect fourth
+
+2. FREQUENCY
+   Common AAs in octave 4, rare in octave 5. Simple on white, complex on black.
+
+   White:  L→C4  A→D4  V→E4  E→F4  G→G4  S→A4  I→B4  K→C5  T→D5  N→E5  D→F5  Q→G5
+   Black:  F→C#4  P→D#4  M→F#4  Y→G#4  R→A#4  W→C#5  H→D#5  C→F#5
+
+   Salt bridges:  K(C5)↔E(F4) perfect fifth, R(A#4)↔D(F5) perfect fifth,
+                  K(C5)↔D(F5) perfect fourth, R(A#4)↔E(F4) perfect fourth
+   Aromatics:     F(C#4)↔Y(G#4) perfect fifth, F(C#4)↔W(C#5) octave,
+                  Y(G#4)↔W(C#5) perfect fourth
+
+3. PHYSICOCHEMICAL
+   Residue size/polarity order — small nonpolar at low end, charged at high end.
+
+   G→C4  A→C#4  V→D4  P→D#4  L→E4  I→F4  M→F#4  S→G4  T→G#4  F→A4
+   C→A#4  N→B4  Q→C5  Y→C#5  H→D5  K→D#5  W→E5  D→F5  E→F#5  R→G5
