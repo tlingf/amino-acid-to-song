@@ -4,396 +4,55 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Protein Melody Player</title>
-<style>
-:root {
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
-  --color-text-primary: #1a1a1a;
-  --color-text-secondary: #666;
-  --color-text-tertiary: #999;
-  --color-background-primary: #fff;
-  --color-background-secondary: #f5f5f5;
-  --color-border-primary: #1a1a1a;
-  --color-border-secondary: #ddd;
-  --color-border-tertiary: #eee;
-  --border-radius-md: 8px;
-}
-body {
-  font-family: var(--font-sans);
-  max-width: 640px;
-  margin: 2rem auto;
-  padding: 0 1rem;
-  background: var(--color-background-primary);
-  color: var(--color-text-primary);
-}
-h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
-</style>
+<link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
 <h1>Protein Melody Player</h1>
 
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-.pmp{padding:1.5rem 0;font-family:var(--font-sans)}
-.presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
-.presets button{font-size:12px;padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-primary);cursor:pointer}
-.presets button.active{background:var(--color-background-secondary);font-weight:500}
-.seq-input-row{display:flex;gap:8px;margin-bottom:0.75rem}
-.seq-input-row input{flex:1;padding:6px 10px;font-size:13px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-family:var(--font-mono)}
-.seq-input-row button{padding:6px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-primary);cursor:pointer;font-size:13px}
-.seq-row{display:flex;gap:3px;flex-wrap:wrap;min-height:32px;margin:0.5rem 0;align-items:center}
-.aa-badge{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:5px;font-size:13px;font-weight:500;cursor:default;opacity:0.6;transition:transform 0.1s,opacity 0.1s}
-.aa-badge.active{transform:scale(1.35);opacity:1;box-shadow:0 0 0 2px var(--color-border-primary)}
-.controls{display:flex;align-items:center;gap:12px;margin:0.5rem 0 1rem;flex-wrap:wrap}
-.play-btn{padding:6px 18px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-primary);cursor:pointer;font-size:14px;font-weight:500}
-.play-btn:hover{background:var(--color-background-secondary)}
-.tempo-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--color-text-secondary)}
-.info-bar{padding:8px 12px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);font-size:13px;color:var(--color-text-secondary);min-height:36px;display:flex;align-items:center;gap:8px;margin-bottom:0.75rem}
-.melbars{display:flex;align-items:flex-end;gap:2px;height:48px;margin:0.25rem 0;overflow-x:auto}
-.mbar{min-width:9px;border-radius:2px 2px 0 0;opacity:0.3;cursor:pointer;flex-shrink:0;transition:opacity 0.08s}
-.mbar.active{opacity:1}
-.mbar:hover{opacity:0.65}
-.piano-area{position:relative}
-.piano-scroll{overflow-x:auto;padding:4px 0}
-.piano-wrap{position:relative;width:576px;height:180px;margin:0 auto}
-.wkey{position:absolute;bottom:0;border:0.5px solid var(--color-border-secondary);border-radius:0 0 5px 5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:5px;transition:filter 0.1s}
-.bkey{position:absolute;top:0;border-radius:0 0 4px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:4px;z-index:2;transition:filter 0.1s}
-.wkey:hover,.bkey:hover{filter:brightness(0.88)}
-.wkey.lit{filter:brightness(0.75)}
-.bkey.lit{filter:brightness(1.35)}
-.klabel{font-size:11px;font-weight:600;line-height:1.1;text-align:center;pointer-events:none}
-.klabel-sub{font-size:9px;font-weight:400;opacity:0.7;line-height:1;margin-top:1px;pointer-events:none}
-.klabel-note{font-size:8px;opacity:0.55;line-height:1}
-.key-tooltip{position:absolute;bottom:194px;left:50%;transform:translateX(-50%);background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:5px 10px;font-size:12px;white-space:nowrap;pointer-events:none;display:none;z-index:10;color:var(--color-text-primary);box-shadow:none}
-.key-tooltip span{color:var(--color-text-secondary);margin-left:4px;font-size:11px}
-.aa-display{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:0.75rem}
-.aa-card{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 12px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:var(--color-background-secondary);min-width:140px}
-.aa-card-name{font-size:14px;font-weight:600;color:var(--color-text-primary)}
-.aa-card-code{font-size:11px;color:var(--color-text-tertiary)}
-.aa-card-blurb{font-size:11px;color:var(--color-text-secondary);max-width:200px;text-align:center;line-height:1.3}
-.aa-card svg{display:block}
-.aa-card svg text{font-family:var(--font-sans);fill:var(--color-text-primary)}
-.aa-card svg .bond{stroke:var(--color-text-secondary);stroke-width:1.5;fill:none}
-.aa-card svg .atom{font-size:10px;text-anchor:middle;dominant-baseline:central}
-.aa-card svg .atom-N{fill:#2563eb}
-.aa-card svg .atom-O{fill:#dc2626}
-.aa-card svg .atom-S{fill:#ca8a04}
-.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--color-text-secondary);margin-top:0.75rem}
-.leg{display:flex;align-items:center;gap:5px}
-.leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-</style>
-
 <div class="pmp">
-<div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px">mapping</div>
-<div class="presets" id="mappingBtns"></div>
-<div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px;margin-top:8px">preset</div>
-<div class="presets" id="presets"></div>
-<div class="seq-input-row">
-  <input type="text" id="seqInput" placeholder="Amino acid sequence (one-letter codes)..." maxlength="200"/>
-  <button onclick="loadCustom()">load</button>
+<div class="mapping-panel">
+  <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px">mapping</div>
+  <div class="presets" id="mappingBtns"></div>
+  <div class="legend" id="legend"></div>
+  <div class="detail-toggle" id="detailToggle" onclick="toggleDetails()">show details</div>
+  <div id="panelRef" style="display:none"></div>
 </div>
-<div class="seq-row" id="seqRow"></div>
-<div class="controls">
-  <button class="play-btn" id="playBtn" onclick="togglePlay()">play</button>
-  <div class="tempo-row">
-    <span>tempo</span>
-    <input type="range" min="40" max="300" value="120" step="1" id="tempoSlider" style="width:100px" oninput="document.getElementById('tempoOut').textContent=this.value"/>
-    <span id="tempoOut" style="min-width:36px;font-weight:500;color:var(--color-text-primary)">120</span>
+<div class="main-panel">
+  <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px">preset</div>
+  <div class="presets" id="presets"></div>
+  <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px;margin-top:4px">harmony · binding pairs</div>
+  <div class="presets" id="harmonyBtns"></div>
+  <div class="seq-input-row">
+    <input type="text" id="seqInput" placeholder="Amino acid sequence (one-letter codes)..." maxlength="200" onkeydown="if(event.key==='Enter')loadCustom()"/>
+    <button type="button" onclick="loadCustom()">submit</button>
+  </div>
+  <div class="seq-mel" id="seqMel"></div>
+  <div class="controls">
+    <button class="play-btn" id="playBtn" onclick="togglePlay()">play</button>
+    <div class="tempo-row">
+      <span>tempo</span>
+      <input type="range" min="40" max="300" value="120" step="1" id="tempoSlider" style="width:100px" oninput="document.getElementById('tempoOut').textContent=this.value"/>
+      <span id="tempoOut" style="min-width:36px;font-weight:500;color:var(--color-text-primary)">120</span>
+    </div>
+  </div>
+  <div class="info-bar" id="infoBar">select a preset or enter a sequence</div>
+  <div class="piano-area">
+    <div class="key-tooltip" id="keyTooltip"></div>
+    <div class="piano-scroll"><div class="piano-wrap" id="pianoWrap"></div></div>
+  </div>
+  <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:4px">play with your keyboard — A&thinsp;S&thinsp;D&thinsp;F… for white keys, W&thinsp;E&thinsp;T&thinsp;Y… for black keys</div>
+  <div class="aa-display" id="aaDisplay"></div>
+</div>
+<div class="info-panel" id="infoPanel">
+  <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px">protein info</div>
+  <div id="infoPanelContent">
+    <div class="info-panel-placeholder">select a preset or harmony complex</div>
   </div>
 </div>
-<div class="info-bar" id="infoBar">select a preset or enter a sequence</div>
-<div class="melbars" id="melBars"></div>
-<div class="piano-area">
-  <div class="key-tooltip" id="keyTooltip"></div>
-  <div class="piano-scroll"><div class="piano-wrap" id="pianoWrap"></div></div>
-</div>
-<div style="font-size:11px;color:var(--color-text-tertiary);margin-top:4px">play with your keyboard — A&thinsp;S&thinsp;D&thinsp;F… for white keys, W&thinsp;E&thinsp;T&thinsp;Y… for black keys</div>
-<div class="legend" id="legend"></div>
-<div class="aa-display" id="aaDisplay"></div>
 </div>
 
 <script src="aa_mapping.js"></script>
-<script>
-const MORD=['C4','C#4','D4','D#4','E4','F4','F#4','G4','G#4','A4','A#4','B4','C5','C#5','D5','D#5','E5','F5','F#5','G5'];
-const NI={};MORD.forEach((n,i)=>NI[n]=i);
-const WN=['C4','D4','E4','F4','G4','A4','B4','C5','D5','E5','F5','G5'];
-const BN=['C#4','D#4','F#4','G#4','A#4','C#5','D#5','F#5'];
-const BP={'C#4':0,'D#4':1,'F#4':3,'G#4':4,'A#4':5,'C#5':7,'D#5':8,'F#5':10};
-const PS=[
-  {name:'trp-cage',seq:'NLYIQWLKDGGPSSGRPPPS',desc:'Trp-cage (20aa) — smallest known folding protein; W rings out as the highest note'},
-  {name:'ubiquitin',seq:'MQIFVKTLTGKTITLEVEPS',desc:'Ubiquitin N-terminus (20aa) — the cell\'s molecular tag for degradation'},
-  {name:'insulin B',seq:'FVNQHLCGSHLVEALYLVCG',desc:'Insulin B-chain (20aa) — the hormone sequence that regulates blood sugar'},
-  {name:'VHH CDR3',seq:'AAEGRTFGSYYSY',desc:'VHH CDR3 loop (13aa) — nanobody antigen-binding region'}
-];
-let NA={};
-function rebuildNA(){NA={};Object.entries(AM).forEach(([aa,n])=>NA[n]=aa);}
-rebuildNA();
-let activeMapping=MAPPINGS[0].id;
-const WW=48,BW=30,WH=178,BH=112;
-let seq=[],playing=false,timers=[],ctx=null,presetActive='',savedInfoHTML='';
-
-function getCtx(){if(!ctx)ctx=new(window.AudioContext||window.webkitAudioContext)();return ctx;}
-function playNote(freq,dur){
-  const c=getCtx();if(c.state==='suspended')c.resume();
-  const o1=c.createOscillator(),o2=c.createOscillator(),g=c.createGain();
-  o1.type='triangle';o1.frequency.value=freq;o2.type='sine';o2.frequency.value=freq*2;
-  o1.connect(g);o2.connect(g);g.connect(c.destination);
-  const t=c.currentTime;
-  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.17,t+0.01);g.gain.exponentialRampToValueAtTime(0.001,t+dur*0.9);
-  o1.start(t);o2.start(t);o1.stop(t+dur);o2.stop(t+dur);
-}
-function stopPlay(){
-  playing=false;timers.forEach(clearTimeout);timers=[];
-  document.getElementById('playBtn').textContent='play';setActive(-1);
-}
-function togglePlay(){
-  if(playing){stopPlay();return;}
-  if(!seq.length)return;
-  playing=true;document.getElementById('playBtn').textContent='stop';
-  const bpm=parseInt(document.getElementById('tempoSlider').value);
-  const nd=60/bpm;
-  seq.forEach((aa,i)=>{
-    const t=setTimeout(()=>{
-      if(!playing)return;
-      const note=AM[aa];if(note)playNote(FR[note],nd*0.85);
-      setActive(i);
-      if(i===seq.length-1)setTimeout(()=>{if(playing)stopPlay();},nd*900);
-    },i*nd*1000);
-    timers.push(t);
-  });
-}
-function setActive(idx){
-  document.querySelectorAll('.aa-badge').forEach((el,i)=>el.classList.toggle('active',i===idx));
-  document.querySelectorAll('.mbar').forEach((el,i)=>el.classList.toggle('active',i===idx));
-  if(idx>=0&&idx<seq.length){
-    const aa=seq[idx],note=AM[aa],g=GR[aa];
-    document.getElementById('infoBar').innerHTML=`<span style="font-size:15px;font-weight:500;color:var(--color-text-primary)">${aa}</span><span style="color:var(--color-text-secondary)">${AN[aa]||aa} (${A3[aa]||''})</span><span style="margin-left:auto;font-size:12px;color:var(--color-text-tertiary)">${note||'?'} &middot; ${GC[g]?.label?.split(' ')[0]||g}</span>`;
-    showAADisplay([aa]);
-    if(note){
-      const cls='piano-key-'+note.replace('#','s');
-      document.querySelectorAll('.'+cls).forEach(el=>el.classList.add('lit'));
-      setTimeout(()=>document.querySelectorAll('.'+cls).forEach(el=>el.classList.remove('lit')),280);
-    }
-  }
-}
-function showTooltip(el,aa,note){
-  const tip=document.getElementById('keyTooltip');
-  if(!aa){tip.style.display='none';return;}
-  tip.innerHTML=`${AN[aa]}<span>${A3[aa]} &middot; ${aa} &middot; ${note}</span>`;
-  const pianoArea=document.querySelector('.piano-area');
-  const areaRect=pianoArea.getBoundingClientRect();
-  const keyRect=el.getBoundingClientRect();
-  const keyCenter=keyRect.left+keyRect.width/2-areaRect.left;
-  tip.style.display='block';
-  tip.style.left=keyCenter+'px';
-  tip.style.bottom='158px';
-  tip.style.transform='translateX(-50%)';
-}
-function hideTooltip(){
-  document.getElementById('keyTooltip').style.display='none';
-}
-function renderSeq(){
-  const row=document.getElementById('seqRow');row.innerHTML='';
-  seq.forEach(aa=>{
-    const g=GR[aa]||'ali',c=GC[g],el=document.createElement('div');
-    el.className='aa-badge';el.style.background=c.bg;el.style.color=c.tx;el.textContent=aa;el.title=AN[aa]||aa;
-    row.appendChild(el);
-  });
-}
-function renderMelody(){
-  const bars=document.getElementById('melBars');bars.innerHTML='';
-  const bw=Math.max(9,Math.floor(476/Math.max(seq.length,1))-2);
-  seq.forEach((aa,i)=>{
-    const note=AM[aa],idx=note?NI[note]:0,pct=(idx)/19,h=Math.round(8+pct*38);
-    const g=GR[aa]||'ali',c=GC[g],el=document.createElement('div');
-    el.className='mbar';el.style.height=h+'px';el.style.width=bw+'px';
-    el.style.background=c.bg;el.style.border=`1px solid ${c.bk}`;
-    el.onclick=()=>{if(note)playNote(FR[note],0.4);setActive(i);};
-    bars.appendChild(el);
-  });
-}
-function renderPiano(){
-  const wrap=document.getElementById('pianoWrap');wrap.innerHTML='';
-  WN.forEach((note,i)=>{
-    const aa=NA[note],g=aa?GR[aa]:null,c=aa?GC[g]:null;
-    const el=document.createElement('div');
-    el.className='wkey piano-key-'+note.replace('#','s');
-    el.style.cssText=`left:${i*WW}px;width:${WW-1}px;height:${WH}px;background:${c?c.bg:'var(--color-background-primary)'}`;
-    el.innerHTML=aa?`<div class="klabel" style="color:${c?c.tx:'var(--color-text-tertiary)'}">${aa}</div><div class="klabel-sub" style="color:${c?c.tx:'var(--color-text-tertiary)'}">${A3[aa]}</div>`:'';
-    el.onclick=()=>{if(aa){playNote(FR[note],0.5);showAADisplay([aa]);}};
-    el.onmouseenter=()=>showTooltip(el,aa,note);
-    el.onmouseleave=hideTooltip;
-    wrap.appendChild(el);
-  });
-  BN.forEach(note=>{
-    const aa=NA[note],g=aa?GR[aa]:null,c=aa?GC[g]:null;
-    const wi=BP[note],left=wi*WW+WW*0.7-BW/2;
-    const bkBg=c?c.bk:'#444441',bkTx=c?c.bg:'#F1EFE8';
-    const el=document.createElement('div');
-    el.className='bkey piano-key-'+note.replace('#','s');
-    el.style.cssText=`left:${left}px;width:${BW}px;height:${BH}px;background:${bkBg}`;
-    el.innerHTML=aa?`<div class="klabel" style="color:${bkTx}">${aa}</div><div class="klabel-sub" style="color:${bkTx}">${A3[aa]}</div>`:'';
-    el.onclick=()=>{if(aa){playNote(FR[note],0.5);showAADisplay([aa]);}};
-    el.onmouseenter=()=>showTooltip(el,aa,note);
-    el.onmouseleave=hideTooltip;
-    wrap.appendChild(el);
-  });
-}
-function renderLegend(){
-  const leg=document.getElementById('legend');leg.innerHTML='';
-  ['ali','pol','aro','pos','neg'].forEach(g=>{
-    const c=GC[g],el=document.createElement('div');
-    el.className='leg';
-    el.innerHTML=`<div class="leg-dot" style="background:${c.bk}"></div><span>${c.label}</span>`;
-    leg.appendChild(el);
-  });
-}
-function renderPresets(){
-  const wrap=document.getElementById('presets');wrap.innerHTML='';
-  PS.forEach(p=>{
-    const btn=document.createElement('button');
-    btn.textContent=p.name;btn.className=p.name===presetActive?'active':'';
-    btn.onclick=()=>loadPreset(p);
-    wrap.appendChild(btn);
-  });
-}
-function loadPreset(p){
-  stopPlay();presetActive=p.name;
-  document.getElementById('seqInput').value=p.seq;
-  seq=p.seq.toUpperCase().split('').filter(aa=>AM[aa]);
-  renderPresets();renderSeq();renderMelody();
-  document.getElementById('infoBar').textContent=p.desc;
-}
-function loadCustom(){
-  stopPlay();presetActive='';
-  seq=document.getElementById('seqInput').value.toUpperCase().split('').filter(aa=>AM[aa]);
-  renderPresets();renderSeq();renderMelody();
-  document.getElementById('infoBar').textContent=seq.length?`${seq.length} amino acids loaded`:'no valid amino acids found';
-}
-/* Amino acid 2D structures — atoms:[{x,y,l,cls}], bonds:[{a,b,d}] d=1 single, d=2 double */
-function mkBB(){return{
-  atoms:[{x:10,y:44,l:'H₂N',cls:'N'},{x:42,y:44,l:'Cα',cls:''},{x:74,y:44,l:'C',cls:''},{x:74,y:18,l:'O',cls:'O'},{x:106,y:44,l:'OH',cls:'O'}],
-  bonds:[{a:0,b:1,d:1},{a:1,b:2,d:1},{a:2,b:3,d:2},{a:2,b:4,d:1}]
-};}
-const SC={
-  G:{a:[],b:[]},
-  A:{a:[{x:42,y:76,l:'CH₃'}],b:[{a:1,b:5,d:1}]},
-  V:{a:[{x:42,y:76,l:'CH'},{x:14,y:100,l:'CH₃'},{x:70,y:100,l:'CH₃'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:5,b:7,d:1}]},
-  L:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:106,l:'CH'},{x:14,y:130,l:'CH₃'},{x:70,y:130,l:'CH₃'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:1},{a:6,b:8,d:1}]},
-  I:{a:[{x:42,y:76,l:'CH'},{x:14,y:100,l:'CH₃'},{x:70,y:100,l:'CH₂'},{x:70,y:126,l:'CH₃'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:5,b:7,d:1},{a:7,b:8,d:1}]},
-  P:{a:[{x:42,y:74,l:'CH₂'},{x:18,y:90,l:'CH₂'},{x:10,y:62,l:'CH₂'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:1},{a:7,b:0,d:1}]},
-  M:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:104,l:'CH₂'},{x:42,y:132,l:'S',cls:'S'},{x:42,y:156,l:'CH₃'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:1},{a:7,b:8,d:1}]},
-  S:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:104,l:'OH',cls:'O'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1}]},
-  T:{a:[{x:42,y:76,l:'CH'},{x:14,y:100,l:'OH',cls:'O'},{x:70,y:100,l:'CH₃'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:5,b:7,d:1}]},
-  C:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:104,l:'SH',cls:'S'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1}]},
-  N:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:106,l:'C'},{x:14,y:130,l:'O',cls:'O'},{x:70,y:130,l:'NH₂',cls:'N'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:2},{a:6,b:8,d:1}]},
-  Q:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:104,l:'CH₂'},{x:42,y:132,l:'C'},{x:14,y:156,l:'O',cls:'O'},{x:70,y:156,l:'NH₂',cls:'N'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:1},{a:7,b:8,d:2},{a:7,b:9,d:1}]},
-  D:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:106,l:'C'},{x:14,y:130,l:'O',cls:'O'},{x:70,y:130,l:'O⁻',cls:'O'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:2},{a:6,b:8,d:1}]},
-  E:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:104,l:'CH₂'},{x:42,y:132,l:'C'},{x:14,y:156,l:'O',cls:'O'},{x:70,y:156,l:'O⁻',cls:'O'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:1},{a:7,b:8,d:2},{a:7,b:9,d:1}]},
-  K:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:100,l:'CH₂'},{x:42,y:124,l:'CH₂'},{x:42,y:148,l:'CH₂'},{x:42,y:172,l:'NH₃⁺',cls:'N'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:1},{a:7,b:8,d:1},{a:8,b:9,d:1}]},
-  R:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:100,l:'CH₂'},{x:42,y:124,l:'CH₂'},{x:42,y:148,l:'NH',cls:'N'},{x:42,y:172,l:'C'},{x:14,y:194,l:'NH₂',cls:'N'},{x:70,y:194,l:'NH₂⁺',cls:'N'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:1},{a:7,b:8,d:1},{a:8,b:9,d:1},{a:9,b:10,d:1},{a:9,b:11,d:2}]},
-  H:{a:[{x:42,y:76,l:'CH₂'},{x:30,y:104,l:''},{x:54,y:104,l:''},{x:20,y:130,l:'N',cls:'N'},{x:54,y:130,l:'C'},{x:30,y:148,l:'C'},{x:50,y:148,l:'NH',cls:'N'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:5,b:7,d:2},{a:6,b:8,d:1},{a:7,b:9,d:1},{a:8,b:10,d:2},{a:8,b:11,d:1},{a:9,b:11,d:1},{a:9,b:10,d:1}]},
-  F:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:106,l:''},{x:22,y:118,l:''},{x:62,y:118,l:''},{x:22,y:142,l:''},{x:62,y:142,l:''},{x:42,y:154,l:''}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:5,b:7,d:2},{a:6,b:8,d:2},{a:7,b:9,d:1},{a:8,b:10,d:1},{a:9,b:11,d:2},{a:10,b:11,d:1}]},
-  Y:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:106,l:''},{x:22,y:118,l:''},{x:62,y:118,l:''},{x:22,y:142,l:''},{x:62,y:142,l:''},{x:42,y:154,l:''},{x:42,y:176,l:'OH',cls:'O'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:5,b:7,d:2},{a:6,b:8,d:2},{a:7,b:9,d:1},{a:8,b:10,d:1},{a:9,b:11,d:2},{a:10,b:11,d:1},{a:11,b:12,d:1}]},
-  W:{a:[{x:42,y:76,l:'CH₂'},{x:34,y:104,l:''},{x:20,y:116,l:''},{x:50,y:116,l:''},{x:10,y:140,l:''},{x:34,y:140,l:''},{x:62,y:128,l:''},{x:76,y:140,l:''},{x:62,y:156,l:''},{x:20,y:152,l:'NH',cls:'N'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:5,b:7,d:2},{a:6,b:9,d:2},{a:7,b:10,d:1},{a:9,b:14,d:1},{a:7,b:11,d:1},{a:11,b:12,d:2},{a:12,b:13,d:1},{a:10,b:14,d:2},{a:10,b:9,d:1},{a:13,b:10,d:1}]}
-};
-function renderStructSVG(aa){
-  const bb=mkBB();const sc=SC[aa];if(!sc)return '';
-  const atoms=[...bb.atoms,...sc.a];
-  const bonds=[...bb.bonds,...sc.b];
-  let maxY=60;atoms.forEach(a=>{if(a.y>maxY)maxY=a.y;});
-  const h=maxY+20;
-  let svg=`<svg width="120" height="${h}" viewBox="0 0 120 ${h}" xmlns="http://www.w3.org/2000/svg">`;
-  bonds.forEach(b=>{
-    const a1=atoms[b.a],a2=atoms[b.b];
-    if(b.d===2){
-      const dx=a2.x-a1.x,dy=a2.y-a1.y,len=Math.sqrt(dx*dx+dy*dy)||1;
-      const ox=(-dy/len)*2,oy=(dx/len)*2;
-      svg+=`<line class="bond" x1="${a1.x+ox}" y1="${a1.y+oy}" x2="${a2.x+ox}" y2="${a2.y+oy}"/>`;
-      svg+=`<line class="bond" x1="${a1.x-ox}" y1="${a1.y-oy}" x2="${a2.x-ox}" y2="${a2.y-oy}"/>`;
-    } else {
-      svg+=`<line class="bond" x1="${a1.x}" y1="${a1.y}" x2="${a2.x}" y2="${a2.y}"/>`;
-    }
-  });
-  atoms.forEach(a=>{
-    if(!a.l)return;
-    const cls=a.cls?` atom-${a.cls}`:'';
-    svg+=`<text class="atom${cls}" x="${a.x}" y="${a.y}">${a.l}</text>`;
-  });
-  svg+=`</svg>`;
-  return svg;
-}
-function showAADisplay(aaCodes){
-  const disp=document.getElementById('aaDisplay');
-  if(!aaCodes||aaCodes.length===0){disp.innerHTML='';return;}
-  disp.innerHTML=aaCodes.map(aa=>{
-    const g=GR[aa],c=GC[g];
-    return `<div class="aa-card">
-      <div class="aa-card-name" style="color:${c?c.bk:'var(--color-text-primary)'}">${AN[aa]} (${A3[aa]})</div>
-      <div class="aa-card-code">${aa} &middot; ${AM[aa]} &middot; ${c?c.label.split(' ')[0]:''}</div>
-      ${renderStructSVG(aa)}
-      <div class="aa-card-blurb">${AB[aa]||''}</div>
-    </div>`;
-  }).join('');
-}
-function renderMappingBtns(){
-  const wrap=document.getElementById('mappingBtns');wrap.innerHTML='';
-  MAPPINGS.forEach(m=>{
-    const btn=document.createElement('button');
-    btn.textContent=m.name;btn.className=m.id===activeMapping?'active':'';
-    btn.title=m.desc;
-    btn.onclick=()=>switchMapping(m.id);
-    wrap.appendChild(btn);
-  });
-}
-function switchMapping(id){
-  stopPlay();activeMapping=id;setMapping(id);rebuildNA();
-  renderMappingBtns();renderPiano();renderMelody();
-  document.getElementById('infoBar').textContent=MAPPINGS.find(m=>m.id===id)?.desc||'';
-}
-renderMappingBtns();renderPiano();renderLegend();renderPresets();loadPreset(PS[0]);
-
-/* Keyboard-to-piano mapping (two octave rows) */
-const KB={
-  'a':'C4','w':'C#4','s':'D4','e':'D#4','d':'E4','f':'F4','t':'F#4',
-  'g':'G4','y':'G#4','h':'A4','u':'A#4','j':'B4',
-  'k':'C5','o':'C#5','l':'D5','p':'D#5',';':'E5',"'":'F5',']':'F#5',
-  '\\':'G5'
-};
-const kbDown=new Map();
-function updateKbInfo(){
-  const bar=document.getElementById('infoBar');
-  if(kbDown.size===0){bar.innerHTML=savedInfoHTML;showAADisplay([]);return;}
-  const notes=[...kbDown.values()];
-  const parts=notes.map(note=>{
-    const aa=NA[note],g=aa?GR[aa]:null,c=aa?GC[g]:null;
-    const color=c?c.bk:'var(--color-text-primary)';
-    return aa?`<span style="font-weight:500;color:${color}">${AN[aa]}</span> <span style="color:var(--color-text-tertiary)">(${A3[aa]} &middot; ${note})</span>`
-      :`<span style="color:var(--color-text-tertiary)">${note}</span>`;
-  });
-  bar.innerHTML=parts.join(' &nbsp;&middot;&nbsp; ');
-  const aas=notes.map(n=>NA[n]).filter(Boolean);
-  showAADisplay(aas);
-}
-document.addEventListener('keydown',e=>{
-  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
-  const note=KB[e.key.toLowerCase()];
-  if(!note||kbDown.has(e.key))return;
-  if(kbDown.size===0)savedInfoHTML=document.getElementById('infoBar').innerHTML;
-  kbDown.set(e.key,note);
-  playNote(FR[note],0.5);
-  const cls='piano-key-'+note.replace('#','s');
-  document.querySelectorAll('.'+cls).forEach(el=>el.classList.add('lit'));
-  updateKbInfo();
-});
-document.addEventListener('keyup',e=>{
-  kbDown.delete(e.key);
-  const note=KB[e.key.toLowerCase()];
-  if(!note)return;
-  const cls='piano-key-'+note.replace('#','s');
-  document.querySelectorAll('.'+cls).forEach(el=>el.classList.remove('lit'));
-  updateKbInfo();
-});
-</script>
+<script src="aa_structures.js"></script>
+<script src="player.js"></script>
 </body>
 </html>
