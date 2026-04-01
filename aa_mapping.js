@@ -2,10 +2,13 @@
  * Amino Acid ↔ Note Mapping
  *
  * Each of the 20 standard amino acids is mapped to one chromatic semitone
- * across two octaves (C4–G5). The mapping follows residue size / polarity
- * order so that the melody roughly tracks physicochemical properties.
+ * across two octaves (C4–G5). The mapping is designed so that:
+ *   1. Common AAs land on white (diatonic) keys, rare AAs on black keys
+ *   2. Salt-bridge pairs (K↔D, K↔E, R↔D, R↔E) form perfect 5ths/4ths
+ *   3. Aromatic-stacking pairs (F↔Y, F↔W, Y↔W) form 5ths and 3rds
+ *   4. Hydrophobic pair L↔V forms a perfect 5th
  *
- * AM  — one-letter AA code → note  (e.g. G → C4)
+ * AM  — one-letter AA code → note  (e.g. L → C5)
  * AN  — one-letter AA code → full name
  * GR  — one-letter AA code → property group key
  * GC  — group key → colour / label config
@@ -15,10 +18,10 @@
 
 /* Amino acid → note */
 const AM = {
-  G: 'C4',   A: 'C#4',  V: 'D4',   P: 'D#4',  L: 'E4',
-  I: 'F4',   M: 'F#4',  S: 'G4',   T: 'G#4',  F: 'A4',
-  C: 'A#4',  N: 'B4',   Q: 'C5',   Y: 'C#5',  H: 'D5',
-  K: 'D#5',  W: 'E5',   D: 'F5',   E: 'F#5',  R: 'G5'
+  D: 'C4',   N: 'C#4',  E: 'D4',   C: 'D#4',  A: 'E4',
+  V: 'F4',   F: 'F#4',  K: 'G4',   M: 'G#4',  R: 'A4',
+  W: 'A#4',  S: 'B4',   L: 'C5',   Y: 'C#5',  I: 'D5',
+  H: 'D#5',  T: 'E5',   P: 'F5',   Q: 'F#5',  G: 'G5'
 };
 
 /* Amino acid → full name */
