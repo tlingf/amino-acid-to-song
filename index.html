@@ -66,6 +66,18 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
 .klabel-note{font-size:8px;opacity:0.55;line-height:1}
 .key-tooltip{position:absolute;bottom:194px;left:50%;transform:translateX(-50%);background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:5px 10px;font-size:12px;white-space:nowrap;pointer-events:none;display:none;z-index:10;color:var(--color-text-primary);box-shadow:none}
 .key-tooltip span{color:var(--color-text-secondary);margin-left:4px;font-size:11px}
+.aa-display{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:0.75rem}
+.aa-card{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 12px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:var(--color-background-secondary);min-width:140px}
+.aa-card-name{font-size:14px;font-weight:600;color:var(--color-text-primary)}
+.aa-card-code{font-size:11px;color:var(--color-text-tertiary)}
+.aa-card-blurb{font-size:11px;color:var(--color-text-secondary);max-width:200px;text-align:center;line-height:1.3}
+.aa-card svg{display:block}
+.aa-card svg text{font-family:var(--font-sans);fill:var(--color-text-primary)}
+.aa-card svg .bond{stroke:var(--color-text-secondary);stroke-width:1.5;fill:none}
+.aa-card svg .atom{font-size:10px;text-anchor:middle;dominant-baseline:central}
+.aa-card svg .atom-N{fill:#2563eb}
+.aa-card svg .atom-O{fill:#dc2626}
+.aa-card svg .atom-S{fill:#ca8a04}
 .legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--color-text-secondary);margin-top:0.75rem}
 .leg{display:flex;align-items:center;gap:5px}
 .leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
@@ -90,13 +102,14 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
   </div>
 </div>
 <div class="info-bar" id="infoBar">select a preset or enter a sequence</div>
-<div id="aaBlurb" style="font-size:12px;color:var(--color-text-secondary);min-height:18px;margin-bottom:0.5rem;line-height:1.4"></div>
 <div class="melbars" id="melBars"></div>
 <div class="piano-area">
   <div class="key-tooltip" id="keyTooltip"></div>
   <div class="piano-scroll"><div class="piano-wrap" id="pianoWrap"></div></div>
 </div>
+<div style="font-size:11px;color:var(--color-text-tertiary);margin-top:4px">play with your keyboard — A&thinsp;S&thinsp;D&thinsp;F… for white keys, W&thinsp;E&thinsp;T&thinsp;Y… for black keys</div>
 <div class="legend" id="legend"></div>
+<div class="aa-display" id="aaDisplay"></div>
 </div>
 
 <script src="aa_mapping.js"></script>
@@ -155,7 +168,7 @@ function setActive(idx){
   if(idx>=0&&idx<seq.length){
     const aa=seq[idx],note=AM[aa],g=GR[aa];
     document.getElementById('infoBar').innerHTML=`<span style="font-size:15px;font-weight:500;color:var(--color-text-primary)">${aa}</span><span style="color:var(--color-text-secondary)">${AN[aa]||aa} (${A3[aa]||''})</span><span style="margin-left:auto;font-size:12px;color:var(--color-text-tertiary)">${note||'?'} &middot; ${GC[g]?.label?.split(' ')[0]||g}</span>`;
-    document.getElementById('aaBlurb').textContent=AB[aa]||'';
+    showAADisplay([aa]);
     if(note){
       const cls='piano-key-'+note.replace('#','s');
       document.querySelectorAll('.'+cls).forEach(el=>el.classList.add('lit'));
@@ -207,7 +220,7 @@ function renderPiano(){
     el.className='wkey piano-key-'+note.replace('#','s');
     el.style.cssText=`left:${i*WW}px;width:${WW-1}px;height:${WH}px;background:${c?c.bg:'var(--color-background-primary)'}`;
     el.innerHTML=aa?`<div class="klabel" style="color:${c?c.tx:'var(--color-text-tertiary)'}">${aa}</div><div class="klabel-sub" style="color:${c?c.tx:'var(--color-text-tertiary)'}">${A3[aa]}</div>`:'';
-    el.onclick=()=>{if(aa){playNote(FR[note],0.5);document.getElementById('aaBlurb').textContent=AB[aa]||'';}};
+    el.onclick=()=>{if(aa){playNote(FR[note],0.5);showAADisplay([aa]);}};
     el.onmouseenter=()=>showTooltip(el,aa,note);
     el.onmouseleave=hideTooltip;
     wrap.appendChild(el);
@@ -220,7 +233,7 @@ function renderPiano(){
     el.className='bkey piano-key-'+note.replace('#','s');
     el.style.cssText=`left:${left}px;width:${BW}px;height:${BH}px;background:${bkBg}`;
     el.innerHTML=aa?`<div class="klabel" style="color:${bkTx}">${aa}</div><div class="klabel-sub" style="color:${bkTx}">${A3[aa]}</div>`:'';
-    el.onclick=()=>{if(aa){playNote(FR[note],0.5);document.getElementById('aaBlurb').textContent=AB[aa]||'';}};
+    el.onclick=()=>{if(aa){playNote(FR[note],0.5);showAADisplay([aa]);}};
     el.onmouseenter=()=>showTooltip(el,aa,note);
     el.onmouseleave=hideTooltip;
     wrap.appendChild(el);
@@ -257,6 +270,72 @@ function loadCustom(){
   renderPresets();renderSeq();renderMelody();
   document.getElementById('infoBar').textContent=seq.length?`${seq.length} amino acids loaded`:'no valid amino acids found';
 }
+/* Amino acid 2D structures — atoms:[{x,y,l,cls}], bonds:[{a,b,d}] d=1 single, d=2 double */
+function mkBB(){return{
+  atoms:[{x:10,y:44,l:'H₂N',cls:'N'},{x:42,y:44,l:'Cα',cls:''},{x:74,y:44,l:'C',cls:''},{x:74,y:18,l:'O',cls:'O'},{x:106,y:44,l:'OH',cls:'O'}],
+  bonds:[{a:0,b:1,d:1},{a:1,b:2,d:1},{a:2,b:3,d:2},{a:2,b:4,d:1}]
+};}
+const SC={
+  G:{a:[],b:[]},
+  A:{a:[{x:42,y:76,l:'CH₃'}],b:[{a:1,b:5,d:1}]},
+  V:{a:[{x:42,y:76,l:'CH'},{x:14,y:100,l:'CH₃'},{x:70,y:100,l:'CH₃'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:5,b:7,d:1}]},
+  L:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:106,l:'CH'},{x:14,y:130,l:'CH₃'},{x:70,y:130,l:'CH₃'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:1},{a:6,b:8,d:1}]},
+  I:{a:[{x:42,y:76,l:'CH'},{x:14,y:100,l:'CH₃'},{x:70,y:100,l:'CH₂'},{x:70,y:126,l:'CH₃'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:5,b:7,d:1},{a:7,b:8,d:1}]},
+  P:{a:[{x:42,y:74,l:'CH₂'},{x:18,y:90,l:'CH₂'},{x:10,y:62,l:'CH₂'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:1},{a:7,b:0,d:1}]},
+  M:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:104,l:'CH₂'},{x:42,y:132,l:'S',cls:'S'},{x:42,y:156,l:'CH₃'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:1},{a:7,b:8,d:1}]},
+  S:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:104,l:'OH',cls:'O'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1}]},
+  T:{a:[{x:42,y:76,l:'CH'},{x:14,y:100,l:'OH',cls:'O'},{x:70,y:100,l:'CH₃'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:5,b:7,d:1}]},
+  C:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:104,l:'SH',cls:'S'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1}]},
+  N:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:106,l:'C'},{x:14,y:130,l:'O',cls:'O'},{x:70,y:130,l:'NH₂',cls:'N'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:2},{a:6,b:8,d:1}]},
+  Q:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:104,l:'CH₂'},{x:42,y:132,l:'C'},{x:14,y:156,l:'O',cls:'O'},{x:70,y:156,l:'NH₂',cls:'N'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:1},{a:7,b:8,d:2},{a:7,b:9,d:1}]},
+  D:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:106,l:'C'},{x:14,y:130,l:'O',cls:'O'},{x:70,y:130,l:'O⁻',cls:'O'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:2},{a:6,b:8,d:1}]},
+  E:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:104,l:'CH₂'},{x:42,y:132,l:'C'},{x:14,y:156,l:'O',cls:'O'},{x:70,y:156,l:'O⁻',cls:'O'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:1},{a:7,b:8,d:2},{a:7,b:9,d:1}]},
+  K:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:100,l:'CH₂'},{x:42,y:124,l:'CH₂'},{x:42,y:148,l:'CH₂'},{x:42,y:172,l:'NH₃⁺',cls:'N'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:1},{a:7,b:8,d:1},{a:8,b:9,d:1}]},
+  R:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:100,l:'CH₂'},{x:42,y:124,l:'CH₂'},{x:42,y:148,l:'NH',cls:'N'},{x:42,y:172,l:'C'},{x:14,y:194,l:'NH₂',cls:'N'},{x:70,y:194,l:'NH₂⁺',cls:'N'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:6,b:7,d:1},{a:7,b:8,d:1},{a:8,b:9,d:1},{a:9,b:10,d:1},{a:9,b:11,d:2}]},
+  H:{a:[{x:42,y:76,l:'CH₂'},{x:30,y:104,l:''},{x:54,y:104,l:''},{x:20,y:130,l:'N',cls:'N'},{x:54,y:130,l:'C'},{x:30,y:148,l:'C'},{x:50,y:148,l:'NH',cls:'N'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:5,b:7,d:2},{a:6,b:8,d:1},{a:7,b:9,d:1},{a:8,b:10,d:2},{a:8,b:11,d:1},{a:9,b:11,d:1},{a:9,b:10,d:1}]},
+  F:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:106,l:''},{x:22,y:118,l:''},{x:62,y:118,l:''},{x:22,y:142,l:''},{x:62,y:142,l:''},{x:42,y:154,l:''}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:5,b:7,d:2},{a:6,b:8,d:2},{a:7,b:9,d:1},{a:8,b:10,d:1},{a:9,b:11,d:2},{a:10,b:11,d:1}]},
+  Y:{a:[{x:42,y:76,l:'CH₂'},{x:42,y:106,l:''},{x:22,y:118,l:''},{x:62,y:118,l:''},{x:22,y:142,l:''},{x:62,y:142,l:''},{x:42,y:154,l:''},{x:42,y:176,l:'OH',cls:'O'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:5,b:7,d:2},{a:6,b:8,d:2},{a:7,b:9,d:1},{a:8,b:10,d:1},{a:9,b:11,d:2},{a:10,b:11,d:1},{a:11,b:12,d:1}]},
+  W:{a:[{x:42,y:76,l:'CH₂'},{x:34,y:104,l:''},{x:20,y:116,l:''},{x:50,y:116,l:''},{x:10,y:140,l:''},{x:34,y:140,l:''},{x:62,y:128,l:''},{x:76,y:140,l:''},{x:62,y:156,l:''},{x:20,y:152,l:'NH',cls:'N'}],b:[{a:1,b:5,d:1},{a:5,b:6,d:1},{a:5,b:7,d:2},{a:6,b:9,d:2},{a:7,b:10,d:1},{a:9,b:14,d:1},{a:7,b:11,d:1},{a:11,b:12,d:2},{a:12,b:13,d:1},{a:10,b:14,d:2},{a:10,b:9,d:1},{a:13,b:10,d:1}]}
+};
+function renderStructSVG(aa){
+  const bb=mkBB();const sc=SC[aa];if(!sc)return '';
+  const atoms=[...bb.atoms,...sc.a];
+  const bonds=[...bb.bonds,...sc.b];
+  let maxY=60;atoms.forEach(a=>{if(a.y>maxY)maxY=a.y;});
+  const h=maxY+20;
+  let svg=`<svg width="120" height="${h}" viewBox="0 0 120 ${h}" xmlns="http://www.w3.org/2000/svg">`;
+  bonds.forEach(b=>{
+    const a1=atoms[b.a],a2=atoms[b.b];
+    if(b.d===2){
+      const dx=a2.x-a1.x,dy=a2.y-a1.y,len=Math.sqrt(dx*dx+dy*dy)||1;
+      const ox=(-dy/len)*2,oy=(dx/len)*2;
+      svg+=`<line class="bond" x1="${a1.x+ox}" y1="${a1.y+oy}" x2="${a2.x+ox}" y2="${a2.y+oy}"/>`;
+      svg+=`<line class="bond" x1="${a1.x-ox}" y1="${a1.y-oy}" x2="${a2.x-ox}" y2="${a2.y-oy}"/>`;
+    } else {
+      svg+=`<line class="bond" x1="${a1.x}" y1="${a1.y}" x2="${a2.x}" y2="${a2.y}"/>`;
+    }
+  });
+  atoms.forEach(a=>{
+    if(!a.l)return;
+    const cls=a.cls?` atom-${a.cls}`:'';
+    svg+=`<text class="atom${cls}" x="${a.x}" y="${a.y}">${a.l}</text>`;
+  });
+  svg+=`</svg>`;
+  return svg;
+}
+function showAADisplay(aaCodes){
+  const disp=document.getElementById('aaDisplay');
+  if(!aaCodes||aaCodes.length===0){disp.innerHTML='';return;}
+  disp.innerHTML=aaCodes.map(aa=>{
+    const g=GR[aa],c=GC[g];
+    return `<div class="aa-card">
+      <div class="aa-card-name" style="color:${c?c.bk:'var(--color-text-primary)'}">${AN[aa]} (${A3[aa]})</div>
+      <div class="aa-card-code">${aa} &middot; ${AM[aa]} &middot; ${c?c.label.split(' ')[0]:''}</div>
+      ${renderStructSVG(aa)}
+      <div class="aa-card-blurb">${AB[aa]||''}</div>
+    </div>`;
+  }).join('');
+}
 function renderMappingBtns(){
   const wrap=document.getElementById('mappingBtns');wrap.innerHTML='';
   MAPPINGS.forEach(m=>{
@@ -284,7 +363,7 @@ const KB={
 const kbDown=new Map();
 function updateKbInfo(){
   const bar=document.getElementById('infoBar');
-  if(kbDown.size===0){bar.innerHTML=savedInfoHTML;document.getElementById('aaBlurb').textContent='';return;}
+  if(kbDown.size===0){bar.innerHTML=savedInfoHTML;showAADisplay([]);return;}
   const notes=[...kbDown.values()];
   const parts=notes.map(note=>{
     const aa=NA[note],g=aa?GR[aa]:null,c=aa?GC[g]:null;
@@ -293,8 +372,8 @@ function updateKbInfo(){
       :`<span style="color:var(--color-text-tertiary)">${note}</span>`;
   });
   bar.innerHTML=parts.join(' &nbsp;&middot;&nbsp; ');
-  const lastNote=notes[notes.length-1],lastAA=NA[lastNote];
-  document.getElementById('aaBlurb').textContent=lastAA?AB[lastAA]||'':'';
+  const aas=notes.map(n=>NA[n]).filter(Boolean);
+  showAADisplay(aas);
 }
 document.addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
