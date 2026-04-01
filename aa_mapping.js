@@ -26,6 +26,17 @@ const MAPPINGS = [
     }
   },
   {
+    id: 'binding-chords',
+    name: 'Binding chords',
+    desc: 'Optimized for harmony: salt bridges (E–K, D–R) land on perfect fifths, hydrophobic contacts (L–I, F–I) on major thirds, aromatics (F–Y) on fifths, H-bonds (T–N, E–H) on minor thirds. Common AAs on octave 4 white keys.',
+    map: {
+      L: 'C4',   C: 'C#4',  A: 'D4',   W: 'D#4',  I: 'E4',
+      V: 'F4',   M: 'F#4',  E: 'G4',   F: 'G#4',  G: 'A4',
+      H: 'A#4',  S: 'B4',   D: 'C5',   N: 'C#5',  K: 'D5',
+      Y: 'D#5',  T: 'E5',   Q: 'F5',   P: 'F#5',  R: 'G5'
+    }
+  },
+  {
     id: 'complexity',
     name: 'Complexity',
     desc: 'White = complexity ladder (G→K). Black = modification of neighboring white key (e.g. C#4:P next to C4:G, D#4:C next to E4:S).',
