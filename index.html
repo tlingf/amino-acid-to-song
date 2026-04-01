@@ -20,7 +20,7 @@
 }
 body {
   font-family: var(--font-sans);
-  max-width: 600px;
+  max-width: 640px;
   margin: 2rem auto;
   padding: 0 1rem;
   background: var(--color-background-primary);
@@ -55,15 +55,16 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
 .mbar:hover{opacity:0.65}
 .piano-area{position:relative}
 .piano-scroll{overflow-x:auto;padding:4px 0}
-.piano-wrap{position:relative;width:480px;height:150px;margin:0 auto}
+.piano-wrap{position:relative;width:576px;height:180px;margin:0 auto}
 .wkey{position:absolute;bottom:0;border:0.5px solid var(--color-border-secondary);border-radius:0 0 5px 5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:5px;transition:filter 0.1s}
 .bkey{position:absolute;top:0;border-radius:0 0 4px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:4px;z-index:2;transition:filter 0.1s}
 .wkey:hover,.bkey:hover{filter:brightness(0.88)}
 .wkey.lit{filter:brightness(0.75)}
 .bkey.lit{filter:brightness(1.35)}
-.klabel{font-size:9px;font-weight:500;line-height:1.1;text-align:center;pointer-events:none}
+.klabel{font-size:11px;font-weight:600;line-height:1.1;text-align:center;pointer-events:none}
+.klabel-sub{font-size:9px;font-weight:400;opacity:0.7;line-height:1;margin-top:1px;pointer-events:none}
 .klabel-note{font-size:8px;opacity:0.55;line-height:1}
-.key-tooltip{position:absolute;bottom:164px;left:50%;transform:translateX(-50%);background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:5px 10px;font-size:12px;white-space:nowrap;pointer-events:none;display:none;z-index:10;color:var(--color-text-primary);box-shadow:none}
+.key-tooltip{position:absolute;bottom:194px;left:50%;transform:translateX(-50%);background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:5px 10px;font-size:12px;white-space:nowrap;pointer-events:none;display:none;z-index:10;color:var(--color-text-primary);box-shadow:none}
 .key-tooltip span{color:var(--color-text-secondary);margin-left:4px;font-size:11px}
 .legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--color-text-secondary);margin-top:0.75rem}
 .leg{display:flex;align-items:center;gap:5px}
@@ -89,6 +90,7 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
   </div>
 </div>
 <div class="info-bar" id="infoBar">select a preset or enter a sequence</div>
+<div id="aaBlurb" style="font-size:12px;color:var(--color-text-secondary);min-height:18px;margin-bottom:0.5rem;line-height:1.4"></div>
 <div class="melbars" id="melBars"></div>
 <div class="piano-area">
   <div class="key-tooltip" id="keyTooltip"></div>
@@ -114,7 +116,7 @@ let NA={};
 function rebuildNA(){NA={};Object.entries(AM).forEach(([aa,n])=>NA[n]=aa);}
 rebuildNA();
 let activeMapping=MAPPINGS[0].id;
-const WW=40,BW=24,WH=148,BH=96;
+const WW=48,BW=30,WH=178,BH=112;
 let seq=[],playing=false,timers=[],ctx=null,presetActive='',savedInfoHTML='';
 
 function getCtx(){if(!ctx)ctx=new(window.AudioContext||window.webkitAudioContext)();return ctx;}
@@ -152,7 +154,8 @@ function setActive(idx){
   document.querySelectorAll('.mbar').forEach((el,i)=>el.classList.toggle('active',i===idx));
   if(idx>=0&&idx<seq.length){
     const aa=seq[idx],note=AM[aa],g=GR[aa];
-    document.getElementById('infoBar').innerHTML=`<span style="font-size:15px;font-weight:500;color:var(--color-text-primary)">${aa}</span><span style="color:var(--color-text-secondary)">${AN[aa]||aa}</span><span style="margin-left:auto;font-size:12px;color:var(--color-text-tertiary)">${note||'?'} &middot; ${GC[g]?.label?.split(' ')[0]||g}</span>`;
+    document.getElementById('infoBar').innerHTML=`<span style="font-size:15px;font-weight:500;color:var(--color-text-primary)">${aa}</span><span style="color:var(--color-text-secondary)">${AN[aa]||aa} (${A3[aa]||''})</span><span style="margin-left:auto;font-size:12px;color:var(--color-text-tertiary)">${note||'?'} &middot; ${GC[g]?.label?.split(' ')[0]||g}</span>`;
+    document.getElementById('aaBlurb').textContent=AB[aa]||'';
     if(note){
       const cls='piano-key-'+note.replace('#','s');
       document.querySelectorAll('.'+cls).forEach(el=>el.classList.add('lit'));
@@ -163,7 +166,7 @@ function setActive(idx){
 function showTooltip(el,aa,note){
   const tip=document.getElementById('keyTooltip');
   if(!aa){tip.style.display='none';return;}
-  tip.innerHTML=`${AN[aa]}<span>${aa} &middot; ${note}</span>`;
+  tip.innerHTML=`${AN[aa]}<span>${A3[aa]} &middot; ${aa} &middot; ${note}</span>`;
   const pianoArea=document.querySelector('.piano-area');
   const areaRect=pianoArea.getBoundingClientRect();
   const keyRect=el.getBoundingClientRect();
@@ -203,8 +206,8 @@ function renderPiano(){
     const el=document.createElement('div');
     el.className='wkey piano-key-'+note.replace('#','s');
     el.style.cssText=`left:${i*WW}px;width:${WW-1}px;height:${WH}px;background:${c?c.bg:'var(--color-background-primary)'}`;
-    el.innerHTML=`<div class="klabel" style="color:${c?c.tx:'var(--color-text-tertiary)'}">${aa||''}</div>`;
-    el.onclick=()=>{if(aa)playNote(FR[note],0.5);};
+    el.innerHTML=aa?`<div class="klabel" style="color:${c?c.tx:'var(--color-text-tertiary)'}">${aa}</div><div class="klabel-sub" style="color:${c?c.tx:'var(--color-text-tertiary)'}">${A3[aa]}</div>`:'';
+    el.onclick=()=>{if(aa){playNote(FR[note],0.5);document.getElementById('aaBlurb').textContent=AB[aa]||'';}};
     el.onmouseenter=()=>showTooltip(el,aa,note);
     el.onmouseleave=hideTooltip;
     wrap.appendChild(el);
@@ -216,8 +219,8 @@ function renderPiano(){
     const el=document.createElement('div');
     el.className='bkey piano-key-'+note.replace('#','s');
     el.style.cssText=`left:${left}px;width:${BW}px;height:${BH}px;background:${bkBg}`;
-    el.innerHTML=aa?`<div class="klabel" style="color:${bkTx}">${aa}</div>`:'';
-    el.onclick=()=>{if(aa)playNote(FR[note],0.5);};
+    el.innerHTML=aa?`<div class="klabel" style="color:${bkTx}">${aa}</div><div class="klabel-sub" style="color:${bkTx}">${A3[aa]}</div>`:'';
+    el.onclick=()=>{if(aa){playNote(FR[note],0.5);document.getElementById('aaBlurb').textContent=AB[aa]||'';}};
     el.onmouseenter=()=>showTooltip(el,aa,note);
     el.onmouseleave=hideTooltip;
     wrap.appendChild(el);
@@ -281,14 +284,17 @@ const KB={
 const kbDown=new Map();
 function updateKbInfo(){
   const bar=document.getElementById('infoBar');
-  if(kbDown.size===0){bar.innerHTML=savedInfoHTML;return;}
-  const parts=[...kbDown.values()].map(note=>{
+  if(kbDown.size===0){bar.innerHTML=savedInfoHTML;document.getElementById('aaBlurb').textContent='';return;}
+  const notes=[...kbDown.values()];
+  const parts=notes.map(note=>{
     const aa=NA[note],g=aa?GR[aa]:null,c=aa?GC[g]:null;
     const color=c?c.bk:'var(--color-text-primary)';
-    return aa?`<span style="font-weight:500;color:${color}">${AN[aa]}</span> <span style="color:var(--color-text-tertiary)">(${aa} ${note})</span>`
+    return aa?`<span style="font-weight:500;color:${color}">${AN[aa]}</span> <span style="color:var(--color-text-tertiary)">(${A3[aa]} &middot; ${note})</span>`
       :`<span style="color:var(--color-text-tertiary)">${note}</span>`;
   });
   bar.innerHTML=parts.join(' &nbsp;&middot;&nbsp; ');
+  const lastNote=notes[notes.length-1],lastAA=NA[lastNote];
+  document.getElementById('aaBlurb').textContent=lastAA?AB[lastAA]||'':'';
 }
 document.addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;

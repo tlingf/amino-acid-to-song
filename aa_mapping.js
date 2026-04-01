@@ -88,6 +88,37 @@ const GC = {
   neg: { bg: '#E6F1FB', tx: '#0C447C', bk: '#378ADD', label: 'Acidic \u2212 (D E)' }
 };
 
+/* Amino acid → three-letter abbreviation */
+const A3 = {
+  G: 'Gly', A: 'Ala', V: 'Val', P: 'Pro', L: 'Leu', I: 'Ile', M: 'Met',
+  S: 'Ser', T: 'Thr', F: 'Phe', C: 'Cys', N: 'Asn', Q: 'Gln', Y: 'Tyr',
+  H: 'His', K: 'Lys', W: 'Trp', D: 'Asp', E: 'Glu', R: 'Arg'
+};
+
+/* Amino acid → short description */
+const AB = {
+  G: 'Smallest amino acid. Extreme flexibility — found in tight turns and loops.',
+  A: 'Simple and compact. A helix-lover — the most common residue in α-helices.',
+  V: 'Branched and bulky. Prefers buried β-sheets; resists helix formation.',
+  P: 'The only cyclic residue. Acts as a structural "kink" — breaks helices and introduces rigid turns.',
+  L: 'Long hydrophobic side chain. A workhorse in protein cores and coiled-coils.',
+  I: 'Branched at Cβ like Val. Strong β-sheet preference; common in membrane proteins.',
+  M: 'Flexible sulfur-containing chain. Often the start codon residue (initiator Met).',
+  S: 'Small polar hydroxyl. Frequent phosphorylation site — a key signaling switch.',
+  T: 'Polar with a methyl branch. Also a phosphorylation target; common in glycoproteins.',
+  F: 'Benzene ring, no hydroxyl. Drives hydrophobic packing; participates in π-stacking.',
+  C: 'Thiol side chain. Forms disulfide bonds (S–S) that cross-link and stabilize structure.',
+  N: 'Short polar amide. Caps helix ends; common in N-linked glycosylation sites (N-X-S/T).',
+  Q: 'Longer polar amide. Participates in coiled-coil "polar layers" and hydrogen-bond networks.',
+  Y: 'Phenol ring — aromatic + hydroxyl. Phosphorylation target in kinase signaling cascades.',
+  H: 'Imidazole ring, pKa ≈ 6. Switches charge near physiological pH — critical in enzyme catalysis.',
+  K: 'Long flexible amine. Ubiquitination and acetylation target; key in histone regulation.',
+  W: 'Largest amino acid. Indole ring absorbs UV at 280 nm — anchors membrane-protein interfaces.',
+  D: 'Short acidic carboxyl. Chelates metal ions (Ca²⁺, Mg²⁺); common in enzyme active sites.',
+  E: 'Longer acidic carboxyl. Strong helix former; prominent in salt bridges with Arg/Lys.',
+  R: 'Guanidinium group, always charged. Forms bidentate salt bridges; reads DNA in the major groove.'
+};
+
 /* Hydrophobic residues */
 const HP = new Set(['G', 'A', 'V', 'P', 'L', 'I', 'M', 'F', 'W']);
 
