@@ -24,6 +24,7 @@ body {
 }
 
 h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
+.h1-sub { font-size: 0.85rem; font-weight: 400; color: var(--color-text-secondary); margin-left: 0.5rem }
 .blurb { font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; margin-bottom: 0.25rem; max-width: 600px }
 .blurb-accent { color: #6b7fa3 }
 
@@ -36,7 +37,7 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
 /* Presets */
 .presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 0.5rem }
 .presets button { font-size: 12px; padding: 4px 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-primary); cursor: pointer }
-.presets button.active { background: var(--color-background-secondary); font-weight: 500 }
+.presets button.active { background: #555; color: #fff; font-weight: 600 }
 
 /* Sequence input */
 .seq-input-row { display: flex; gap: 8px; margin-bottom: 0.75rem }
@@ -57,8 +58,8 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
 
 /* Controls */
 .controls { display: flex; align-items: center; gap: 12px; margin: 0.5rem 0 1rem; flex-wrap: wrap }
-.play-btn { padding: 6px 18px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-primary); cursor: pointer; font-size: 14px; font-weight: 500 }
-.play-btn:hover { background: var(--color-background-secondary) }
+.play-btn { padding: 6px 18px; border-radius: var(--border-radius-md); border: 1px solid #3a8a5c; background: #3a8a5c; color: #fff; cursor: pointer; font-size: 14px; font-weight: 600 }
+.play-btn:hover { opacity: 0.85 }
 .tempo-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--color-text-secondary) }
 .info-bar { padding: 8px 12px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); font-size: 13px; color: var(--color-text-secondary); min-height: 36px; display: flex; align-items: center; gap: 8px; margin-bottom: 0.75rem }
 
@@ -83,8 +84,7 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
 .key-tooltip span { color: var(--color-text-secondary); margin-left: 4px; font-size: 11px }
 
 /* Keyboard hint */
-.kb-hint { font-size: 11px; color: var(--color-text-tertiary); margin-top: 4px; opacity: 0; transition: opacity 0.2s }
-.piano-area:hover + .kb-hint, .kb-hint:hover { opacity: 1 }
+.kb-hint { font-size: 11px; color: var(--color-text-tertiary); margin-top: 4px }
 
 /* AA display cards */
 .aa-display { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 0.75rem }

@@ -32,7 +32,7 @@ const KB = {
 let NA = {};
 let activeMapping = MAPPINGS[0].id;
 let seq = [], playing = false, paused = false, playIdx = 0, timers = [], ctx = null;
-let presetActive = '', savedInfoHTML = '';
+let presetActive = '';
 let activeComplex = null, contactMap = new Map();
 let detailsOpen = false;
 const kbDown = new Map();
@@ -75,13 +75,13 @@ function playNote(freq, dur) {
 function stopPlay() {
   playing = false; paused = false; playIdx = 0;
   timers.forEach(clearTimeout); timers = [];
-  document.getElementById('playBtn').textContent = 'play'; setActive(-1);
+  document.getElementById('playBtn').textContent = 'play sequence'; setActive(-1);
 }
 
 function pausePlay() {
   paused = true; playing = false;
   timers.forEach(clearTimeout); timers = [];
-  document.getElementById('playBtn').textContent = 'play';
+  document.getElementById('playBtn').textContent = 'play sequence';
 }
 
 function startFrom(startIdx) {
@@ -114,38 +114,25 @@ function togglePlay() {
   playIdx = 0; startFrom(0);
 }
 
-/* ── Active highlight + info bar ── */
+/* ── Active highlight ── */
 function setActive(idx) {
   document.querySelectorAll('.aa-badge').forEach((el, i) => el.classList.toggle('active', i === idx));
   document.querySelectorAll('.partner-badge').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.contact-dot').forEach(el => el.classList.remove('active'));
 
   if (idx >= 0 && idx < seq.length) {
-    const aa = seq[idx], note = AM[aa], g = GR[aa];
+    const aa = seq[idx], note = AM[aa];
     const contact = contactMap.get(idx);
-    let infoHTML;
 
     if (contact) {
-      const paa = contact.aa, pg = GR[paa], pc = GC[pg];
-      const pNote = AM[paa];
-      infoHTML = `<span style="font-size:15px;font-weight:500;color:var(--color-text-primary)">${aa}</span>`
-        + `<span style="color:var(--color-text-secondary)">${AN[aa]} (${A3[aa]})</span>`
-        + `<span style="color:var(--color-text-tertiary);margin:0 4px">+</span>`
-        + `<span style="font-size:15px;font-weight:500;color:${pc ? pc.bk : 'var(--color-text-primary)'}">${paa}</span>`
-        + `<span style="color:var(--color-text-secondary)">${AN[paa]} (${A3[paa]})</span>`
-        + `<span style="margin-left:auto;font-size:12px;color:var(--color-text-tertiary)">${contact.dist.toFixed(1)} \u00C5 \u00B7 ${note}+${pNote}</span>`;
       const pb = document.querySelector(`.partner-badge[data-idx="${idx}"]`);
       if (pb) pb.classList.add('active');
       const cd = document.querySelector(`.contact-dot[data-idx="${idx}"]`);
       if (cd) cd.classList.add('active');
-      showAADisplay([aa, paa]);
+      showAADisplay([aa, contact.aa]);
     } else {
-      infoHTML = `<span style="font-size:15px;font-weight:500;color:var(--color-text-primary)">${aa}</span>`
-        + `<span style="color:var(--color-text-secondary)">${AN[aa] || aa} (${A3[aa] || ''})</span>`
-        + `<span style="margin-left:auto;font-size:12px;color:var(--color-text-tertiary)">${note || '?'} \u00B7 ${GC[g]?.label?.split(' ')[0] || g}</span>`;
       showAADisplay([aa]);
     }
-    document.getElementById('infoBar').innerHTML = infoHTML;
     updateInfoPanelNow(idx);
 
     // Light up piano keys
@@ -326,7 +313,6 @@ function loadPreset(p) {
   document.getElementById('seqInput').value = p.seq;
   seq = p.seq.toUpperCase().split('').filter(aa => AM[aa]);
   renderPresets(); renderSeqMel();
-  document.getElementById('infoBar').textContent = `${p.name} (${p.seq.length} aa)`;
   renderInfoPanel();
 }
 
@@ -339,7 +325,6 @@ function loadCustom() {
   stopPlay(); presetActive = ''; activeComplex = null; contactMap = new Map();
   seq = document.getElementById('seqInput').value.toUpperCase().split('').filter(aa => AM[aa]);
   renderPresets(); renderHarmonyBtns(); renderSeqMel();
-  document.getElementById('infoBar').textContent = seq.length ? `${seq.length} amino acids loaded` : 'no valid amino acids found';
   renderInfoPanel();
 }
 
@@ -358,7 +343,6 @@ function renderMappingBtns() {
 function switchMapping(id) {
   stopPlay(); activeMapping = id; setMapping(id); rebuildNA();
   renderMappingBtns(); renderPanelRef(); renderPiano(); renderSeqMel();
-  document.getElementById('infoBar').textContent = MAPPINGS.find(m => m.id === id)?.desc || '';
   renderInfoPanel();
 }
 
@@ -389,27 +373,13 @@ function loadComplex(cx) {
   document.getElementById('seqInput').value = cx.chainA.seq;
   seq = cx.chainA.seq.toUpperCase().split('').filter(aa => AM[aa]);
   renderPresets(); renderHarmonyBtns(); renderSeqMel();
-  document.getElementById('infoBar').innerHTML =
-    `<span style="font-weight:500">${cx.name}</span> `
-    + `<span style="color:var(--color-text-tertiary)">(${cx.pdb})</span> `
-    + `<span style="color:var(--color-text-secondary);font-size:12px">${cx.contacts.length} contacts</span>`;
   renderInfoPanel();
 }
 
 /* ── Keyboard ── */
 function updateKbInfo() {
-  const bar = document.getElementById('infoBar');
-  if (kbDown.size === 0) { bar.innerHTML = savedInfoHTML; showAADisplay([]); return; }
-  const notes = [...kbDown.values()];
-  const parts = notes.map(note => {
-    const aa = NA[note], g = aa ? GR[aa] : null, c = aa ? GC[g] : null;
-    const color = c ? c.bk : 'var(--color-text-primary)';
-    return aa
-      ? `<span style="font-weight:500;color:${color}">${AN[aa]}</span> <span style="color:var(--color-text-tertiary)">(${A3[aa]} \u00B7 ${note})</span>`
-      : `<span style="color:var(--color-text-tertiary)">${note}</span>`;
-  });
-  bar.innerHTML = parts.join(' &nbsp;\u00B7&nbsp; ');
-  showAADisplay(notes.map(n => NA[n]).filter(Boolean));
+  if (kbDown.size === 0) { showAADisplay([]); return; }
+  showAADisplay([...kbDown.values()].map(n => NA[n]).filter(Boolean));
 }
 
 document.addEventListener('keydown', e => {
@@ -417,7 +387,6 @@ document.addEventListener('keydown', e => {
   const note = KB[e.key.toLowerCase()];
   if (!note || kbDown.has(e.key)) return;
   const hint = document.getElementById('kbHint'); if (hint) hint.style.display = 'none';
-  if (kbDown.size === 0) savedInfoHTML = document.getElementById('infoBar').innerHTML;
   kbDown.set(e.key, note);
   playNote(FR[note], 0.5);
   const cls = 'piano-key-' + note.replace('#', 's');
