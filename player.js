@@ -6,27 +6,48 @@
  */
 
 /* ── Constants ── */
+/* Chromatic layout */
 const MORD = ['C4','C#4','D4','D#4','E4','F4','F#4','G4','G#4','A4','A#4','B4','C5','C#5','D5','D#5','E5','F5','F#5','G5'];
 const NI = {}; MORD.forEach((n, i) => NI[n] = i);
 const WN = ['C4','D4','E4','F4','G4','A4','B4','C5','D5','E5','F5','G5'];
 const BN = ['C#4','D#4','F#4','G#4','A#4','C#5','D#5','F#5'];
 const BP = { 'C#4': 0, 'D#4': 1, 'F#4': 3, 'G#4': 4, 'A#4': 5, 'C#5': 7, 'D#5': 8, 'F#5': 10 };
 const WW = 48, BW = 30, WH = 178, BH = 112;
+/* Pentatonic layout */
+const PENT_MORD = ['C3','D3','E3','G3','A3','C4','D4','E4','G4','A4','C5','D5','E5','G5','A5','C6','D6','E6','G6','A6'];
+const PENT_NI = {}; PENT_MORD.forEach((n, i) => PENT_NI[n] = i);
+const PENT_W = 36;
 const AF = { L: 9.66, A: 8.25, G: 7.07, V: 6.87, E: 6.75, S: 6.56, I: 5.96, K: 5.84, R: 5.53, D: 5.45, T: 5.34, P: 4.70, N: 4.06, Q: 3.93, F: 3.86, Y: 2.92, M: 2.42, H: 2.27, C: 1.37, W: 1.08 };
 
 const PS = [
-  { name: 'trp-cage',   seq: 'NLYIQWLKDGGPSSGRPPPS', pdb: '1L2Y', desc: 'Trp-cage (20aa) — smallest known folding protein; W rings out as the highest note', significance: 'A 20-residue mini-protein that folds in microseconds, making it a key model system for studying protein folding dynamics.' },
-  { name: 'ubiquitin',  seq: 'MQIFVKTLTGKTITLEVEPS', pdb: '1UBQ', desc: 'Ubiquitin N-terminus (20aa) — the cell\'s molecular tag for degradation', significance: 'A universal molecular tag that marks proteins for destruction by the proteasome — its discovery earned the 2004 Nobel Prize in Chemistry.' },
-  { name: 'insulin B',  seq: 'FVNQHLCGSHLVEALYLVCG', pdb: '4INS', desc: 'Insulin B-chain (20aa) — the hormone sequence that regulates blood sugar', significance: 'The B-chain of insulin binds to the insulin receptor, triggering glucose uptake. Mutations here cause hereditary diabetes.' },
-  { name: 'VHH CDR3',   seq: 'AAEGRTFGSYYSY',        pdb: '1ZVH', desc: 'VHH CDR3 loop (13aa) — nanobody antigen-binding region', significance: 'The hypervariable loop that gives camelid nanobodies their antigen specificity — now widely used as compact biologics and research tools.' }
+  { name: 'trp-cage',   seq: 'NLYIQWLKDGGPSSGRPPPS', ss: 'CHHHHHHHHHHHHHHCCCCC', pdb: '1L2Y', desc: 'Trp-cage (20aa) — smallest known folding protein; W rings out as the highest note', significance: 'A 20-residue mini-protein that folds in microseconds, making it a key model system for studying protein folding dynamics.' },
+  { name: 'ubiquitin',  seq: 'MQIFVKTLTGKTITLEVEPS', ss: 'EEEEEEECCEEEEEEEECCC', pdb: '1UBQ', desc: 'Ubiquitin N-terminus (20aa) — the cell\'s molecular tag for degradation', significance: 'A universal molecular tag that marks proteins for destruction by the proteasome — its discovery earned the 2004 Nobel Prize in Chemistry.' },
+  { name: 'insulin B',  seq: 'FVNQHLCGSHLVEALYLVCG', ss: 'CCCCCCCCHHHHHHHHHHHH', pdb: '4INS', desc: 'Insulin B-chain (20aa) — the hormone sequence that regulates blood sugar', significance: 'The B-chain of insulin binds to the insulin receptor, triggering glucose uptake. Mutations here cause hereditary diabetes.' },
+  { name: 'VHH CDR3',   seq: 'AAEGRTFGSYYSY',        ss: 'CCCCCCCCCCCCC',        pdb: '1ZVH', desc: 'VHH CDR3 loop (13aa) — nanobody antigen-binding region', significance: 'The hypervariable loop that gives camelid nanobodies their antigen specificity — now widely used as compact biologics and research tools.' }
 ];
 
-const KB = {
+const KB_CHROMATIC = {
   'a': 'C4', 'w': 'C#4', 's': 'D4', 'e': 'D#4', 'd': 'E4', 'f': 'F4', 't': 'F#4',
   'g': 'G4', 'y': 'G#4', 'h': 'A4', 'u': 'A#4', 'j': 'B4',
   'k': 'C5', 'o': 'C#5', 'l': 'D5', 'p': 'D#5', ';': 'E5', "'": 'F5', ']': 'F#5',
   '\\': 'G5'
 };
+const KB_PENTATONIC = {
+  'a': 'C3', 's': 'D3', 'd': 'E3', 'f': 'G3', 'g': 'A3',
+  'h': 'C4', 'j': 'D4', 'k': 'E4', 'l': 'G4', ';': 'A4',
+  'q': 'C5', 'w': 'D5', 'e': 'E5', 'r': 'G5', 't': 'A5',
+  'y': 'C6', 'u': 'D6', 'i': 'E6', 'o': 'G6', 'p': 'A6'
+};
+let KB = { ...KB_CHROMATIC };
+
+function isPentatonic() {
+  const m = MAPPINGS.find(m => m.id === activeMapping);
+  return m && m.type === 'pentatonic';
+}
+
+function getNoteIndex(note) {
+  return isPentatonic() ? (PENT_NI[note] ?? -1) : (NI[note] ?? -1);
+}
 
 /* ── State ── */
 let NA = {};
@@ -44,7 +65,8 @@ rebuildNA();
 /* ── Audio ── */
 function getCtx() { if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); return ctx; }
 
-function playNote(freq, dur) {
+function playNote(freq, dur, vel) {
+  vel = vel ?? 1.0;
   const c = getCtx(); if (c.state === 'suspended') c.resume();
   const hold = dur * 1.6;
   const t = c.currentTime, master = c.createGain();
@@ -55,6 +77,7 @@ function playNote(freq, dur) {
   master.connect(resonance); resonance.connect(res2); res2.connect(c.destination);
   const partials = [[1, 0.38], [2, 0.15], [3, 0.08], [4, 0.04], [0.5, 0.06]];
   partials.forEach(([mult, amp]) => {
+    amp *= vel;
     const o = c.createOscillator(), g = c.createGain();
     o.type = 'sine'; o.frequency.value = freq * mult;
     if (mult > 1) o.detune.value = Math.random() * 4 - 2;
@@ -66,10 +89,101 @@ function playNote(freq, dur) {
     g.gain.exponentialRampToValueAtTime(0.001, t + Math.max(decay, 0.15));
     o.start(t); o.stop(t + hold);
   });
-  master.gain.setValueAtTime(0.9, t);
-  master.gain.linearRampToValueAtTime(0.75, t + 0.05);
-  master.gain.setValueAtTime(0.65, t + hold * 0.4);
+  master.gain.setValueAtTime(0.9 * vel, t);
+  master.gain.linearRampToValueAtTime(0.75 * vel, t + 0.05);
+  master.gain.setValueAtTime(0.65 * vel, t + hold * 0.4);
   master.gain.exponentialRampToValueAtTime(0.001, t + hold * 0.98);
+}
+
+/* ── Rhythm engine ── */
+let rhythmEnabled = false;
+
+function getActiveSS() {
+  if (activeComplex && activeComplex.chainA.ss) return activeComplex.chainA.ss;
+  if (presetActive) { const p = PS.find(p => p.name === presetActive); if (p && p.ss) return p.ss; }
+  return null;
+}
+
+function toggleRhythm() {
+  rhythmEnabled = document.getElementById('rhythmCheck').checked;
+  updateSSBadges();
+}
+
+function updateRhythmUI() {
+  const ss = getActiveSS();
+  const toggle = document.getElementById('rhythmToggle');
+  const hint = document.getElementById('rhythmHint');
+  if (!toggle) return;
+  if (ss) {
+    toggle.style.display = 'flex';
+    const nH = (ss.match(/H/g) || []).length;
+    const nE = (ss.match(/E/g) || []).length;
+    const nC = (ss.match(/C/g) || []).length;
+    const parts = [];
+    if (nH) parts.push(nH + 'H');
+    if (nE) parts.push(nE + 'E');
+    if (nC) parts.push(nC + 'C');
+    hint.textContent = parts.join(' ');
+  } else {
+    toggle.style.display = 'none';
+  }
+}
+
+function updateSSBadges() {
+  const ss = rhythmEnabled ? getActiveSS() : null;
+  document.querySelectorAll('.aa-badge').forEach((el, i) => {
+    el.classList.remove('ss-H', 'ss-E', 'ss-C');
+    if (ss && i < ss.length) el.classList.add('ss-' + ss[i]);
+  });
+}
+
+function computeTimings(startIdx, bpm) {
+  const baseDur = 60 / bpm;
+  const ss = rhythmEnabled ? getActiveSS() : null;
+  const timings = [];
+  let offset = 0;
+
+  const segPos = [];
+  if (ss) {
+    let segStart = 0;
+    for (let i = 0; i < seq.length; i++) {
+      if (i > 0 && ss[i] !== ss[i - 1]) segStart = i;
+      segPos[i] = i - segStart;
+    }
+  }
+
+  for (let i = startIdx; i < seq.length; i++) {
+    let dur = baseDur;
+    let vel = 1.0;
+
+    if (ss && i < ss.length) {
+      const ssType = ss[i];
+      const gp = segPos[i] || 0;
+
+      if (i > startIdx && ss[i] !== ss[i - 1]) {
+        offset += baseDur * 0.25;
+      }
+
+      if (ssType === 'H') {
+        const beat = gp % 3;
+        dur = baseDur * (beat === 0 ? 1.15 : 0.92);
+        vel = beat === 0 ? 1.0 : 0.65;
+      } else if (ssType === 'E') {
+        const beat = gp % 4;
+        const accent = beat === 0;
+        const medium = beat === 2;
+        dur = baseDur * (accent ? 1.08 : 1.0);
+        vel = accent ? 1.0 : (medium ? 0.8 : 0.6);
+      } else {
+        dur = baseDur * (0.88 + Math.random() * 0.24);
+        vel = 0.75 + Math.random() * 0.25;
+      }
+    }
+
+    timings.push({ offset, dur: dur * 0.85, vel });
+    offset += dur;
+  }
+  return timings;
 }
 
 /* ── Playback ── */
@@ -89,21 +203,22 @@ function startFrom(startIdx) {
   playing = true; paused = false;
   document.getElementById('playBtn').textContent = 'pause';
   const bpm = parseInt(document.getElementById('tempoSlider').value);
-  const nd = 60 / bpm;
+  const timings = computeTimings(startIdx, bpm);
   seq.slice(startIdx).forEach((aa, j) => {
     const i = startIdx + j;
+    const ti = timings[j];
     const t = setTimeout(() => {
       if (!playing) return;
       playIdx = i + 1;
-      const note = AM[aa]; if (note) playNote(FR[note], nd * 0.85);
+      const note = AM[aa]; if (note) playNote(FR[note], ti.dur, ti.vel);
       const contact = contactMap.get(i);
       if (contact) {
         const pNote = AM[contact.aa];
-        if (pNote) playNote(FR[pNote], nd * 0.85);
+        if (pNote) playNote(FR[pNote], ti.dur, ti.vel);
       }
       setActive(i);
-      if (i === seq.length - 1) setTimeout(() => { if (playing) stopPlay(); }, nd * 900);
-    }, j * nd * 1000);
+      if (i === seq.length - 1) setTimeout(() => { if (playing) stopPlay(); }, ti.dur * 1100);
+    }, ti.offset * 1000);
     timers.push(t);
   });
 }
@@ -223,6 +338,12 @@ function renderSeqMel() {
 
 function renderPiano() {
   const wrap = document.getElementById('pianoWrap'); wrap.innerHTML = '';
+  if (isPentatonic()) {
+    wrap.style.width = (20 * PENT_W + 3 * 4) + 'px';
+    renderPianoPentatonic(wrap);
+    return;
+  }
+  wrap.style.width = '576px';
   WN.forEach((note, i) => {
     const aa = NA[note], g = aa ? GR[aa] : null, c = aa ? GC[g] : null;
     const el = document.createElement('div');
@@ -249,6 +370,26 @@ function renderPiano() {
   });
 }
 
+function renderPianoPentatonic(wrap) {
+  const octaveGap = 4;
+  PENT_MORD.forEach((note, i) => {
+    const aa = NA[note], g = aa ? GR[aa] : null, c = aa ? GC[g] : null;
+    const octave = Math.floor(i / 5);
+    const left = i * PENT_W + octave * octaveGap;
+    const el = document.createElement('div');
+    el.className = 'wkey pent-key piano-key-' + note;
+    el.style.cssText = `left:${left}px;width:${PENT_W - 1}px;height:${WH}px;background:${c ? c.bg : 'var(--color-background-primary)'}`;
+    const octLabel = i % 5 === 0 ? `<div class="pent-oct">${note.slice(-1)}</div>` : '';
+    el.innerHTML = aa
+      ? `<div class="klabel" style="color:${c ? c.tx : 'var(--color-text-tertiary)'}">${aa}</div><div class="klabel-sub" style="color:${c ? c.tx : 'var(--color-text-tertiary)'}">${A3[aa]}</div>${octLabel}`
+      : octLabel;
+    el.onclick = () => { if (aa) { playNote(FR[note], 0.5); showAADisplay([aa]); } };
+    el.onmouseenter = () => showTooltip(el, aa, note);
+    el.onmouseleave = hideTooltip;
+    wrap.appendChild(el);
+  });
+}
+
 function renderLegend() {
   const leg = document.getElementById('legend'); leg.innerHTML = '';
   ['ali', 'pol', 'aro', 'pos', 'neg'].forEach(g => {
@@ -268,7 +409,7 @@ function toggleDetails() {
 function renderPanelRef() {
   const panel = document.getElementById('panelRef');
   const m = MAPPINGS.find(m => m.id === activeMapping);
-  const sorted = Object.entries(m.map).sort((a, b) => NI[a[1]] - NI[b[1]]);
+  const sorted = Object.entries(m.map).sort((a, b) => getNoteIndex(a[1]) - getNoteIndex(b[1]));
   let html = '<div class="panel-ref">';
   if (activeMapping === 'frequency') {
     sorted.forEach(([aa, note]) => {
@@ -314,7 +455,8 @@ function loadPreset(p) {
   document.getElementById('seqInput').value = p.seq;
   seq = p.seq.toUpperCase().split('').filter(aa => AM[aa]);
   renderPresets(); renderSeqMel();
-  renderInfoPanel();
+  document.getElementById('infoBar').textContent = `${p.name} (${p.seq.length} aa)`;
+  renderInfoPanel(); updateRhythmUI(); updateSSBadges();
 }
 
 function loadPresetClear(p) {
@@ -326,7 +468,8 @@ function loadCustom() {
   stopPlay(); presetActive = ''; activeComplex = null; contactMap = new Map();
   seq = document.getElementById('seqInput').value.toUpperCase().split('').filter(aa => AM[aa]);
   renderPresets(); renderHarmonyBtns(); renderSeqMel();
-  renderInfoPanel();
+  document.getElementById('infoBar').textContent = seq.length ? `${seq.length} amino acids loaded` : 'no valid amino acids found';
+  renderInfoPanel(); updateRhythmUI(); updateSSBadges();
 }
 
 /* ── Mapping ── */
@@ -343,6 +486,12 @@ function renderMappingBtns() {
 
 function switchMapping(id) {
   stopPlay(); activeMapping = id; setMapping(id); rebuildNA();
+  Object.keys(KB).forEach(k => delete KB[k]);
+  Object.assign(KB, isPentatonic() ? KB_PENTATONIC : KB_CHROMATIC);
+  const hint = document.getElementById('kbHint');
+  if (hint) hint.innerHTML = isPentatonic()
+    ? 'or play with your keyboard — A&thinsp;S&thinsp;D&thinsp;F&thinsp;G for octave 3, H&thinsp;J&thinsp;K&thinsp;L&thinsp;; for octave 4, Q&thinsp;W&thinsp;E&thinsp;R&thinsp;T for octave 5, Y&thinsp;U&thinsp;I&thinsp;O&thinsp;P for octave 6'
+    : 'or play with your keyboard — A&thinsp;S&thinsp;D&thinsp;F… for white keys, W&thinsp;E&thinsp;T&thinsp;Y… for black keys';
   renderMappingBtns(); renderPanelRef(); renderPiano(); renderSeqMel();
   renderInfoPanel();
 }
@@ -374,7 +523,11 @@ function loadComplex(cx) {
   document.getElementById('seqInput').value = cx.chainA.seq;
   seq = cx.chainA.seq.toUpperCase().split('').filter(aa => AM[aa]);
   renderPresets(); renderHarmonyBtns(); renderSeqMel();
-  renderInfoPanel();
+  document.getElementById('infoBar').innerHTML =
+    `<span style="font-weight:500">${cx.name}</span> `
+    + `<span style="color:var(--color-text-tertiary)">(${cx.pdb})</span> `
+    + `<span style="color:var(--color-text-secondary);font-size:12px">${cx.contacts.length} contacts</span>`;
+  renderInfoPanel(); updateRhythmUI(); updateSSBadges();
 }
 
 /* ── Keyboard ── */
