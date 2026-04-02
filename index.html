@@ -38,6 +38,11 @@
       <input type="range" min="40" max="300" value="120" step="1" id="tempoSlider" style="width:100px" oninput="document.getElementById('tempoOut').textContent=this.value"/>
       <span id="tempoOut" style="min-width:36px;font-weight:500;color:var(--color-text-primary)">120</span>
     </div>
+    <label class="rhythm-toggle" id="rhythmToggle" style="display:none" title="Helix = 3/4 waltz, Strand = 4/4 march, Coil = free tempo">
+      <input type="checkbox" id="rhythmCheck" onchange="toggleRhythm()"/>
+      <span class="rhythm-label">rhythm</span>
+      <span class="rhythm-ss-hint" id="rhythmHint"></span>
+    </label>
   </div>
   <div class="info-bar" id="infoBar">select a preset or enter a sequence</div>
   <div class="piano-area">

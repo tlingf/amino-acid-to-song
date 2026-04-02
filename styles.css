@@ -82,6 +82,22 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
 .key-tooltip { position: absolute; bottom: 194px; left: 50%; transform: translateX(-50%); background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 5px 10px; font-size: 12px; white-space: nowrap; pointer-events: none; display: none; z-index: 10; color: var(--color-text-primary); box-shadow: none }
 .key-tooltip span { color: var(--color-text-secondary); margin-left: 4px; font-size: 11px }
 
+/* Rhythm toggle */
+.rhythm-toggle { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--color-text-secondary); cursor: pointer; user-select: none }
+.rhythm-toggle input[type="checkbox"] { accent-color: #3a8a5c }
+.rhythm-label { font-weight: 500 }
+.rhythm-ss-hint { font-size: 10px; color: var(--color-text-tertiary) }
+
+/* SS coloring on sequence badges */
+.aa-badge.ss-H { border-bottom: 2px solid #e07a3a }
+.aa-badge.ss-E { border-bottom: 2px solid #3a7ae0 }
+.aa-badge.ss-C { border-bottom: 2px solid #aaa }
+
+/* Pentatonic piano */
+.pent-key { border-radius: 0 0 5px 5px }
+.pent-key.lit { filter: brightness(0.75) }
+.pent-oct { position: absolute; top: 4px; font-size: 8px; opacity: 0.4; pointer-events: none; font-weight: 500 }
+
 /* Keyboard hint */
 .kb-hint { font-size: 11px; color: var(--color-text-tertiary); margin-top: 4px; opacity: 0; transition: opacity 0.2s }
 .piano-area:hover + .kb-hint, .kb-hint:hover { opacity: 1 }
