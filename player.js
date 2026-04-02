@@ -35,6 +35,7 @@ let seq = [], playing = false, paused = false, playIdx = 0, timers = [], ctx = n
 let presetActive = '';
 let activeComplex = null, contactMap = new Map();
 let detailsOpen = false;
+let composing = false, compSeq = [];
 const kbDown = new Map();
 
 function rebuildNA() { NA = {}; Object.entries(AM).forEach(([aa, n]) => NA[n] = aa); }
@@ -228,7 +229,7 @@ function renderPiano() {
     el.className = 'wkey piano-key-' + note.replace('#', 's');
     el.style.cssText = `left:${i * WW}px;width:${WW - 1}px;height:${WH}px;background:${c ? c.bg : 'var(--color-background-primary)'}`;
     el.innerHTML = aa ? `<div class="klabel" style="color:${c ? c.tx : 'var(--color-text-tertiary)'}">${aa}</div><div class="klabel-sub" style="color:${c ? c.tx : 'var(--color-text-tertiary)'}">${A3[aa]}</div>` : '';
-    el.onclick = () => { if (aa) { playNote(FR[note], 0.5); showAADisplay([aa]); } };
+    el.onclick = () => { if (aa) { playNote(FR[note], 0.5); showAADisplay([aa]); if (composing) addComposeAA(aa); } };
     el.onmouseenter = () => showTooltip(el, aa, note);
     el.onmouseleave = hideTooltip;
     wrap.appendChild(el);
@@ -241,7 +242,7 @@ function renderPiano() {
     el.className = 'bkey piano-key-' + note.replace('#', 's');
     el.style.cssText = `left:${left}px;width:${BW}px;height:${BH}px;background:${bkBg}`;
     el.innerHTML = aa ? `<div class="klabel" style="color:${bkTx}">${aa}</div><div class="klabel-sub" style="color:${bkTx}">${A3[aa]}</div>` : '';
-    el.onclick = () => { if (aa) { playNote(FR[note], 0.5); showAADisplay([aa]); } };
+    el.onclick = () => { if (aa) { playNote(FR[note], 0.5); showAADisplay([aa]); if (composing) addComposeAA(aa); } };
     el.onmouseenter = () => showTooltip(el, aa, note);
     el.onmouseleave = hideTooltip;
     wrap.appendChild(el);
@@ -392,6 +393,7 @@ document.addEventListener('keydown', e => {
   const cls = 'piano-key-' + note.replace('#', 's');
   document.querySelectorAll('.' + cls).forEach(el => el.classList.add('lit'));
   updateKbInfo();
+  if (composing) { const aa = NA[note]; if (aa) addComposeAA(aa); }
 });
 
 document.addEventListener('keyup', e => {
@@ -402,6 +404,164 @@ document.addEventListener('keyup', e => {
   document.querySelectorAll('.' + cls).forEach(el => el.classList.remove('lit'));
   updateKbInfo();
 });
+
+/* ── Composition Mode ── */
+function toggleCompose() {
+  composing = !composing;
+  const btn = document.getElementById('composeBtn');
+  const bar = document.getElementById('composeBar');
+  if (composing) {
+    stopPlay();
+    compSeq = [];
+    seq = [];
+    document.getElementById('seqInput').value = '';
+    renderSeqMel();
+    btn.textContent = 'exit compose'; btn.classList.add('active');
+    bar.style.display = 'flex';
+    updateComposeCount();
+    updateSuggestions();
+    renderComposeInfo();
+  } else {
+    btn.textContent = 'compose'; btn.classList.remove('active');
+    bar.style.display = 'none';
+    clearSuggestions();
+    renderInfoPanel();
+  }
+}
+
+function addComposeAA(aa) {
+  if (!aa) return;
+  compSeq.push(aa);
+  seq = [...compSeq];
+  document.getElementById('seqInput').value = compSeq.join('');
+  renderSeqMel();
+  updateComposeCount();
+  updateSuggestions();
+  renderComposeInfo();
+}
+
+function undoCompose() {
+  if (compSeq.length === 0) return;
+  compSeq.pop();
+  seq = [...compSeq];
+  document.getElementById('seqInput').value = compSeq.join('');
+  renderSeqMel();
+  updateComposeCount();
+  updateSuggestions();
+  renderComposeInfo();
+}
+
+function clearCompose() {
+  compSeq = [];
+  seq = [];
+  document.getElementById('seqInput').value = '';
+  renderSeqMel();
+  updateComposeCount();
+  updateSuggestions();
+  renderComposeInfo();
+}
+
+function updateComposeCount() {
+  const el = document.getElementById('composeCount');
+  if (el) el.textContent = compSeq.length + ' aa';
+  const foldBtn = document.getElementById('foldBtn');
+  if (foldBtn) foldBtn.disabled = compSeq.length < 20;
+}
+
+function clearSuggestions() {
+  document.querySelectorAll('.suggested').forEach(el => {
+    el.classList.remove('suggested');
+    el.style.removeProperty('--suggest-color');
+  });
+}
+
+function updateSuggestions() {
+  clearSuggestions();
+  const lastAA = compSeq.length > 0 ? compSeq[compSeq.length - 1] : null;
+  const top4 = getTop4(lastAA);
+  top4.forEach(aa => {
+    const note = AM[aa];
+    if (!note) return;
+    const cls = 'piano-key-' + note.replace('#', 's');
+    const g = GR[aa], c = GC[g];
+    document.querySelectorAll('.' + cls).forEach(el => {
+      el.classList.add('suggested');
+      el.style.setProperty('--suggest-color', c ? c.bk : '#534AB7');
+    });
+  });
+}
+
+function renderComposeInfo() {
+  const el = document.getElementById('infoPanelContent');
+  if (!el) return;
+  if (compSeq.length === 0) {
+    el.innerHTML = '<div class="info-panel-title">compose mode</div>'
+      + '<div class="info-panel-desc">Play keys to build an amino acid sequence. Glowing keys show the most likely next residues for a foldable protein.</div>'
+      + '<div class="info-panel-subtitle">min 20 aa to fold</div>';
+    return;
+  }
+  const groups = { ali: 0, pol: 0, aro: 0, pos: 0, neg: 0 };
+  compSeq.forEach(aa => { const g = GR[aa]; if (g) groups[g]++; });
+  const total = compSeq.length;
+  let html = '<div class="info-panel-title">your sequence</div>';
+  html += '<div class="info-panel-subtitle">' + total + ' amino acids</div>';
+  html += '<div style="margin:6px 0;font-size:11px;color:var(--color-text-secondary)">';
+  ['ali', 'pol', 'aro', 'pos', 'neg'].forEach(g => {
+    const c = GC[g], pct = total > 0 ? Math.round(100 * groups[g] / total) : 0;
+    if (groups[g] > 0) html += '<div style="display:flex;align-items:center;gap:4px;margin:2px 0"><div style="width:8px;height:8px;border-radius:50%;background:' + c.bk + '"></div>' + c.label.split('(')[0].trim() + ': ' + pct + '%</div>';
+  });
+  html += '</div>';
+  if (total >= 20) {
+    html += '<div style="margin-top:8px;font-size:11px;color:#534AB7;font-weight:500">Ready to fold!</div>';
+  } else {
+    html += '<div style="margin-top:8px;font-size:11px;color:var(--color-text-tertiary)">' + (20 - total) + ' more aa to fold</div>';
+  }
+  html += '<div id="infoPanelNow"></div>';
+  el.innerHTML = html;
+}
+
+async function foldSequence() {
+  if (compSeq.length < 20) return;
+  const seqStr = compSeq.join('');
+  const el = document.getElementById('infoPanelContent');
+  el.innerHTML = '<div class="info-panel-title">folding...</div>'
+    + '<div class="fold-loading">Sending ' + seqStr.length + ' residues to ESMFold</div>';
+
+  try {
+    const resp = await fetch('https://api.esmatlas.com/foldSequence/v1/pdb/', {
+      method: 'POST',
+      body: seqStr,
+      headers: { 'Content-Type': 'text/plain' }
+    });
+    if (!resp.ok) throw new Error('ESMFold returned ' + resp.status);
+    const pdbData = await resp.text();
+    showFold(pdbData, seqStr);
+  } catch (err) {
+    el.innerHTML = '<div class="info-panel-title">fold error</div>'
+      + '<div class="fold-error">' + err.message + '</div>'
+      + '<div class="info-panel-desc">The ESMFold API may be unavailable or blocking browser requests. Your sequence:</div>'
+      + '<div style="font-family:var(--font-mono);font-size:10px;word-break:break-all;margin:6px 0;padding:6px;background:var(--color-background-secondary);border-radius:4px">' + seqStr + '</div>';
+  }
+}
+
+function showFold(pdbData, seqStr) {
+  const el = document.getElementById('infoPanelContent');
+  el.innerHTML = '<div class="info-panel-title">your protein</div>'
+    + '<div class="info-panel-subtitle">' + seqStr.length + ' amino acids</div>'
+    + '<div id="foldViewer" class="fold-viewer"></div>'
+    + '<div class="fold-status">colored by pLDDT confidence</div>';
+
+  if (typeof $3Dmol !== 'undefined') {
+    const viewer = $3Dmol.createViewer('foldViewer', { backgroundColor: 'white' });
+    viewer.addModel(pdbData, 'pdb');
+    viewer.setStyle({}, { cartoon: { colorscheme: { prop: 'b', gradient: 'roygb', min: 50, max: 90 } } });
+    viewer.zoomTo();
+    viewer.render();
+    viewer.spin('y', 1);
+  } else {
+    document.getElementById('foldViewer').innerHTML = '<div class="fold-loading">3Dmol.js not loaded</div>';
+  }
+}
 
 /* ── Info Panel (right) ── */
 function renderInfoPanel() {

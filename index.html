@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>AA Melody Player</title>
+<script src="https://3Dmol.org/build/3Dmol-min.js" defer></script>
 <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
@@ -33,11 +34,19 @@
   </div>
   <div class="controls">
     <button class="play-btn" id="playBtn" onclick="togglePlay()">play sequence</button>
+    <button class="compose-btn" id="composeBtn" onclick="toggleCompose()">compose</button>
     <div class="tempo-row">
       <span>tempo</span>
       <input type="range" min="40" max="300" value="120" step="1" id="tempoSlider" style="width:100px" oninput="document.getElementById('tempoOut').textContent=this.value"/>
       <span id="tempoOut" style="min-width:36px;font-weight:500;color:var(--color-text-primary)">120</span>
     </div>
+  </div>
+  <div class="compose-bar" id="composeBar" style="display:none">
+    <span class="compose-label">composing</span>
+    <span class="compose-count" id="composeCount">0 aa</span>
+    <button class="compose-action" onclick="undoCompose()">undo</button>
+    <button class="compose-action" onclick="clearCompose()">clear</button>
+    <button class="compose-fold" id="foldBtn" onclick="foldSequence()" disabled>fold it!</button>
   </div>
   <div class="piano-area">
     <div class="key-tooltip" id="keyTooltip"></div>
@@ -58,6 +67,7 @@
 
 <script src="aa_mapping.js"></script>
 <script src="aa_structures.js"></script>
+<script src="aa_bigrams.js"></script>
 <script src="player.js"></script>
 </body>
 </html>
