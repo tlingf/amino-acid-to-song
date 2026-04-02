@@ -55,6 +55,8 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
 .seq-unit { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 26px; flex-shrink: 0 }
 .aa-badge { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 5px; font-size: 13px; font-weight: 500; cursor: default; opacity: 0.6; transition: transform 0.1s, opacity 0.1s }
 .aa-badge.active { transform: scale(1.35); opacity: 1; box-shadow: 0 0 0 2px var(--color-border-primary) }
+.aa-badge.hydrophobic { border-bottom: 2.5px solid rgba(100, 140, 180, 0.55) }
+.aa-badge.hydrophobic.active { border-bottom-color: rgba(100, 140, 180, 0.85) }
 
 /* Controls */
 .controls { display: flex; align-items: center; gap: 12px; margin: 0.5rem 0 1rem; flex-wrap: wrap }
@@ -77,6 +79,8 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
 .wkey:hover, .bkey:hover { filter: brightness(0.88) }
 .wkey.lit { filter: brightness(0.75) }
 .bkey.lit { filter: brightness(1.35) }
+.wkey.hydrophobic { border-bottom: 3px solid rgba(100, 140, 180, 0.45) }
+.bkey.hydrophobic { box-shadow: inset 0 -3px 0 rgba(140, 180, 220, 0.5) }
 .klabel { font-size: 11px; font-weight: 600; line-height: 1.1; text-align: center; pointer-events: none }
 .klabel-sub { font-size: 9px; font-weight: 400; opacity: 0.7; line-height: 1; margin-top: 1px; pointer-events: none }
 .klabel-note { font-size: 8px; opacity: 0.55; line-height: 1 }

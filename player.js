@@ -43,9 +43,21 @@ rebuildNA();
 /* ── Audio ── */
 function getCtx() { if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); return ctx; }
 
-function playNote(freq, dur) {
+/**
+ * Map amino acid hydrophobicity to a sustain multiplier.
+ * Most hydrophobic (I=4.5) → 2.0x sustain, least (R=-4.5) → 0.5x sustain.
+ * Non-hydrophobic AAs get 1.0x (neutral).
+ */
+function hySustain(aa) {
+  if (!aa || HY[aa] === undefined) return 1.0;
+  // Normalize from [-4.5, 4.5] to [0.5, 2.0]
+  return 0.5 + ((HY[aa] + 4.5) / 9.0) * 1.5;
+}
+
+function playNote(freq, dur, sustain) {
+  sustain = sustain || 1.0;
   const c = getCtx(); if (c.state === 'suspended') c.resume();
-  const hold = dur * 1.6;
+  const hold = dur * 1.6 * sustain;
   const t = c.currentTime, master = c.createGain();
   const resonance = c.createBiquadFilter();
   resonance.type = 'peaking'; resonance.frequency.value = freq; resonance.Q.value = 3.5; resonance.gain.value = 6;
@@ -94,11 +106,11 @@ function startFrom(startIdx) {
     const t = setTimeout(() => {
       if (!playing) return;
       playIdx = i + 1;
-      const note = AM[aa]; if (note) playNote(FR[note], nd * 0.85);
+      const note = AM[aa]; if (note) playNote(FR[note], nd * 0.85, hySustain(aa));
       const contact = contactMap.get(i);
       if (contact) {
         const pNote = AM[contact.aa];
-        if (pNote) playNote(FR[pNote], nd * 0.85);
+        if (pNote) playNote(FR[pNote], nd * 0.85, hySustain(contact.aa));
       }
       setActive(i);
       if (i === seq.length - 1) setTimeout(() => { if (playing) stopPlay(); }, nd * 900);
@@ -195,7 +207,7 @@ function renderSeqMel() {
     const unit = document.createElement('div');
     unit.className = 'seq-unit';
     const badge = document.createElement('div');
-    badge.className = 'aa-badge'; badge.style.background = c.bg; badge.style.color = c.tx;
+    badge.className = 'aa-badge' + (HP.has(aa) ? ' hydrophobic' : ''); badge.style.background = c.bg; badge.style.color = c.tx;
     badge.textContent = aa; badge.title = AN[aa] || aa;
     unit.appendChild(badge);
     const contact = contactMap.get(i);
@@ -212,8 +224,8 @@ function renderSeqMel() {
       unit.appendChild(pb);
     }
     unit.onclick = () => {
-      if (note) playNote(FR[note], 0.4);
-      if (contact) { const pn = AM[contact.aa]; if (pn) playNote(FR[pn], 0.4); }
+      if (note) playNote(FR[note], 0.4, hySustain(aa));
+      if (contact) { const pn = AM[contact.aa]; if (pn) playNote(FR[pn], 0.4, hySustain(contact.aa)); }
       setActive(i);
     };
     wrap.appendChild(unit);
@@ -225,10 +237,10 @@ function renderPiano() {
   WN.forEach((note, i) => {
     const aa = NA[note], g = aa ? GR[aa] : null, c = aa ? GC[g] : null;
     const el = document.createElement('div');
-    el.className = 'wkey piano-key-' + note.replace('#', 's');
+    el.className = 'wkey piano-key-' + note.replace('#', 's') + (aa && HP.has(aa) ? ' hydrophobic' : '');
     el.style.cssText = `left:${i * WW}px;width:${WW - 1}px;height:${WH}px;background:${c ? c.bg : 'var(--color-background-primary)'}`;
     el.innerHTML = aa ? `<div class="klabel" style="color:${c ? c.tx : 'var(--color-text-tertiary)'}">${aa}</div><div class="klabel-sub" style="color:${c ? c.tx : 'var(--color-text-tertiary)'}">${A3[aa]}</div>` : '';
-    el.onclick = () => { if (aa) { playNote(FR[note], 0.5); showAADisplay([aa]); } };
+    el.onclick = () => { if (aa) { playNote(FR[note], 0.5, hySustain(aa)); showAADisplay([aa]); } };
     el.onmouseenter = () => showTooltip(el, aa, note);
     el.onmouseleave = hideTooltip;
     wrap.appendChild(el);
@@ -238,10 +250,10 @@ function renderPiano() {
     const wi = BP[note], left = wi * WW + WW * 0.7 - BW / 2;
     const bkBg = c ? c.bk : '#444441', bkTx = c ? c.bg : '#F1EFE8';
     const el = document.createElement('div');
-    el.className = 'bkey piano-key-' + note.replace('#', 's');
+    el.className = 'bkey piano-key-' + note.replace('#', 's') + (aa && HP.has(aa) ? ' hydrophobic' : '');
     el.style.cssText = `left:${left}px;width:${BW}px;height:${BH}px;background:${bkBg}`;
     el.innerHTML = aa ? `<div class="klabel" style="color:${bkTx}">${aa}</div><div class="klabel-sub" style="color:${bkTx}">${A3[aa]}</div>` : '';
-    el.onclick = () => { if (aa) { playNote(FR[note], 0.5); showAADisplay([aa]); } };
+    el.onclick = () => { if (aa) { playNote(FR[note], 0.5, hySustain(aa)); showAADisplay([aa]); } };
     el.onmouseenter = () => showTooltip(el, aa, note);
     el.onmouseleave = hideTooltip;
     wrap.appendChild(el);
@@ -256,6 +268,10 @@ function renderLegend() {
     el.innerHTML = `<div class="leg-dot" style="background:${c.bk}"></div><span>${c.label}</span>`;
     leg.appendChild(el);
   });
+  const hy = document.createElement('div');
+  hy.className = 'leg';
+  hy.innerHTML = '<div class="leg-dot" style="background:transparent;border-bottom:3px solid rgba(100,140,180,0.65);border-radius:0"></div><span>Hydrophobic (longer sustain)</span>';
+  leg.appendChild(hy);
 }
 
 function toggleDetails() {
@@ -388,7 +404,7 @@ document.addEventListener('keydown', e => {
   if (!note || kbDown.has(e.key)) return;
   const hint = document.getElementById('kbHint'); if (hint) hint.style.display = 'none';
   kbDown.set(e.key, note);
-  playNote(FR[note], 0.5);
+  playNote(FR[note], 0.5, hySustain(NA[note]));
   const cls = 'piano-key-' + note.replace('#', 's');
   document.querySelectorAll('.' + cls).forEach(el => el.classList.add('lit'));
   updateKbInfo();
