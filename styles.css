@@ -284,4 +284,8 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
 
   /* Prevent iOS auto-zoom on input focus */
   .seq-input-row input { font-size: 16px }
+
+  /* Pin footer */
+  .footer-blurb { position: fixed; bottom: 0; left: 0; right: 0; margin: 0; padding: 6px; background: var(--color-background-primary); border-top: 0.5px solid var(--color-border-tertiary); z-index: 20; font-size: 11px }
+  body { padding-bottom: 2rem }
 }
