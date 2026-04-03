@@ -525,11 +525,11 @@ function switchMapping(id) {
     Object.assign(KB, isPentatonic() ? KB_PENTATONIC : KB_CHROMATIC);
   }
   const hint = document.getElementById('kbHint');
-  if (hint) hint.innerHTML = isDirect()
+  if (hint) { hint.style.display = ''; hint.innerHTML = isDirect()
     ? 'type amino acid letters directly — A&thinsp;G&thinsp;V&thinsp;L&thinsp;I&thinsp;S&thinsp;T&thinsp;C&thinsp;M&thinsp;P&thinsp;D&thinsp;E&thinsp;N&thinsp;Q&thinsp;K&thinsp;R&thinsp;H&thinsp;F&thinsp;W&thinsp;Y'
     : isPentatonic()
     ? 'or play with your keyboard — A&thinsp;S&thinsp;D&thinsp;F&thinsp;G for octave 3, H&thinsp;J&thinsp;K&thinsp;L&thinsp;; for octave 4, Q&thinsp;W&thinsp;E&thinsp;R&thinsp;T for octave 5, Y&thinsp;U&thinsp;I&thinsp;O&thinsp;P for octave 6'
-    : 'or play with your keyboard — A&thinsp;S&thinsp;D&thinsp;F… for white keys, W&thinsp;E&thinsp;T&thinsp;Y… for black keys';
+    : 'or play with your keyboard — A&thinsp;S&thinsp;D&thinsp;F… for white keys, W&thinsp;E&thinsp;T&thinsp;Y… for black keys'; }
   renderMappingBtns(); renderPanelRef(); renderPiano(); renderSeqMel();
   renderInfoPanel();
 }
