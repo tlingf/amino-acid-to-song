@@ -575,6 +575,41 @@ document.addEventListener('keyup', e => {
   updateKbInfo();
 });
 
+/* ── 3D Viewer ── */
+let activeViewer = null;
+
+function waitFor3Dmol() {
+  if (typeof $3Dmol !== 'undefined') return Promise.resolve();
+  return new Promise(resolve => {
+    const check = setInterval(() => {
+      if (typeof $3Dmol !== 'undefined') { clearInterval(check); resolve(); }
+    }, 100);
+  });
+}
+
+function initPdbViewer(pdbId, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const pdbData = typeof PDB_DATA !== 'undefined' && PDB_DATA[pdbId.toUpperCase()];
+  if (!pdbData) {
+    container.innerHTML = `<img class="info-panel-img" src="https://cdn.rcsb.org/images/structures/${pdbId.toLowerCase()}_assembly-1.jpeg" alt="structure" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover"/>`;
+    return;
+  }
+  container.innerHTML = '<div class="pdb-viewer-loading">loading viewer...</div>';
+
+  waitFor3Dmol().then(() => {
+    if (!document.getElementById(containerId)) return;
+    container.innerHTML = '';
+    const viewer = $3Dmol.createViewer(container, { backgroundColor: 'white' });
+    viewer.addModel(pdbData, 'pdb');
+    viewer.setStyle({}, { cartoon: { color: 'spectrum' } });
+    viewer.zoomTo();
+    viewer.render();
+    viewer.spin('y', 0.5);
+    activeViewer = viewer;
+  });
+}
+
 /* ── Composition Mode ── */
 function toggleCompose() {
   composing = !composing;
@@ -771,28 +806,27 @@ function showFold(pdbData, seqStr) {
     + '<div style="margin-top:8px;font-size:9px;color:var(--color-text-tertiary);line-height:1.4">Folded with <a href="https://esmatlas.com" target="_blank" style="color:var(--color-text-tertiary)">ESMFold</a> (Lin et al., Science 2023)</div>';
   el.innerHTML = html;
 
-  if (typeof $3Dmol !== 'undefined') {
+  waitFor3Dmol().then(() => {
     const viewerDiv = document.getElementById('foldViewer');
+    if (!viewerDiv) return;
     const viewer = $3Dmol.createViewer(viewerDiv, { backgroundColor: 'white' });
     viewer.addModel(pdbData, 'pdb');
     viewer.setStyle({}, { cartoon: { colorscheme: { prop: 'b', gradient: 'roygb', min: 50, max: 90 } } });
     viewer.zoomTo();
     viewer.render();
     viewer.spin('y', 1);
-  } else {
-    document.getElementById('foldViewer').innerHTML = '<div class="fold-loading">3Dmol.js not loaded</div>';
-  }
+  });
 }
 
 /* ── Info Panel (right) ── */
 function renderInfoPanel() {
   const el = document.getElementById('infoPanelContent');
   if (!el) return;
+  if (activeViewer) { activeViewer = null; }
 
   if (activeComplex) {
     const cx = activeComplex;
-    const imgUrl = `https://cdn.rcsb.org/images/structures/${cx.pdb.toLowerCase()}_assembly-1.jpeg`;
-    let html = `<img class="info-panel-img" src="${imgUrl}" alt="${cx.name} structure" onerror="this.style.display='none'"/>`;
+    let html = `<div id="pdbViewer" class="pdb-viewer"></div>`;
     html += `<div class="info-panel-title">${cx.name}</div>`;
     html += `<div class="info-panel-subtitle">${cx.pdb} · ${cx.contacts.length} contacts</div>`;
     html += `<div class="info-panel-stats">${cx.chainA.name} melody + ${cx.chainB.name} harmony</div>`;
@@ -812,17 +846,18 @@ function renderInfoPanel() {
     html += '</div>';
     html += '<div id="infoPanelNow"></div>';
     el.innerHTML = html;
+    initPdbViewer(cx.pdb, 'pdbViewer');
 
   } else if (presetActive) {
     const p = PS.find(p => p.name === presetActive);
     if (p) {
-      const imgUrl = `https://cdn.rcsb.org/images/structures/${p.pdb.toLowerCase()}_assembly-1.jpeg`;
-      let html = `<img class="info-panel-img" src="${imgUrl}" alt="${p.name} structure" onerror="this.style.display='none'"/>`;
+      let html = `<div id="pdbViewer" class="pdb-viewer"></div>`;
       html += `<div class="info-panel-title">${p.name}</div>`;
       html += `<div class="info-panel-subtitle">${p.pdb} · ${p.seq.length} amino acids</div>`;
       html += `<div class="info-panel-desc">${p.significance}</div>`;
       html += '<div id="infoPanelNow"></div>';
       el.innerHTML = html;
+      initPdbViewer(p.pdb, 'pdbViewer');
     }
 
   } else if (seq.length) {
