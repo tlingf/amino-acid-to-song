@@ -428,7 +428,7 @@ function renderLegend() {
   });
   const hy = document.createElement('div');
   hy.className = 'leg';
-  hy.innerHTML = '<div class="leg-dot" style="background:transparent;border-bottom:3px solid rgba(100,140,180,0.65);border-radius:0"></div><span>Hydrophobic (longer sustain)</span>';
+  hy.innerHTML = '<div class="leg-dot" style="background:transparent;border-bottom:3px solid rgba(100,140,180,0.65);border-radius:0"></div><div><span>Hydrophobic (longer sustain)</span><div class="leg-role">protein\'s core; important for protein-protein interactions</div></div>';
   leg.appendChild(hy);
 }
 

@@ -94,7 +94,7 @@ const GR = {
 
 /* Group colours & labels */
 const GC = {
-  ali: { bg: '#FAEEDA', tx: '#633806', bk: '#EF9F27', label: 'Aliphatic (G A V L I P M)', role: 'Build the hydrophobic core' },
+  ali: { bg: '#FAEEDA', tx: '#633806', bk: '#EF9F27', label: 'Nonpolar Aliphatic (G A V L I P M)', role: 'Bury deep; water-repelling (hydrophobic)' },
   pol: { bg: '#E1F5EE', tx: '#085041', bk: '#1D9E75', label: 'Polar (S T C N Q)', role: 'H-bonds & signaling switches' },
   aro: { bg: '#EEEDFE', tx: '#3C3489', bk: '#534AB7', label: 'Aromatic (F Y W)', role: 'Ring-stacking & UV absorption' },
   pos: { bg: '#FAECE7', tx: '#712B13', bk: '#D85A30', label: 'Basic + (H K R)', role: 'Positive charge; bind DNA' },
