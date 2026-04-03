@@ -59,7 +59,7 @@ function getTop4(lastAA) {
   const row = BG[ri];
   const scored = AA_ORDER.split('').map((aa, j) => ({
     aa,
-    score: 0.6 * row[j] + 0.2 * _NH[aa] + 0.2 * _NS[aa]
+    score: 0.6 * row[j] + 0.2 * _NH[aa] * 0.05 + 0.2 * _NS[aa] * 0.05
   }));
   scored.sort((a, b) => b.score - a.score);
   return scored.slice(0, 4).map(s => s.aa);

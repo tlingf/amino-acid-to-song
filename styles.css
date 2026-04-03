@@ -170,7 +170,7 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
 .footer-blurb a:hover { text-decoration: underline }
 
 /* Composition mode */
-.compose-btn { padding: 6px 18px; border-radius: var(--border-radius-md); border: 1px solid #534AB7; background: transparent; color: #534AB7; cursor: pointer; font-size: 14px; font-weight: 600 }
+.compose-btn { padding: 6px 18px; border-radius: var(--border-radius-md); border: 1.5px solid #534AB7; background: #f0eeff; color: #534AB7; cursor: pointer; font-size: 14px; font-weight: 600 }
 .compose-btn:hover { opacity: 0.85 }
 .compose-btn.active { background: #534AB7; color: #fff }
 
@@ -183,11 +183,15 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
 .compose-fold:hover { opacity: 0.85 }
 .compose-fold:disabled { opacity: 0.4; cursor: default }
 
+.compose-seq { display: flex; gap: 2px; overflow-x: auto; padding: 4px 0; min-height: 0 }
+.compose-seq:empty { display: none }
+.compose-seq .cbadge { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 4px; font-size: 11px; font-weight: 600; flex-shrink: 0 }
+
 .wkey.suggested { box-shadow: 0 0 12px 3px var(--suggest-color, #534AB7); z-index: 1; animation: suggestPulse 1.5s ease-in-out infinite }
 .bkey.suggested { box-shadow: 0 0 10px 2px var(--suggest-color, #534AB7); animation: suggestPulse 1.5s ease-in-out infinite }
 @keyframes suggestPulse { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(0.92); } }
 
-.fold-viewer { width: 100%; height: 300px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); overflow: hidden }
+.fold-viewer { width: 100%; height: 300px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); overflow: hidden; position: relative }
 .fold-status { font-size: 11px; color: var(--color-text-tertiary); margin: 4px 0 }
 .fold-loading { text-align: center; padding: 40px 10px; color: var(--color-text-tertiary); font-size: 12px }
 .fold-error { font-size: 11px; color: #dc2626; margin: 4px 0; line-height: 1.4 }

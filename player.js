@@ -202,13 +202,13 @@ function computeTimings(startIdx, bpm) {
 function stopPlay() {
   playing = false; paused = false; playIdx = 0;
   timers.forEach(clearTimeout); timers = [];
-  document.getElementById('playBtn').textContent = 'play sequence'; setActive(-1);
+  document.getElementById('playBtn').textContent = '🎵 play sequence'; setActive(-1);
 }
 
 function pausePlay() {
   paused = true; playing = false;
   timers.forEach(clearTimeout); timers = [];
-  document.getElementById('playBtn').textContent = 'play sequence';
+  document.getElementById('playBtn').textContent = '🎵 play sequence';
 }
 
 function startFrom(startIdx) {
@@ -554,6 +554,7 @@ function updateKbInfo() {
 
 document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (composing && e.key === 'Backspace') { e.preventDefault(); undoCompose(); return; }
   const note = KB[e.key.toLowerCase()];
   if (!note || kbDown.has(e.key)) return;
   const hint = document.getElementById('kbHint'); if (hint) hint.style.display = 'none';
@@ -579,20 +580,28 @@ function toggleCompose() {
   composing = !composing;
   const btn = document.getElementById('composeBtn');
   const bar = document.getElementById('composeBar');
+  const seqRow = document.querySelector('.seq-input-row');
+  const seqWrap = document.querySelector('.seq-mel-wrap');
   if (composing) {
     stopPlay();
     compSeq = [];
     seq = [];
     document.getElementById('seqInput').value = '';
     renderSeqMel();
-    btn.textContent = 'exit compose'; btn.classList.add('active');
+    btn.textContent = 'exit'; btn.classList.add('active');
     bar.style.display = 'flex';
+    if (seqRow) seqRow.style.display = 'none';
+    if (seqWrap) seqWrap.style.display = 'none';
+    document.getElementById('composeSeq').innerHTML = '';
     updateComposeCount();
     updateSuggestions();
     renderComposeInfo();
   } else {
-    btn.textContent = 'compose'; btn.classList.remove('active');
+    btn.textContent = '🎼 compose mode'; btn.classList.remove('active');
     bar.style.display = 'none';
+    if (seqRow) seqRow.style.display = '';
+    if (seqWrap) seqWrap.style.display = '';
+    document.getElementById('composeSeq').innerHTML = '';
     clearSuggestions();
     renderInfoPanel();
   }
@@ -603,7 +612,7 @@ function addComposeAA(aa) {
   compSeq.push(aa);
   seq = [...compSeq];
   document.getElementById('seqInput').value = compSeq.join('');
-  renderSeqMel();
+  renderComposeSeq();
   updateComposeCount();
   updateSuggestions();
   renderComposeInfo();
@@ -614,7 +623,7 @@ function undoCompose() {
   compSeq.pop();
   seq = [...compSeq];
   document.getElementById('seqInput').value = compSeq.join('');
-  renderSeqMel();
+  renderComposeSeq();
   updateComposeCount();
   updateSuggestions();
   renderComposeInfo();
@@ -624,15 +633,34 @@ function clearCompose() {
   compSeq = [];
   seq = [];
   document.getElementById('seqInput').value = '';
-  renderSeqMel();
+  renderComposeSeq();
   updateComposeCount();
   updateSuggestions();
   renderComposeInfo();
 }
 
+function renderComposeSeq() {
+  const wrap = document.getElementById('composeSeq');
+  wrap.innerHTML = '';
+  compSeq.forEach(aa => {
+    const g = GR[aa] || 'ali', c = GC[g];
+    const el = document.createElement('div');
+    el.className = 'cbadge';
+    el.style.background = c.bg; el.style.color = c.tx;
+    el.textContent = aa;
+    wrap.appendChild(el);
+  });
+  if (wrap.scrollWidth > wrap.clientWidth) {
+    wrap.scrollLeft = wrap.scrollWidth;
+  }
+}
+
 function updateComposeCount() {
   const el = document.getElementById('composeCount');
-  if (el) el.textContent = compSeq.length + ' aa';
+  if (el) {
+    const remaining = 20 - compSeq.length;
+    el.textContent = remaining > 0 ? compSeq.length + ' aa (' + remaining + ' more to fold)' : compSeq.length + ' aa';
+  }
   const foldBtn = document.getElementById('foldBtn');
   if (foldBtn) foldBtn.disabled = compSeq.length < 20;
 }
@@ -713,15 +741,39 @@ async function foldSequence() {
   }
 }
 
+function parsePLDDT(pdbData) {
+  const bFactors = [];
+  pdbData.split('\n').forEach(line => {
+    if (line.startsWith('ATOM') && line.substring(12, 16).trim() === 'CA') {
+      const bf = parseFloat(line.substring(60, 66));
+      if (!isNaN(bf)) bFactors.push(bf);
+    }
+  });
+  if (bFactors.length === 0) return null;
+  const avg = bFactors.reduce((a, b) => a + b, 0) / bFactors.length;
+  return { avg: avg.toFixed(1), min: Math.min(...bFactors).toFixed(1), max: Math.max(...bFactors).toFixed(1) };
+}
+
 function showFold(pdbData, seqStr) {
   const el = document.getElementById('infoPanelContent');
-  el.innerHTML = '<div class="info-panel-title">your protein</div>'
+  const conf = parsePLDDT(pdbData);
+  let html = '<div class="info-panel-title">your protein</div>'
     + '<div class="info-panel-subtitle">' + seqStr.length + ' amino acids</div>'
-    + '<div id="foldViewer" class="fold-viewer"></div>'
-    + '<div class="fold-status">colored by pLDDT confidence</div>';
+    + '<div id="foldViewer" class="fold-viewer"></div>';
+  if (conf) {
+    const color = conf.avg >= 70 ? '#3a8a5c' : conf.avg >= 50 ? '#EF9F27' : '#dc2626';
+    html += '<div style="margin:6px 0;font-size:11px">'
+      + '<span style="font-weight:600;color:' + color + '">pLDDT ' + conf.avg + '</span>'
+      + '<span style="color:var(--color-text-tertiary)"> (' + conf.min + '\u2013' + conf.max + ')</span>'
+      + '</div>';
+  }
+  html += '<div class="fold-status">colored by confidence: <span style="color:#dc2626">low</span> \u2192 <span style="color:#3a8a5c">high</span></div>'
+    + '<div style="margin-top:8px;font-size:9px;color:var(--color-text-tertiary);line-height:1.4">Folded with <a href="https://esmatlas.com" target="_blank" style="color:var(--color-text-tertiary)">ESMFold</a> (Lin et al., Science 2023)</div>';
+  el.innerHTML = html;
 
   if (typeof $3Dmol !== 'undefined') {
-    const viewer = $3Dmol.createViewer('foldViewer', { backgroundColor: 'white' });
+    const viewerDiv = document.getElementById('foldViewer');
+    const viewer = $3Dmol.createViewer(viewerDiv, { backgroundColor: 'white' });
     viewer.addModel(pdbData, 'pdb');
     viewer.setStyle({}, { cartoon: { colorscheme: { prop: 'b', gradient: 'roygb', min: 50, max: 90 } } });
     viewer.zoomTo();

@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>AA Melody Player</title>
+<title>AA Melody Player 🎵</title>
 <script src="https://3Dmol.org/build/3Dmol-min.js" defer></script>
 <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
-<h1>AA Melody Player <span class="h1-sub">Listen to your proteins</span></h1>
+<h1>AA Melody Player 🎵 <span class="h1-sub">Listen to your proteins</span></h1>
 <p class="blurb">Amino acids, <span class="blurb-accent">like notes in a song</span>, form sequences that fold and then bind to each other, <span class="blurb-accent">like harmony in music</span>, that create the machinery of life.</p>
 
 <div class="pmp">
@@ -33,8 +33,8 @@
     <div class="seq-mel" id="seqMel"></div>
   </div>
   <div class="controls">
-    <button class="play-btn" id="playBtn" onclick="togglePlay()">play sequence</button>
-    <button class="compose-btn" id="composeBtn" onclick="toggleCompose()">compose</button>
+    <button class="play-btn" id="playBtn" onclick="togglePlay()">🎵 play sequence</button>
+    <button class="compose-btn" id="composeBtn" onclick="toggleCompose()">🎼 compose mode</button>
     <div class="tempo-row">
       <span>tempo</span>
       <input type="range" min="40" max="300" value="120" step="1" id="tempoSlider" style="width:100px" oninput="document.getElementById('tempoOut').textContent=this.value"/>
@@ -54,6 +54,7 @@
     <button class="compose-fold" id="foldBtn" onclick="foldSequence()" disabled>fold it!</button>
   </div>
   <div class="piano-area">
+    <div class="compose-seq" id="composeSeq"></div>
     <div class="key-tooltip" id="keyTooltip"></div>
     <div class="piano-scroll"><div class="piano-wrap" id="pianoWrap"></div></div>
   </div>
