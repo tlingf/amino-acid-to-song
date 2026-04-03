@@ -229,3 +229,59 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
 .fold-status { font-size: 11px; color: var(--color-text-tertiary); margin: 4px 0 }
 .fold-loading { text-align: center; padding: 40px 10px; color: var(--color-text-tertiary); font-size: 12px }
 .fold-error { font-size: 11px; color: #dc2626; margin: 4px 0; line-height: 1.4 }
+
+/* ── Mobile ── */
+.mobile-toggle { display: none }
+
+@media (max-width: 600px) {
+  body { padding: 0 0.75rem; margin: 0.5rem auto }
+  h1 { font-size: 1.1rem }
+  .h1-sub { display: block; margin-left: 0; font-size: 0.8rem }
+  .blurb { font-size: 12px }
+
+  /* Stack layout */
+  .pmp { flex-direction: column; gap: 10px }
+  .mapping-panel { width: 100%; max-height: none; overflow-y: visible; order: 2 }
+  .mapping-panel .presets { flex-direction: row }
+  .info-panel { width: 100%; max-height: none; overflow-y: visible; order: 1 }
+
+  /* Collapsible panels */
+  .mobile-toggle { display: flex; align-items: center; gap: 6px; width: 100%; padding: 8px 0; border: none; background: none; font-size: 12px; font-weight: 600; color: var(--color-text-secondary); cursor: pointer; font-family: var(--font-sans) }
+  .mobile-toggle::before { content: '\25B6'; font-size: 8px; transition: transform 0.15s }
+  .mobile-toggle.open::before { transform: rotate(90deg) }
+  .mapping-panel-body, .info-panel-body { display: none }
+  .mapping-panel-body.open, .info-panel-body.open { display: block }
+
+  /* Sequence badges */
+  .seq-mel { gap: 2px }
+  .seq-unit { width: 22px }
+  .aa-badge { width: 22px; height: 22px; font-size: 11px; border-radius: 4px }
+  .partner-badge { width: 22px; height: 18px; font-size: 10px }
+  .mbar { width: 22px }
+
+  /* Controls */
+  .controls { gap: 8px }
+  .play-btn, .compose-btn { font-size: 13px; padding: 8px 14px }
+  .tempo-row input[type="range"] { width: 80px }
+
+  /* Compose bar */
+  .compose-bar { flex-wrap: wrap; gap: 6px }
+
+  /* Piano — scaled by JS, prevent scroll */
+  .piano-scroll { overflow-x: hidden }
+  .piano-wrap { transform-origin: top left }
+
+  /* Hide keyboard hint */
+  .kb-hint { display: none }
+
+  /* AA display cards — skip details on mobile */
+  .aa-card { min-width: 100px; padding: 6px 8px }
+  .aa-card-blurb, .aa-card svg { display: none }
+
+  /* Info panel viewers */
+  .pdb-viewer { height: 200px }
+  .fold-viewer { height: 220px }
+
+  /* Prevent iOS auto-zoom on input focus */
+  .seq-input-row input { font-size: 16px }
+}

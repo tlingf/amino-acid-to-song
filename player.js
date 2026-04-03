@@ -309,6 +309,7 @@ function setActive(idx) {
 
 /* ── Tooltip ── */
 function showTooltip(el, aa, note) {
+  if (window.matchMedia('(hover: none)').matches) return;
   const tip = document.getElementById('keyTooltip');
   if (!aa) { tip.style.display = 'none'; return; }
   tip.innerHTML = `${AN[aa]}<span>${A3[aa]} \u00B7 ${aa} \u00B7 ${note}</span>`;
@@ -377,6 +378,7 @@ function renderPiano() {
   if (isPentatonic()) {
     wrap.style.width = (20 * PENT_W + 3 * 4) + 'px';
     renderPianoPentatonic(wrap);
+    scalePianoForMobile();
     return;
   }
   wrap.style.width = '576px';
@@ -406,6 +408,7 @@ function renderPiano() {
     el.onmouseleave = hideTooltip;
     wrap.appendChild(el);
   });
+  scalePianoForMobile();
 }
 
 function renderPianoPentatonic(wrap) {
@@ -427,6 +430,25 @@ function renderPianoPentatonic(wrap) {
     el.onmouseleave = hideTooltip;
     wrap.appendChild(el);
   });
+}
+
+/* ── Mobile piano scaling ── */
+function scalePianoForMobile() {
+  const wrap = document.getElementById('pianoWrap');
+  const scroll = wrap.parentElement; // .piano-scroll
+  if (window.innerWidth > 600) {
+    wrap.style.transform = '';
+    scroll.style.height = '';
+    scroll.style.overflowX = 'auto';
+    return;
+  }
+  const pianoW = parseFloat(wrap.style.width);
+  const avail = scroll.clientWidth;
+  if (pianoW <= avail) { wrap.style.transform = ''; scroll.style.height = ''; return; }
+  const s = avail / pianoW;
+  wrap.style.transform = `scale(${s})`;
+  scroll.style.height = (WH * s + 8) + 'px';
+  scroll.style.overflowX = 'hidden';
 }
 
 function renderLegend() {
@@ -1150,6 +1172,33 @@ function updateInfoPanelNow(idx) {
   el.innerHTML = html;
 }
 
+/* ── Mobile collapsibles ── */
+function setupMobileCollapsibles() {
+  if (window.innerWidth > 600) return;
+  const mp = document.querySelector('.mapping-panel');
+  const ip = document.getElementById('infoPanel');
+  [{ panel: mp, label: 'Mappings & legend', cls: 'mapping-panel-body', startOpen: false },
+   { panel: ip, label: 'Protein info', cls: 'info-panel-body', startOpen: true }].forEach(({ panel, label, cls, startOpen }) => {
+    if (!panel || panel.querySelector('.mobile-toggle')) return;
+    const body = document.createElement('div');
+    body.className = cls + (startOpen ? ' open' : '');
+    while (panel.firstChild) body.appendChild(panel.firstChild);
+    const btn = document.createElement('button');
+    btn.className = 'mobile-toggle' + (startOpen ? ' open' : '');
+    btn.textContent = label;
+    btn.onclick = () => { btn.classList.toggle('open'); body.classList.toggle('open'); };
+    panel.appendChild(btn);
+    panel.appendChild(body);
+  });
+}
+
 /* ── Init ── */
 renderMappingBtns(); renderLegend(); renderPanelRef(); renderPiano();
 renderPresets(); renderHarmonyBtns(); loadComplex(COMPLEXES[0]);
+setupMobileCollapsibles();
+
+let _resizeT;
+window.addEventListener('resize', () => {
+  clearTimeout(_resizeT);
+  _resizeT = setTimeout(scalePianoForMobile, 150);
+});
