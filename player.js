@@ -471,7 +471,7 @@ function loadPreset(p) {
   document.getElementById('seqInput').value = p.seq;
   seq = p.seq.toUpperCase().split('').filter(aa => AM[aa]);
   renderPresets(); renderSeqMel();
-  document.getElementById('infoBar').textContent = `${p.name} (${p.seq.length} aa)`;
+  const ib1 = document.getElementById('infoBar'); if (ib1) ib1.textContent = `${p.name} (${p.seq.length} aa)`;
   renderInfoPanel(); updateRhythmUI(); updateSSBadges();
 }
 
@@ -484,7 +484,7 @@ function loadCustom() {
   stopPlay(); presetActive = ''; activeComplex = null; contactMap = new Map();
   seq = document.getElementById('seqInput').value.toUpperCase().split('').filter(aa => AM[aa]);
   renderPresets(); renderHarmonyBtns(); renderSeqMel();
-  document.getElementById('infoBar').textContent = seq.length ? `${seq.length} amino acids loaded` : 'no valid amino acids found';
+  const ib2 = document.getElementById('infoBar'); if (ib2) ib2.textContent = seq.length ? `${seq.length} amino acids loaded` : 'no valid amino acids found';
   renderInfoPanel(); updateRhythmUI(); updateSSBadges();
 }
 
@@ -539,8 +539,8 @@ function loadComplex(cx) {
   document.getElementById('seqInput').value = cx.chainA.seq;
   seq = cx.chainA.seq.toUpperCase().split('').filter(aa => AM[aa]);
   renderPresets(); renderHarmonyBtns(); renderSeqMel();
-  document.getElementById('infoBar').innerHTML =
-    `<span style="font-weight:500">${cx.name}</span> `
+  const ib3 = document.getElementById('infoBar');
+  if (ib3) ib3.innerHTML = `<span style="font-weight:500">${cx.name}</span> `
     + `<span style="color:var(--color-text-tertiary)">(${cx.pdb})</span> `
     + `<span style="color:var(--color-text-secondary);font-size:12px">${cx.contacts.length} contacts</span>`;
   renderInfoPanel(); updateRhythmUI(); updateSSBadges();
