@@ -15,8 +15,20 @@
 
 const MAPPINGS = [
   {
+    id: 'pentatonic-harmony',
+    name: 'Pentatonic (harmony)',
+    type: 'pentatonic',
+    desc: 'C-major pentatonic across 4 octaves — every interval is consonant. Common hydrophobics (L A V G I) on octave 4, salt bridges (E–K, D–R) as perfect fifths on octave 5, polar AAs high on octave 6.',
+    map: {
+      P: 'C3',  F: 'D3',  H: 'E3',  M: 'G3',  W: 'A3',
+      L: 'C4',  A: 'D4',  V: 'E4',  G: 'G4',  I: 'A4',
+      E: 'C5',  D: 'D5',  Y: 'E5',  K: 'G5',  R: 'A5',
+      S: 'C6',  T: 'D6',  N: 'E6',  Q: 'G6',  C: 'A6'
+    }
+  },
+  {
     id: 'complexity-harmony',
-    name: 'Complexity (harmony)',
+    name: 'Complexity',
     desc: 'Same complexity ladder, but black keys placed for binding-pair consonance (salt bridges = perfect fifths/fourths, aromatics = thirds/fourths).',
     map: {
       G: 'C4',   P: 'C#4',  A: 'D4',   C: 'D#4',  S: 'E4',
@@ -26,37 +38,15 @@ const MAPPINGS = [
     }
   },
   {
-    id: 'pentatonic-harmony',
-    name: 'Pentatonic (harmony)',
-    type: 'pentatonic',
-    desc: 'C-major pentatonic across 4 octaves — every interval is consonant. Salt bridges (E–K, D–R) land on perfect fifths, hydrophobics (L–I–F) cluster in octave 4, aromatics nearby. Cannot sound bad.',
+    id: 'keyboard',
+    name: 'Keyboard letters',
+    type: 'direct',
+    desc: 'Type amino acid letters directly — each key plays the corresponding residue on a pentatonic scale.',
     map: {
-      P: 'C3',  D: 'D3',  H: 'E3',  M: 'G3',  R: 'A3',
-      G: 'C4',  L: 'D4',  I: 'E4',  F: 'G4',  W: 'A4',
-      E: 'C5',  V: 'D5',  A: 'E5',  K: 'G5',  S: 'A5',
-      T: 'C6',  C: 'D6',  N: 'E6',  Y: 'G6',  Q: 'A6'
-    }
-  },
-  {
-    id: 'binding-chords',
-    name: 'Binding chords',
-    desc: 'Optimized for harmony: salt bridges (E–K, D–R) land on perfect fifths, hydrophobic contacts (L–I, F–I) on major thirds, aromatics (F–Y) on fifths, H-bonds (T–N, E–H) on minor thirds. Common AAs on octave 4 white keys.',
-    map: {
-      L: 'C4',   C: 'C#4',  A: 'D4',   W: 'D#4',  I: 'E4',
-      V: 'F4',   M: 'F#4',  E: 'G4',   F: 'G#4',  G: 'A4',
-      H: 'A#4',  S: 'B4',   D: 'C5',   N: 'C#5',  K: 'D5',
-      Y: 'D#5',  T: 'E5',   Q: 'F5',   P: 'F#5',  R: 'G5'
-    }
-  },
-  {
-    id: 'complexity',
-    name: 'Complexity',
-    desc: 'White = complexity ladder (G→K). Black = modification of neighboring white key (e.g. C#4:P next to C4:G, D#4:C next to E4:S).',
-    map: {
-      G: 'C4',   P: 'C#4',  A: 'D4',   C: 'D#4',  S: 'E4',
-      T: 'F4',   M: 'F#4',  V: 'G4',   W: 'G#4',  L: 'A4',
-      F: 'A#4',  I: 'B4',   D: 'C5',   Y: 'C#5',  N: 'D5',
-      H: 'D#5',  E: 'E5',   Q: 'F5',   R: 'F#5',  K: 'G5'
+      P: 'C3',  F: 'D3',  H: 'E3',  M: 'G3',  W: 'A3',
+      L: 'C4',  A: 'D4',  V: 'E4',  G: 'G4',  I: 'A4',
+      E: 'C5',  D: 'D5',  Y: 'E5',  K: 'G5',  R: 'A5',
+      S: 'C6',  T: 'D6',  N: 'E6',  Q: 'G6',  C: 'A6'
     }
   },
   {
@@ -70,17 +60,6 @@ const MAPPINGS = [
       H: 'D#5',  N: 'E5',   D: 'F5',   C: 'F#5',  Q: 'G5'
     }
   },
-  {
-    id: 'literal',
-    name: 'Literal note',
-    desc: 'Letter-matched AAs on their namesake note (C→C4, D→D4 …). Remaining AAs grouped by property: aromatics, aliphatics, polars, basic+.',
-    map: {
-      C: 'C4',   S: 'C#4',  D: 'D4',   T: 'D#4',  E: 'E4',
-      F: 'F4',   Y: 'F#4',  G: 'G4',   W: 'G#4',  A: 'A4',
-      V: 'A#4',  P: 'B4',   L: 'C5',   I: 'C#5',  M: 'D5',
-      N: 'D#5',  Q: 'E5',   H: 'F5',   K: 'F#5',  R: 'G5'
-    }
-  }
 ];
 
 /* Active mapping (mutable) */
@@ -115,11 +94,11 @@ const GR = {
 
 /* Group colours & labels */
 const GC = {
-  ali: { bg: '#FAEEDA', tx: '#633806', bk: '#EF9F27', label: 'Aliphatic (G A V L I P M)' },
-  pol: { bg: '#E1F5EE', tx: '#085041', bk: '#1D9E75', label: 'Polar (S T C N Q)' },
-  aro: { bg: '#EEEDFE', tx: '#3C3489', bk: '#534AB7', label: 'Aromatic (F Y W)' },
-  pos: { bg: '#FAECE7', tx: '#712B13', bk: '#D85A30', label: 'Basic + (H K R)' },
-  neg: { bg: '#E6F1FB', tx: '#0C447C', bk: '#378ADD', label: 'Acidic \u2212 (D E)' }
+  ali: { bg: '#FAEEDA', tx: '#633806', bk: '#EF9F27', label: 'Aliphatic (G A V L I P M)', role: 'Build the hydrophobic core' },
+  pol: { bg: '#E1F5EE', tx: '#085041', bk: '#1D9E75', label: 'Polar (S T C N Q)', role: 'H-bonds & signaling switches' },
+  aro: { bg: '#EEEDFE', tx: '#3C3489', bk: '#534AB7', label: 'Aromatic (F Y W)', role: 'Ring-stacking & UV absorption' },
+  pos: { bg: '#FAECE7', tx: '#712B13', bk: '#D85A30', label: 'Basic + (H K R)', role: 'Positive charge; bind DNA' },
+  neg: { bg: '#E6F1FB', tx: '#0C447C', bk: '#378ADD', label: 'Acidic \u2212 (D E)', role: 'Negative charge; bind metals' }
 };
 
 /* Amino acid → three-letter abbreviation */

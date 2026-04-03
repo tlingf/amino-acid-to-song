@@ -13,7 +13,7 @@ Open `index.html` in a browser. No build step or dependencies.
 
 ## Key mappings
 
-Six mappings available, including chromatic (complexity-ordered, harmony-optimized, frequency-based, literal) and pentatonic. Amino acids are colored by property group: aliphatic (orange), polar (green), aromatic (purple), basic (red), acidic (blue).
+Four mappings available: pentatonic (harmony-optimized), complexity (chromatic), keyboard (direct letter input), and frequency-based. Amino acids are colored by property group: aliphatic (orange), polar (green), aromatic (purple), basic (red), acidic (blue).
 
 ## Files
 

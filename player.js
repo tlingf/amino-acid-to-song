@@ -40,9 +40,14 @@ const KB_PENTATONIC = {
 };
 let KB = { ...KB_CHROMATIC };
 
+function isDirect() {
+  const m = MAPPINGS.find(m => m.id === activeMapping);
+  return m && m.type === 'direct';
+}
+
 function isPentatonic() {
   const m = MAPPINGS.find(m => m.id === activeMapping);
-  return m && m.type === 'pentatonic';
+  return m && (m.type === 'pentatonic' || m.type === 'direct');
 }
 
 function getNoteIndex(note) {
@@ -56,7 +61,7 @@ let seq = [], playing = false, paused = false, playIdx = 0, timers = [], ctx = n
 let presetActive = '';
 let activeComplex = null, contactMap = new Map();
 let detailsOpen = false;
-let composing = false, compSeq = [];
+let composing = false, compSeq = [], compFolded = false;
 const kbDown = new Map();
 
 function rebuildNA() { NA = {}; Object.entries(AM).forEach(([aa, n]) => NA[n] = aa); }
@@ -418,7 +423,7 @@ function renderLegend() {
   ['ali', 'pol', 'aro', 'pos', 'neg'].forEach(g => {
     const c = GC[g], el = document.createElement('div');
     el.className = 'leg';
-    el.innerHTML = `<div class="leg-dot" style="background:${c.bk}"></div><span>${c.label}</span>`;
+    el.innerHTML = `<div class="leg-dot" style="background:${c.bk}"></div><div><span>${c.label}</span>${c.role ? `<div class="leg-role">${c.role}</div>` : ''}</div>`;
     leg.appendChild(el);
   });
   const hy = document.createElement('div');
@@ -514,9 +519,15 @@ function renderMappingBtns() {
 function switchMapping(id) {
   stopPlay(); activeMapping = id; setMapping(id); rebuildNA();
   Object.keys(KB).forEach(k => delete KB[k]);
-  Object.assign(KB, isPentatonic() ? KB_PENTATONIC : KB_CHROMATIC);
+  if (isDirect()) {
+    Object.entries(AM).forEach(([aa, note]) => { KB[aa.toLowerCase()] = note; });
+  } else {
+    Object.assign(KB, isPentatonic() ? KB_PENTATONIC : KB_CHROMATIC);
+  }
   const hint = document.getElementById('kbHint');
-  if (hint) hint.innerHTML = isPentatonic()
+  if (hint) hint.innerHTML = isDirect()
+    ? 'type amino acid letters directly — A&thinsp;G&thinsp;V&thinsp;L&thinsp;I&thinsp;S&thinsp;T&thinsp;C&thinsp;M&thinsp;P&thinsp;D&thinsp;E&thinsp;N&thinsp;Q&thinsp;K&thinsp;R&thinsp;H&thinsp;F&thinsp;W&thinsp;Y'
+    : isPentatonic()
     ? 'or play with your keyboard — A&thinsp;S&thinsp;D&thinsp;F&thinsp;G for octave 3, H&thinsp;J&thinsp;K&thinsp;L&thinsp;; for octave 4, Q&thinsp;W&thinsp;E&thinsp;R&thinsp;T for octave 5, Y&thinsp;U&thinsp;I&thinsp;O&thinsp;P for octave 6'
     : 'or play with your keyboard — A&thinsp;S&thinsp;D&thinsp;F… for white keys, W&thinsp;E&thinsp;T&thinsp;Y… for black keys';
   renderMappingBtns(); renderPanelRef(); renderPiano(); renderSeqMel();
@@ -635,6 +646,7 @@ function toggleCompose() {
   if (composing) {
     stopPlay();
     activeComplex = null; contactMap = null;
+    compFolded = false;
     compSeq = [];
     seq = [];
     document.getElementById('seqInput').value = '';
@@ -667,7 +679,7 @@ function toggleCompose() {
 }
 
 function addComposeAA(aa) {
-  if (!aa || compSeq.length >= 300) return;
+  if (!aa || compSeq.length >= 300 || compFolded) return;
   compSeq.push(aa);
   seq = [...compSeq];
   document.getElementById('seqInput').value = compSeq.join('');
@@ -679,7 +691,7 @@ function addComposeAA(aa) {
 }
 
 function undoCompose() {
-  if (compSeq.length === 0) return;
+  if (compSeq.length === 0 || compFolded) return;
   compSeq.pop();
   seq = [...compSeq];
   document.getElementById('seqInput').value = compSeq.join('');
@@ -697,6 +709,7 @@ function updateComposePlay() {
 
 function clearCompose() {
   stopPlay();
+  compFolded = false;
   compSeq = [];
   seq = [];
   document.getElementById('seqInput').value = '';
@@ -801,6 +814,7 @@ async function foldSequence() {
     });
     if (!resp.ok) throw new Error('ESMFold returned ' + resp.status);
     const pdbData = await resp.text();
+    compFolded = true;
     showFold(pdbData, seqStr);
   } catch (err) {
     el.innerHTML = '<div class="info-panel-title">fold error</div>'
@@ -831,18 +845,12 @@ function helixImg() {
 function sheetImg() {
   return '<img src="img/beta-sheet.png" alt="beta sheet" style="height:28px;vertical-align:middle;margin-right:4px">';
 }
-function computePropensity(seqStr) {
-  let hSum = 0, sSum = 0, n = seqStr.length;
-  for (let i = 0; i < n; i++) {
-    const aa = seqStr[i];
-    hSum += (HELIX_PROP[aa] || 1.0);
-    sSum += (SHEET_PROP[aa] || 1.0);
-  }
-  // Normalize to 0–100 using each scale's own min/max
-  // Helix: 0.57 (G,P) – 1.51 (E);  Sheet: 0.37 (E) – 1.70 (V)
-  const hPct = Math.round(Math.min(100, Math.max(0, ((hSum / n) - 0.57) / (1.51 - 0.57) * 100)));
-  const sPct = Math.round(Math.min(100, Math.max(0, ((sSum / n) - 0.37) / (1.70 - 0.37) * 100)));
-  return { helix: hPct, sheet: sPct };
+function extractSS(viewer) {
+  const atoms = viewer.selectedAtoms({ atom: 'CA' });
+  let nHelix = 0, nSheet = 0;
+  atoms.forEach(a => { if (a.ss === 'h') nHelix++; else if (a.ss === 's') nSheet++; });
+  const n = atoms.length || 1;
+  return { helix: Math.round(nHelix / n * 100), sheet: Math.round(nSheet / n * 100), coil: Math.round((n - nHelix - nSheet) / n * 100) };
 }
 
 function showFold(pdbData, seqStr) {
@@ -875,11 +883,11 @@ function showFold(pdbData, seqStr) {
     viewer.render();
     viewer.spin('y', 1);
 
-    // Append propensity feedback after structure is visible
+    // Append actual secondary structure from folded model
     const propDiv = document.getElementById('foldPropensity');
     if (propDiv) {
-      const prop = computePropensity(seqStr);
-      function propBar(label, svg, pct, color) {
+      const ss = extractSS(viewer);
+      function ssBar(label, svg, pct, color) {
         return '<div style="display:flex;align-items:center;gap:6px;margin:4px 0">'
           + svg
           + '<span style="min-width:68px;font-weight:500;font-size:11px">' + label + '</span>'
@@ -889,13 +897,10 @@ function showFold(pdbData, seqStr) {
           + '</div>';
       }
       propDiv.innerHTML = '<div style="margin:10px 0 6px;padding:8px 10px;background:#f8f7fc;border-radius:6px;font-size:11px">'
-        + '<div style="font-weight:600;margin-bottom:6px;color:var(--color-text-primary)">amino acid tendency</div>'
-        + propBar('alpha helix', helixImg(), prop.helix, '#e07838')
-        + propBar('beta sheet', sheetImg(), prop.sheet, '#3878c0')
-        + '<div style="margin-top:8px;font-size:10px;color:var(--color-text-tertiary);line-height:1.5">'
-        + 'Can you compose an alpha helix? Try lots of <b style="color:#e07838">A, E, L, M</b>.<br>'
-        + 'What about a beta sheet? Load up on <b style="color:#3878c0">V, I, Y, F, W</b>.'
-        + '</div></div>';
+        + '<div style="font-weight:600;margin-bottom:6px;color:var(--color-text-primary)">secondary structure</div>'
+        + ssBar('alpha helix', helixImg(), ss.helix, '#e07838')
+        + ssBar('beta sheet', sheetImg(), ss.sheet, '#3878c0')
+        + '</div>';
     }
   });
 }

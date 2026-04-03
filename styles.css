@@ -141,8 +141,9 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
 
 /* Legend + side panel */
 .legend { display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: var(--color-text-secondary); margin-top: 0.5rem }
-.leg { display: flex; align-items: center; gap: 5px }
-.leg-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0 }
+.leg { display: flex; align-items: flex-start; gap: 5px }
+.leg-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; margin-top: 3px }
+.leg-role { font-size: 9px; color: var(--color-text-tertiary); margin-top: -1px }
 .detail-toggle { font-size: 11px; color: var(--color-text-tertiary); cursor: pointer; margin-top: 0.5rem; text-decoration: underline; text-decoration-style: dotted }
 .detail-toggle:hover { color: var(--color-text-secondary) }
 .panel-ref { font-size: 10px; line-height: 1.5; color: var(--color-text-secondary); margin-top: 0.5rem }
@@ -200,7 +201,7 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
 .compose-count { font-family: var(--font-mono); font-size: 12px; color: var(--color-text-primary) }
 .compose-action { padding: 3px 8px; border-radius: 4px; border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); cursor: pointer; font-size: 11px }
 .compose-action:hover { background: var(--color-background-secondary) }
-.compose-fold { padding: 3px 10px; border-radius: 4px; border: 1px solid #534AB7; background: #534AB7; color: #fff; cursor: pointer; font-size: 11px; font-weight: 600; margin-left: auto }
+.compose-fold { padding: 5px 14px; border-radius: 5px; border: 1px solid #534AB7; background: #534AB7; color: #fff; cursor: pointer; font-size: 13px; font-weight: 600; margin-left: auto }
 .compose-fold:hover { opacity: 0.85 }
 .compose-fold:disabled { opacity: 0.4; cursor: default }
 
