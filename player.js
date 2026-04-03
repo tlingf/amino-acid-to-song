@@ -987,12 +987,12 @@ function showFold(pdbData, seqStr) {
         + '<div style="font-weight:600;margin-bottom:6px;color:var(--color-text-primary)">secondary structure</div>'
         + ssBar('alpha helix', helixImg(), ss.helix, '#e07838')
         + '<div style="font-size:10px;color:var(--color-text-tertiary);line-height:1.3;margin:2px 0 8px 32px">'
-        + '\u03B1-helices are coils held together by hydrogen bonds every 4th residue. Common in membrane proteins.'
+        + '\u03B1-helices are the most common protein shape: coils held together by hydrogen bonds every 4th residue.'
         + '</div>'
         + ssBar('beta sheet', sheetImg(), ss.sheet, '#3878c0')
         + '<div style="font-size:10px;color:var(--color-text-tertiary);line-height:1.3;margin:2px 0 4px 32px">'
         + '\u03B2-sheets are parallel or antiparallel strands connected by hydrogen bonds, with flexible loops linking adjacent strands. '
-        + 'They form the foundation of antibodies, and the loops form the antigen-binding sites.'
+        + 'They form the framework of antibodies, and the loops form the antigen-binding sites.'
         + '</div>'
         + '</div>';
     }
