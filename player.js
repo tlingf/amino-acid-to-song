@@ -61,7 +61,7 @@ let seq = [], playing = false, paused = false, playIdx = 0, timers = [], ctx = n
 let presetActive = '';
 let activeComplex = null, contactMap = new Map();
 let detailsOpen = false;
-let composing = false, compSeq = [], compFolded = false;
+let composing = false, compSeq = [], compFolded = false, compFoldPdb = null, compFoldSeq = null;
 const kbDown = new Map();
 
 function rebuildNA() { NA = {}; Object.entries(AM).forEach(([aa, n]) => NA[n] = aa); }
@@ -526,7 +526,7 @@ function onSeqInput() {
   // Load the pasted sequence
   compSeq = [...raw];
   seq = [...raw];
-  compFolded = false;
+  compFolded = false; compFoldPdb = null; compFoldSeq = null;
 
   renderComposeSeq();
   updateComposeCount();
@@ -766,7 +766,7 @@ function toggleCompose() {
   if (composing) {
     stopPlay();
     activeComplex = null; contactMap = new Map();
-    compFolded = false;
+    compFolded = false; compFoldPdb = null; compFoldSeq = null;
     compSeq = [];
     seq = [];
     document.getElementById('seqInput').value = '';
@@ -830,7 +830,7 @@ function updateComposePlay() {
 
 function clearCompose() {
   stopPlay();
-  compFolded = false;
+  compFolded = false; compFoldPdb = null; compFoldSeq = null;
   compSeq = [];
   seq = [];
   document.getElementById('seqInput').value = '';
@@ -943,7 +943,7 @@ async function foldSequence() {
     });
     if (!resp.ok) throw new Error('ESMFold returned ' + resp.status);
     const pdbData = await resp.text();
-    compFolded = true;
+    compFolded = true; compFoldPdb = pdbData; compFoldSeq = seqStr;
     const fb = document.getElementById('foldBtn');
     if (fb) { fb.disabled = true; fb.textContent = 'folded ✓'; fb.style.marginLeft = '0'; }
     const cpb = document.getElementById('composePlayBtn');
@@ -1116,6 +1116,10 @@ function renderInfoPanel() {
       el.innerHTML = html;
       initPdbViewer(p.pdb, 'pdbViewer');
     }
+
+  } else if (compFolded && compFoldPdb) {
+    showFold(compFoldPdb, compFoldSeq);
+    return;
 
   } else if (seq.length) {
     let html = '<div class="info-panel-title">custom sequence</div>';
