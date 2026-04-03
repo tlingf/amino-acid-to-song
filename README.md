@@ -26,4 +26,9 @@ Six mappings available, including chromatic (complexity-ordered, harmony-optimiz
 
 ## Credits
 
-Structure prediction by [ESMFold](https://esmatlas.com) (Lin et al., Science 2023). 3D visualization by [3Dmol.js](https://3dmol.csb.pitt.edu).
+- Structure prediction by [ESMFold](https://esmatlas.com) — Lin et al., "Evolutionary-scale prediction of atomic-level protein structure with a language model," *Science* 379, 2023.
+- 3D visualization by [3Dmol.js](https://3dmol.csb.pitt.edu) — Rego & Koes, *Bioinformatics* 31, 2015.
+- Chou-Fasman secondary structure propensities — Chou & Fasman, "Prediction of protein conformation," *Biochemistry* 13(2), 1974.
+- Kyte-Doolittle hydrophobicity scale — Kyte & Doolittle, "A simple method for displaying the hydropathic character of a protein," *J Mol Biol* 157(1), 1982.
+- Protein structures and binding complex data from the [RCSB Protein Data Bank](https://www.rcsb.org) — Berman et al., *Nucleic Acids Res* 28, 2000.
+- Bigram transition probabilities are approximate dipeptide frequencies derived from SwissProt/UniProt statistics.
