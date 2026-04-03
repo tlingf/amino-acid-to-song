@@ -26,9 +26,9 @@
     <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px">example binding proteins</div>
     <div class="presets" id="harmonyBtns"></div>
   </div>
-  <div class="seq-input-row" style="display:none">
-    <input type="text" id="seqInput" placeholder="Amino acid sequence (one-letter codes)..." maxlength="200" onkeydown="if(event.key==='Enter')loadCustom()"/>
-    <button type="button" onclick="loadCustom()">submit</button>
+  <div class="seq-input-row">
+    <input type="text" id="seqInput" placeholder="Paste amino acid sequence (one-letter codes)..." maxlength="300" oninput="onSeqInput()" onkeydown="if(event.key==='Enter')loadAndPlay()"/>
+    <button type="button" onclick="loadAndPlay()">submit</button>
   </div>
   <div class="seq-mel-wrap">
     <div class="seq-row-labels" id="seqRowLabels"></div>
@@ -49,9 +49,9 @@
   <div class="compose-bar" id="composeBar" style="display:none">
     <span class="compose-label">composing</span>
     <span class="compose-count" id="composeCount">0 aa</span>
-    <button class="compose-action" id="composePlayBtn" onclick="togglePlay()" disabled>▶ play</button>
     <button class="compose-action" onclick="undoCompose()">undo</button>
     <button class="compose-action" onclick="clearCompose()">clear</button>
+    <button class="compose-action" id="composePlayBtn" onclick="togglePlay()" disabled>▶ play</button>
     <button class="compose-fold" id="foldBtn" onclick="foldSequence()" disabled>fold it!</button>
   </div>
   <div class="piano-area">

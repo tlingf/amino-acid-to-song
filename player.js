@@ -515,6 +515,33 @@ function loadCustom() {
   renderInfoPanel(); updateRhythmUI(); updateSSBadges();
 }
 
+function onSeqInput() {
+  const input = document.getElementById('seqInput').value;
+  const raw = input.toUpperCase().split('').filter(aa => AM[aa]);
+  if (!raw.length) return;
+
+  // Enter compose mode if not already
+  if (!composing) toggleCompose();
+
+  // Load the pasted sequence
+  compSeq = [...raw];
+  seq = [...raw];
+  compFolded = false;
+
+  renderComposeSeq();
+  updateComposeCount();
+  updateComposePlay();
+  const fb = document.getElementById('foldBtn');
+  if (fb) fb.disabled = compSeq.length < 20;
+  updateSuggestions();
+  renderComposeInfo();
+}
+
+function loadAndPlay() {
+  onSeqInput();
+  if (seq.length) togglePlay();
+}
+
 /* ── Mapping ── */
 function renderMappingBtns() {
   const wrap = document.getElementById('mappingBtns'); wrap.innerHTML = '';
@@ -628,8 +655,8 @@ function applyChainStyle(viewer, styleFn) {
 
 const VIEW_STYLES = [
   { name: 'cartoon',
-    apply: (v, cs, dim) => cs ? v.setStyle({}, { cartoon: { colorscheme: cs, opacity: dim ? 0.35 : 1 } }) : applyChainStyle(v, c => ({ cartoon: { color: c, opacity: dim ? 0.35 : 1 } })),
-    highlight: c => ({ cartoon: { color: c }, stick: { color: c } }) },
+    apply: (v, cs, dim, forceGrey) => cs ? v.setStyle({}, { cartoon: { colorscheme: cs, opacity: dim ? 0.4 : 1 } }) : (dim && forceGrey) ? v.setStyle({}, { cartoon: { color: '#d0d0d0', opacity: 0.5 } }) : applyChainStyle(v, c => ({ cartoon: { color: c, opacity: dim ? 0.35 : 1 } })),
+    highlight: c => ({ stick: { color: c, radius: 0.3 }, sphere: { color: c, scale: 0.5 } }) },
   { name: 'line',
     apply: (v, cs) => cs ? v.setStyle({}, { line: { colorscheme: cs } }) : applyChainStyle(v, c => ({ line: { color: c } })),
     highlight: c => ({ line: { color: c, linewidth: 4 } }) },
@@ -675,13 +702,18 @@ function buildResiMap(viewer) {
 
 function highlightViewerResidue(idx) {
   if (!activeViewer || !activeResiMap) return;
-  const style = VIEW_STYLES[activeViewStyleIdx];
   const isPlaying = idx >= 0 && idx < activeResiMap.length;
+  const wasCartoon = activeViewStyleIdx === 0;
+  const style = isPlaying ? VIEW_STYLES[0] : VIEW_STYLES[activeViewStyleIdx];
   // Re-apply base style (dimmed when playing)
-  style.apply(activeViewer, activeViewCS, isPlaying);
+  style.apply(activeViewer, activeViewCS, isPlaying, isPlaying && !wasCartoon);
   if (isPlaying) {
     const resi = activeResiMap[idx];
-    activeViewer.addStyle({ resi }, style.highlight('#f7c948'));
+    // Use cartoon highlight when already in cartoon mode, stick+sphere when forced from other modes
+    const hl = wasCartoon
+      ? { cartoon: { color: '#f7c948', opacity: 1 }, stick: { color: '#f7c948' } }
+      : style.highlight('#f7c948');
+    activeViewer.addStyle({ resi }, hl);
   }
   activeViewer.render();
 }
@@ -812,9 +844,9 @@ function clearCompose() {
 
 function resetComposeButtons() {
   const fb = document.getElementById('foldBtn');
-  if (fb) { fb.textContent = 'fold it!'; fb.disabled = true; }
+  if (fb) { fb.textContent = 'fold it!'; fb.disabled = true; fb.style.marginLeft = ''; }
   const cpb = document.getElementById('composePlayBtn');
-  if (cpb) { cpb.className = 'compose-action'; cpb.textContent = '▶ play'; }
+  if (cpb) { cpb.className = 'compose-action'; cpb.textContent = '▶ play'; cpb.style.marginLeft = ''; }
 }
 
 function renderComposeSeq() {
@@ -913,10 +945,11 @@ async function foldSequence() {
     const pdbData = await resp.text();
     compFolded = true;
     const fb = document.getElementById('foldBtn');
-    if (fb) { fb.disabled = true; fb.textContent = 'folded ✓'; }
+    if (fb) { fb.disabled = true; fb.textContent = 'folded ✓'; fb.style.marginLeft = '0'; }
     const cpb = document.getElementById('composePlayBtn');
-    if (cpb) { cpb.disabled = false; cpb.className = 'compose-fold compose-play-folded'; cpb.textContent = '▶ play your protein'; }
+    if (cpb) { cpb.disabled = false; cpb.className = 'compose-fold compose-play-folded'; cpb.textContent = '▶ play your protein'; cpb.style.marginLeft = 'auto'; }
     showFold(pdbData, seqStr);
+    togglePlay();
   } catch (err) {
     el.innerHTML = '<div class="info-panel-title">fold error</div>'
       + '<div class="fold-error">' + err.message + '</div>'
