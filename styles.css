@@ -210,10 +210,14 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
 .compose-fold { padding: 5px 14px; border-radius: 5px; border: 1px solid #534AB7; background: #534AB7; color: #fff; cursor: pointer; font-size: 13px; font-weight: 600; margin-left: auto }
 .compose-fold:hover { opacity: 0.85 }
 .compose-fold:disabled { opacity: 0.4; cursor: default }
+.compose-play-folded { background: #3a8a5c !important; border-color: #3a8a5c !important; animation: foldedPlayPulse 2s ease-in-out infinite }
+.compose-play-folded:hover { opacity: 0.85 }
+@keyframes foldedPlayPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(58,138,92,0.4) } 50% { box-shadow: 0 0 12px 4px rgba(58,138,92,0.3) } }
 
 .compose-seq { display: flex; gap: 2px; overflow-x: auto; padding: 4px 0; min-height: 0 }
 .compose-seq:empty { display: none }
 .compose-seq .cbadge { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 4px; font-size: 11px; font-weight: 600; flex-shrink: 0 }
+.compose-seq .cbadge.active { transform: scale(1.35); opacity: 1; box-shadow: 0 0 0 2px var(--color-border-primary) }
 
 .wkey.suggested { box-shadow: 0 0 12px 3px var(--suggest-color, #534AB7); z-index: 1; animation: suggestPulse 1.5s ease-in-out infinite }
 .bkey.suggested { box-shadow: 0 0 10px 2px var(--suggest-color, #534AB7); animation: suggestPulse 1.5s ease-in-out infinite }

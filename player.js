@@ -206,18 +206,25 @@ function computeTimings(startIdx, bpm) {
 function stopPlay() {
   playing = false; paused = false; playIdx = 0;
   timers.forEach(clearTimeout); timers = [];
-  document.getElementById('playBtn').textContent = '🎵 play sequence'; setActive(-1);
+  document.getElementById('playBtn').textContent = '🎵 play sequence';
+  const cpb = document.getElementById('composePlayBtn');
+  if (cpb) cpb.textContent = compFolded ? '▶ play your protein' : '▶ play';
+  setActive(-1);
 }
 
 function pausePlay() {
   paused = true; playing = false;
   timers.forEach(clearTimeout); timers = [];
   document.getElementById('playBtn').textContent = '🎵 play sequence';
+  const cpb = document.getElementById('composePlayBtn');
+  if (cpb) cpb.textContent = compFolded ? '▶ play your protein' : '▶ play';
 }
 
 function startFrom(startIdx) {
   playing = true; paused = false;
   document.getElementById('playBtn').textContent = 'pause';
+  const cpb = document.getElementById('composePlayBtn');
+  if (cpb) cpb.textContent = '⏸ pause';
   const bpm = parseInt(document.getElementById('tempoSlider').value);
   const timings = computeTimings(startIdx, bpm);
   seq.slice(startIdx).forEach((aa, j) => {
@@ -251,6 +258,7 @@ function setActive(idx) {
   document.querySelectorAll('.aa-badge').forEach((el, i) => el.classList.toggle('active', i === idx));
   document.querySelectorAll('.partner-badge').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.contact-dot').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.compose-seq .cbadge').forEach((el, i) => el.classList.toggle('active', i === idx));
 
   if (idx >= 0 && idx < seq.length) {
     const aa = seq[idx], note = AM[aa];
@@ -284,8 +292,8 @@ function setActive(idx) {
     }
 
     // Auto-scroll sequence to keep active badge visible
-    const wrap = document.getElementById('seqMel');
-    const activeEl = wrap.querySelectorAll('.seq-unit')[idx];
+    const wrap = composing ? document.getElementById('composeSeq') : document.getElementById('seqMel');
+    const activeEl = composing ? wrap.querySelectorAll('.cbadge')[idx] : wrap.querySelectorAll('.seq-unit')[idx];
     if (activeEl && wrap.scrollWidth > wrap.clientWidth) {
       const elLeft = activeEl.offsetLeft - wrap.scrollLeft;
       const margin = wrap.clientWidth * 0.25;
@@ -725,7 +733,7 @@ function toggleCompose() {
   const playBtn = document.getElementById('playBtn');
   if (composing) {
     stopPlay();
-    activeComplex = null; contactMap = null;
+    activeComplex = null; contactMap = new Map();
     compFolded = false;
     compSeq = [];
     seq = [];
@@ -739,6 +747,7 @@ function toggleCompose() {
     if (playBtn) playBtn.style.display = 'none';
     document.getElementById('composeSeq').innerHTML = '';
     document.body.classList.add('compose-active');
+    resetComposeButtons();
     updateComposeCount();
     updateComposePlay();
     updateSuggestions();
@@ -793,11 +802,19 @@ function clearCompose() {
   compSeq = [];
   seq = [];
   document.getElementById('seqInput').value = '';
+  resetComposeButtons();
   renderComposeSeq();
   updateComposeCount();
   updateComposePlay();
   updateSuggestions();
   renderComposeInfo();
+}
+
+function resetComposeButtons() {
+  const fb = document.getElementById('foldBtn');
+  if (fb) { fb.textContent = 'fold it!'; fb.disabled = true; }
+  const cpb = document.getElementById('composePlayBtn');
+  if (cpb) { cpb.className = 'compose-action'; cpb.textContent = '▶ play'; }
 }
 
 function renderComposeSeq() {
@@ -895,6 +912,10 @@ async function foldSequence() {
     if (!resp.ok) throw new Error('ESMFold returned ' + resp.status);
     const pdbData = await resp.text();
     compFolded = true;
+    const fb = document.getElementById('foldBtn');
+    if (fb) { fb.disabled = true; fb.textContent = 'folded ✓'; }
+    const cpb = document.getElementById('composePlayBtn');
+    if (cpb) { cpb.disabled = false; cpb.className = 'compose-fold compose-play-folded'; cpb.textContent = '▶ play your protein'; }
     showFold(pdbData, seqStr);
   } catch (err) {
     el.innerHTML = '<div class="info-panel-title">fold error</div>'
@@ -902,6 +923,29 @@ async function foldSequence() {
       + '<div class="info-panel-desc">The ESMFold API may be unavailable or blocking browser requests. Your sequence:</div>'
       + '<div style="font-family:var(--font-mono);font-size:10px;word-break:break-all;margin:6px 0;padding:6px;background:var(--color-background-secondary);border-radius:4px">' + seqStr + '</div>';
   }
+}
+
+function normalizePdbBFactors(pdbData) {
+  // ESMFold may return pLDDT on 0–1 scale; normalize B-factors to 0–100
+  const lines = pdbData.split('\n');
+  const bfs = [];
+  lines.forEach(line => {
+    if (line.startsWith('ATOM') || line.startsWith('HETATM')) {
+      const bf = parseFloat(line.substring(60, 66));
+      if (!isNaN(bf)) bfs.push(bf);
+    }
+  });
+  if (bfs.length === 0 || !bfs.every(b => b <= 1)) return pdbData;
+  return lines.map(line => {
+    if ((line.startsWith('ATOM') || line.startsWith('HETATM')) && line.length >= 66) {
+      const bf = parseFloat(line.substring(60, 66));
+      if (!isNaN(bf)) {
+        const scaled = (bf * 100).toFixed(2).padStart(6);
+        return line.substring(0, 60) + scaled + line.substring(66);
+      }
+    }
+    return line;
+  }).join('\n');
 }
 
 function parsePLDDT(pdbData) {
@@ -913,8 +957,6 @@ function parsePLDDT(pdbData) {
     }
   });
   if (bFactors.length === 0) return null;
-  // ESMFold may return pLDDT on 0–1 scale; normalize to 0–100
-  if (bFactors.every(b => b <= 1)) bFactors.forEach((b, i) => { bFactors[i] = b * 100; });
   const avg = bFactors.reduce((a, b) => a + b, 0) / bFactors.length;
   return { avg: avg.toFixed(1), min: Math.min(...bFactors).toFixed(1), max: Math.max(...bFactors).toFixed(1) };
 }
@@ -934,6 +976,7 @@ function extractSS(viewer) {
 }
 
 function showFold(pdbData, seqStr) {
+  pdbData = normalizePdbBFactors(pdbData);
   const el = document.getElementById('infoPanelContent');
   const conf = parsePLDDT(pdbData);
   // Show structure immediately
