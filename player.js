@@ -785,6 +785,8 @@ function parsePLDDT(pdbData) {
     }
   });
   if (bFactors.length === 0) return null;
+  // ESMFold may return pLDDT on 0–1 scale; normalize to 0–100
+  if (bFactors.every(b => b <= 1)) bFactors.forEach((b, i) => { bFactors[i] = b * 100; });
   const avg = bFactors.reduce((a, b) => a + b, 0) / bFactors.length;
   return { avg: avg.toFixed(1), min: Math.min(...bFactors).toFixed(1), max: Math.max(...bFactors).toFixed(1) };
 }
