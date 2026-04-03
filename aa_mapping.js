@@ -163,6 +163,22 @@ const FR = {
  */
 const COMPLEXES = [
   {
+    id: 'insulin-dimer',
+    name: 'Insulin dimer',
+    pdb: '4INS',
+    desc: 'Insulin molecules naturally pair up when stored in the pancreas. This self-pairing controls how quickly insulin is released into the blood. Understanding this interface is how scientists engineered fast-acting insulins that millions of diabetics depend on daily.',
+    chainA: { name: 'Insulin B', seq: 'FVNQHLCGSHLVEALYLVCGERGFFYTPKT', ss: 'CCCCCCCCHHHHHHHHHHHHCCCEEECCCC' },
+    chainB: { name: 'Insulin B\u2032' },
+    contacts: [
+      [12, 'E', 4.8],   // E13→E13' weak electrostatic
+      [13, 'A', 4.2],   // A14→A14'
+      [16, 'L', 3.9],   // L17→L17' hydrophobic
+      [23, 'F', 3.5],   // F24→F24' aromatic stacking
+      [24, 'F', 3.4],   // F25→F25' aromatic stacking
+      [25, 'Y', 3.6],   // Y26→Y26' aromatic–hydroxyl
+    ]
+  },
+  {
     id: 'p53-mdm2',
     name: 'p53–MDM2',
     pdb: '1YCR',
@@ -180,62 +196,6 @@ const COMPLEXES = [
       [9,  'L', 4.2],   // K24→L57
       [10, 'Y', 3.6],   // L25→Y100
       [11, 'I', 3.3],   // L26→I99  hydrophobic anchor
-    ]
-  },
-  {
-    id: 'insulin-dimer',
-    name: 'Insulin dimer',
-    pdb: '4INS',
-    desc: 'Insulin molecules naturally pair up when stored in the pancreas. This self-pairing controls how quickly insulin is released into the blood. Understanding this interface is how scientists engineered fast-acting insulins that millions of diabetics depend on daily.',
-    chainA: { name: 'Insulin B', seq: 'FVNQHLCGSHLVEALYLVCGERGFFYTPKT', ss: 'CCCCCCCCHHHHHHHHHHHHCCCEEECCCC' },
-    chainB: { name: 'Insulin B\u2032' },
-    contacts: [
-      [12, 'E', 4.8],   // E13→E13' weak electrostatic
-      [13, 'A', 4.2],   // A14→A14'
-      [16, 'L', 3.9],   // L17→L17' hydrophobic
-      [23, 'F', 3.5],   // F24→F24' aromatic stacking
-      [24, 'F', 3.4],   // F25→F25' aromatic stacking
-      [25, 'Y', 3.6],   // Y26→Y26' aromatic–hydroxyl
-    ]
-  },
-  {
-    id: 'gcn4-zipper',
-    name: 'GCN4 zipper',
-    pdb: '2ZTA',
-    desc: 'A "leucine zipper" — two protein helices that wind around each other like a twisted rope. This motif turns genes on and off inside your cells and is one of nature\'s most common ways to build protein partnerships. It\'s also a workhorse in biotech for designing new proteins.',
-    chainA: { name: 'GCN4', seq: 'RMKQLEDKVEELLSKNYHLENEVARLKKLVGER', ss: 'CHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHCC' },
-    chainB: { name: 'GCN4\u2032' },
-    contacts: [
-      [1,  'V', 3.9],   // M1→V'   a–a' packing
-      [4,  'L', 3.5],   // L4→L'   d–d' leucine zipper
-      [5,  'K', 3.8],   // E5→K'   e–g' salt bridge
-      [7,  'E', 3.7],   // K7→E'   g–e' salt bridge
-      [8,  'V', 3.7],   // V8→V'   a–a' packing
-      [11, 'L', 3.4],   // L11→L'  d–d' leucine zipper
-      [15, 'N', 4.0],   // N15→N'  a–a' polar layer (Asn–Asn H-bond)
-      [18, 'L', 3.3],   // L18→L'  d–d' leucine zipper
-      [19, 'K', 3.9],   // E19→K'  e–g' salt bridge
-      [22, 'V', 3.6],   // V22→V'  a–a' packing
-      [25, 'L', 3.4],   // L25→L'  d–d' leucine zipper
-    ]
-  },
-  {
-    id: 'barnase-barstar',
-    name: 'Barnase–Barstar',
-    pdb: '1BRS',
-    desc: 'One of the tightest protein locks in nature — barstar grips barnase so strongly it\'s nearly irreversible. This pair is a textbook example of how cells neutralize dangerous enzymes, and it\'s widely used in lab experiments as a molecular "super-glue" to link proteins together.',
-    chainA: { name: 'Barstar', seq: 'KKAVINGEQIRSISDLHQTLKKELALPEYYGENLDALWDCLTGWVEYPLVLEWRQFEQSKQLTENGAESVLQVFREAKAEGCDITIILS', ss: 'CEEEEEHHHCCCHHHHHHHHHHHCCCCCCCCCCHHHHHHHHHHCCCCCEEEEEECHHHHHHHCCCCHHHHHHHHHHHHHCCCCEEEEEC' },
-    chainB: { name: 'Barnase' },
-    contacts: [
-      [28, 'R', 3.8],   // Y29→R  hydrogen bond
-      [33, 'W', 3.7],   // L34→W  hydrophobic packing
-      [34, 'R', 2.8],   // D35→R59  key salt bridge
-      [37, 'A', 3.6],   // W38→A  hydrophobic
-      [38, 'R', 3.0],   // D39→R83  salt bridge
-      [41, 'N', 3.2],   // T42→N  hydrogen bond
-      [42, 'S', 3.5],   // G43→S  backbone
-      [43, 'G', 3.7],   // W44→G  aromatic packing
-      [75, 'H', 3.4],   // E76→H102  electrostatic
     ]
   }
 ];

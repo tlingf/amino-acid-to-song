@@ -20,10 +20,10 @@ const PENT_W = 36;
 const AF = { L: 9.66, A: 8.25, G: 7.07, V: 6.87, E: 6.75, S: 6.56, I: 5.96, K: 5.84, R: 5.53, D: 5.45, T: 5.34, P: 4.70, N: 4.06, Q: 3.93, F: 3.86, Y: 2.92, M: 2.42, H: 2.27, C: 1.37, W: 1.08 };
 
 const PS = [
-  { name: 'trp-cage',   seq: 'NLYIQWLKDGGPSSGRPPPS', ss: 'CHHHHHHHHHHHHHHCCCCC', pdb: '1L2Y', desc: 'Trp-cage (20aa) — smallest known folding protein; W rings out as the highest note', significance: 'A 20-residue mini-protein designed in 2002 by the Andersen lab. It folds in microseconds around a central tryptophan (W) residue buried by proline rings, making it one of the most important model systems for studying protein folding dynamics and validating molecular simulations.' },
-  { name: 'ubiquitin',  seq: 'MQIFVKTLTGKTITLEVEPS', ss: 'EEEEEEECCEEEEEEEECCC', pdb: '1UBQ', desc: 'Ubiquitin N-terminus (20aa) — the cell\'s molecular tag for degradation', significance: 'Ubiquitin is a small 76-residue protein found in virtually all eukaryotic cells. It acts as a molecular tag — when chains of ubiquitin are attached to a target protein, the cell\'s proteasome recognizes and degrades it. This quality-control system is essential for cell cycle regulation, DNA repair, and immune signaling. Its discovery earned Aaron Ciechanover, Avram Hershko, and Irwin Rose the 2004 Nobel Prize in Chemistry.' },
-  { name: 'insulin B',  seq: 'FVNQHLCGSHLVEALYLVCG', ss: 'CCCCCCCCHHHHHHHHHHHH', pdb: '4INS', desc: 'Insulin B-chain (20aa) — the hormone sequence that regulates blood sugar', significance: 'Insulin is a peptide hormone produced by pancreatic beta cells that regulates blood glucose. It consists of two chains (A and B) linked by disulfide bonds. The B-chain\'s central alpha-helix is critical for binding the insulin receptor and triggering glucose uptake into cells. Mutations in this region can cause hereditary diabetes (MIDY), and engineered B-chain variants are the basis of fast-acting therapeutic insulins.' },
-  { name: 'VHH CDR3',   seq: 'AAEGRTFGSYYSY',        ss: 'CCCCCCCCCCCCC',        pdb: '1ZVH', desc: 'VHH CDR3 loop (13aa) — nanobody antigen-binding region', significance: 'Camelids (llamas, camels, alpacas) produce unique heavy-chain-only antibodies. The VHH domain — or nanobody — is their single variable region, and the CDR3 loop is the primary determinant of antigen specificity. At only ~15 kDa, nanobodies are the smallest known antigen-binding fragments, prized for their stability, ease of engineering, and ability to access epitopes that conventional antibodies cannot reach. They are now used as research tools, diagnostics, and FDA-approved therapeutics.' }
+  { name: 'hemoglobin', seq: 'VHLTPEEKSAVTALWGKVNVDEVGGEALGRLLVVYPWTQRFFESFGDLSTPDAVMGNPKVKAHGKKVLGAFSDGLAHLDNLKGTFATLSELHCDKLHVDP', ss: 'CCCCHHHHHHHHHHHCCCCHHHHHHHHHHHHHHHCHHHHHHCHHHCCCCCHHHHHHCHHHHHHHHHHHHHHHHHHCCHHHHHHHHHHHHHHHHHHHCCCC', pdb: '4HHB', desc: 'Hemoglobin \u03B2 (100aa) \u2014 the oxygen carrier that colors your blood red', significance: 'Hemoglobin is the protein in red blood cells that carries oxygen from your lungs to every tissue in your body. Its \u03B2-chain contains the classic globin fold \u2014 eight alpha-helices wrapping around a heme group that binds O\u2082. A single mutation in this chain (E6V) causes sickle-cell disease, the first \u201Cmolecular disease\u201D ever identified. Max Perutz solved hemoglobin\'s structure in 1959 and earned the 1962 Nobel Prize \u2014 one of the first protein structures determined by X-ray crystallography.' },
+  { name: 'collagen', seq: 'PPGPPGPPGPPGPPAPPGPPGPPGPPGPPG', ss: 'CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC', pdb: '1CAG', desc: 'Collagen I model peptide (30aa) \u2014 the repetitive Gly-X-Y motif that builds skin and bone', significance: 'Collagen is the most abundant protein in the human body, making up roughly 30% of total protein mass. It forms the structural scaffold of skin, bone, tendons, and cartilage. Its hallmark is the Gly-X-Y tripeptide repeat \u2014 where X is often proline and Y is often hydroxyproline \u2014 enabling three chains to wind into a rigid triple helix. Vitamin C is essential for collagen synthesis; its absence causes scurvy. This model peptide from PDB 1CAG captures the core repeat (hydroxyproline shown as proline in the melody).' },
+  { name: 'spike protein (COVID-19)', seq: 'SNNLDSKVGGNYNYLYRLFRKSNLKPFERDISTEIYQAGSTPCNGVEGFNCYFPLQSYGFQPTNGVGYQPY', ss: 'CCCCCCCCEEEEEECHHHHCCCCCECCCEEECCCCCHHHCCCCCCCCHHEECCCCCCCCCCECCEECCEEE', pdb: '6M0J', desc: 'SARS-CoV-2 spike RBM (71aa) \u2014 the COVID-19 surface region that latches onto human cells', significance: 'The SARS-CoV-2 spike protein is the viral surface protein responsible for the COVID-19 pandemic. Its receptor-binding motif (RBM) is the exact region that grips the human ACE2 receptor to enter cells. This stretch was the primary target for vaccine design \u2014 the mRNA vaccines by Pfizer-BioNTech and Moderna encode the full spike to train the immune system against it. Mutations in this region drove successive pandemic waves (Delta, Omicron) by altering ACE2 binding affinity and enabling antibody escape.' },
+  { name: 'VHH nanobody', seq: 'DVQLVESGGGSVQAGGSLRLSCAASGYIASINYLGWFRQAPGKEREGVAAVSPAGGTPYYADSVKGRFTVSLDNAENTVYLQMNSLKPEDTALYYCAAARQGWYIPLNSYGYNYWGQGTQVTVS', ss: 'CEEEEEECCEEECCCCCEEEEEEEEECHHHEEEEEEEEECCCCCCEEEEEECCCCCCEEECCCCECCEEEEEECCCCEEEEEECCCCHHHCEEEEEEEEECCCCCCCCHHHEEEECCCEEEEEC', pdb: '1ZVH', desc: 'VHH nanobody (124aa) \u2014 a complete single-domain antibody from a llama', significance: 'Camelids (llamas, camels, alpacas) produce unique heavy-chain-only antibodies. The VHH domain \u2014 or nanobody \u2014 is their single variable region containing four framework regions (FR1\u2013FR4) that form a \u03B2-sandwich scaffold, and three hypervariable CDR loops that determine antigen specificity. At only ~15 kDa, nanobodies are the smallest known antigen-binding fragments. They are prized for their stability, ease of engineering, and ability to access hidden epitopes that conventional antibodies cannot reach \u2014 now used as research tools, diagnostics, and FDA-approved therapeutics (e.g. caplacizumab).' }
 ];
 
 const KB_CHROMATIC = {
@@ -266,6 +266,7 @@ function setActive(idx) {
       showAADisplay([aa]);
     }
     updateInfoPanelNow(idx);
+    highlightViewerResidue(idx);
 
     // Light up piano keys
     if (note) {
@@ -293,6 +294,8 @@ function setActive(idx) {
         wrap.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
       }
     }
+  } else {
+    highlightViewerResidue(-1);
   }
 }
 
@@ -601,6 +604,79 @@ document.addEventListener('keyup', e => {
 
 /* ── 3D Viewer ── */
 let activeViewer = null;
+let activeViewCS = null;      // colorscheme used by current viewer
+let activeViewStyleIdx = 0;   // index into VIEW_STYLES
+let activeResiMap = null;     // seq index → PDB resi number
+
+const CHAIN_COLORS = ['#8faadc', '#a9d18e', '#c4a4d6', '#f4b183', '#9dc3e6', '#d6a5a5'];
+
+function applyChainStyle(viewer, styleFn) {
+  const chains = [...new Set(viewer.selectedAtoms({}).map(a => a.chain))];
+  chains.forEach((ch, i) => {
+    const color = CHAIN_COLORS[i % CHAIN_COLORS.length];
+    viewer.setStyle({ chain: ch }, styleFn(color));
+  });
+}
+
+const VIEW_STYLES = [
+  { name: 'cartoon',
+    apply: (v, cs, dim) => cs ? v.setStyle({}, { cartoon: { colorscheme: cs, opacity: dim ? 0.35 : 1 } }) : applyChainStyle(v, c => ({ cartoon: { color: c, opacity: dim ? 0.35 : 1 } })),
+    highlight: c => ({ cartoon: { color: c }, stick: { color: c } }) },
+  { name: 'line',
+    apply: (v, cs) => cs ? v.setStyle({}, { line: { colorscheme: cs } }) : applyChainStyle(v, c => ({ line: { color: c } })),
+    highlight: c => ({ line: { color: c, linewidth: 4 } }) },
+  { name: 'stick',
+    apply: (v, cs, dim) => cs ? v.setStyle({}, { stick: { colorscheme: cs, opacity: dim ? 0.3 : 1 } }) : applyChainStyle(v, c => ({ stick: { color: c, opacity: dim ? 0.3 : 1 } })),
+    highlight: c => ({ stick: { color: c, radius: 0.25 } }) },
+  { name: 'sphere',
+    apply: (v, cs, dim) => cs ? v.setStyle({}, { sphere: { colorscheme: cs, scale: 0.4, opacity: dim ? 0.3 : 1 } }) : applyChainStyle(v, c => ({ sphere: { color: c, scale: 0.4, opacity: dim ? 0.3 : 1 } })),
+    highlight: c => ({ sphere: { color: c, scale: 0.5 } }) },
+];
+
+function addViewToggle(container, viewer, colorscheme) {
+  const bar = document.createElement('div');
+  bar.className = 'view-style-bar';
+  const btns = VIEW_STYLES.map((s, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'view-style-btn' + (i === 0 ? ' active' : '');
+    btn.textContent = s.name;
+    btn.onclick = () => {
+      btns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeViewStyleIdx = i;
+      s.apply(viewer, colorscheme);
+      viewer.render();
+    };
+    bar.appendChild(btn);
+    return btn;
+  });
+  container.style.position = 'relative';
+  container.appendChild(bar);
+}
+
+function buildResiMap(viewer) {
+  const cas = viewer.selectedAtoms({ atom: 'CA' });
+  if (!cas.length) return null;
+  // Use chain of first CA; map seq index → PDB resi
+  const chain = cas[0].chain;
+  const residues = cas.filter(a => a.chain === chain);
+  const map = new Array(residues.length);
+  residues.forEach((a, i) => { map[i] = a.resi; });
+  return map;
+}
+
+function highlightViewerResidue(idx) {
+  if (!activeViewer || !activeResiMap) return;
+  const style = VIEW_STYLES[activeViewStyleIdx];
+  const isPlaying = idx >= 0 && idx < activeResiMap.length;
+  // Re-apply base style (dimmed when playing)
+  style.apply(activeViewer, activeViewCS, isPlaying);
+  if (isPlaying) {
+    const resi = activeResiMap[idx];
+    activeViewer.addStyle({ resi }, style.highlight('#f7c948'));
+  }
+  activeViewer.render();
+}
 
 function waitFor3Dmol() {
   if (typeof $3Dmol !== 'undefined') return Promise.resolve();
@@ -626,11 +702,15 @@ function initPdbViewer(pdbId, containerId) {
     container.innerHTML = '';
     const viewer = $3Dmol.createViewer(container, { backgroundColor: 'white' });
     viewer.addModel(pdbData, 'pdb');
-    viewer.setStyle({}, { cartoon: { color: 'spectrum' } });
+    applyChainStyle(viewer, c => ({ cartoon: { color: c } }));
     viewer.zoomTo();
     viewer.render();
     viewer.spin('y', 0.5);
     activeViewer = viewer;
+    activeViewCS = null;
+    activeViewStyleIdx = 0;
+    activeResiMap = buildResiMap(viewer);
+    addViewToggle(container, viewer, null);
   });
 }
 
@@ -867,6 +947,7 @@ function showFold(pdbData, seqStr) {
       + '<span style="font-weight:600;color:' + color + '">pLDDT ' + conf.avg + '</span>'
       + '<span style="color:var(--color-text-tertiary)"> (' + conf.min + '\u2013' + conf.max + ')</span>'
       + '</div>';
+    html += '<div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:4px;line-height:1.3">High confidence (70+) sequences or regions will likely fold into a stable structure</div>';
   }
   html += '<div class="fold-status">colored by confidence: <span style="color:#dc2626">low</span> \u2192 <span style="color:#3a8a5c">high</span></div>'
     + '<div id="foldPropensity"></div>'
@@ -878,10 +959,16 @@ function showFold(pdbData, seqStr) {
     if (!viewerDiv) return;
     const viewer = $3Dmol.createViewer(viewerDiv, { backgroundColor: 'white' });
     viewer.addModel(pdbData, 'pdb');
-    viewer.setStyle({}, { cartoon: { colorscheme: { prop: 'b', gradient: 'roygb', min: 50, max: 90 } } });
+    const foldCS = { prop: 'b', gradient: 'roygb', min: 50, max: 90 };
+    viewer.setStyle({}, { cartoon: { colorscheme: foldCS } });
     viewer.zoomTo();
     viewer.render();
     viewer.spin('y', 1);
+    activeViewer = viewer;
+    activeViewCS = foldCS;
+    activeViewStyleIdx = 0;
+    activeResiMap = buildResiMap(viewer);
+    addViewToggle(viewerDiv, viewer, foldCS);
 
     // Append actual secondary structure from folded model
     const propDiv = document.getElementById('foldPropensity');
@@ -896,10 +983,17 @@ function showFold(pdbData, seqStr) {
           + '<span style="font-size:10px;color:var(--color-text-tertiary);min-width:28px;text-align:right">' + pct + '%</span>'
           + '</div>';
       }
-      propDiv.innerHTML = '<div style="margin:10px 0 6px;padding:8px 10px;background:#f8f7fc;border-radius:6px;font-size:11px">'
+      propDiv.innerHTML = '<div style="margin:10px 0 6px;padding:8px 10px;background:#f8f7fc;border-radius:6px;font-size:12px">'
         + '<div style="font-weight:600;margin-bottom:6px;color:var(--color-text-primary)">secondary structure</div>'
         + ssBar('alpha helix', helixImg(), ss.helix, '#e07838')
+        + '<div style="font-size:10px;color:var(--color-text-tertiary);line-height:1.3;margin:2px 0 8px 32px">'
+        + '\u03B1-helices are coils held together by hydrogen bonds every 4th residue. Common in membrane proteins.'
+        + '</div>'
         + ssBar('beta sheet', sheetImg(), ss.sheet, '#3878c0')
+        + '<div style="font-size:10px;color:var(--color-text-tertiary);line-height:1.3;margin:2px 0 4px 32px">'
+        + '\u03B2-sheets are parallel or antiparallel strands connected by hydrogen bonds, with flexible loops linking adjacent strands. '
+        + 'They form the foundation of antibodies, and the loops form the antigen-binding sites.'
+        + '</div>'
         + '</div>';
     }
   });
@@ -909,7 +1003,7 @@ function showFold(pdbData, seqStr) {
 function renderInfoPanel() {
   const el = document.getElementById('infoPanelContent');
   if (!el) return;
-  if (activeViewer) { activeViewer = null; }
+  if (activeViewer) { activeViewer = null; activeResiMap = null; }
 
   if (activeComplex) {
     const cx = activeComplex;
