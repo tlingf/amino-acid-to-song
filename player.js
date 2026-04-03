@@ -6,27 +6,48 @@
  */
 
 /* ── Constants ── */
+/* Chromatic layout */
 const MORD = ['C4','C#4','D4','D#4','E4','F4','F#4','G4','G#4','A4','A#4','B4','C5','C#5','D5','D#5','E5','F5','F#5','G5'];
 const NI = {}; MORD.forEach((n, i) => NI[n] = i);
 const WN = ['C4','D4','E4','F4','G4','A4','B4','C5','D5','E5','F5','G5'];
 const BN = ['C#4','D#4','F#4','G#4','A#4','C#5','D#5','F#5'];
 const BP = { 'C#4': 0, 'D#4': 1, 'F#4': 3, 'G#4': 4, 'A#4': 5, 'C#5': 7, 'D#5': 8, 'F#5': 10 };
 const WW = 48, BW = 30, WH = 178, BH = 112;
+/* Pentatonic layout */
+const PENT_MORD = ['C3','D3','E3','G3','A3','C4','D4','E4','G4','A4','C5','D5','E5','G5','A5','C6','D6','E6','G6','A6'];
+const PENT_NI = {}; PENT_MORD.forEach((n, i) => PENT_NI[n] = i);
+const PENT_W = 36;
 const AF = { L: 9.66, A: 8.25, G: 7.07, V: 6.87, E: 6.75, S: 6.56, I: 5.96, K: 5.84, R: 5.53, D: 5.45, T: 5.34, P: 4.70, N: 4.06, Q: 3.93, F: 3.86, Y: 2.92, M: 2.42, H: 2.27, C: 1.37, W: 1.08 };
 
 const PS = [
-  { name: 'trp-cage',   seq: 'NLYIQWLKDGGPSSGRPPPS', pdb: '1L2Y', desc: 'Trp-cage (20aa) — smallest known folding protein; W rings out as the highest note', significance: 'A 20-residue mini-protein that folds in microseconds, making it a key model system for studying protein folding dynamics.' },
-  { name: 'ubiquitin',  seq: 'MQIFVKTLTGKTITLEVEPS', pdb: '1UBQ', desc: 'Ubiquitin N-terminus (20aa) — the cell\'s molecular tag for degradation', significance: 'A universal molecular tag that marks proteins for destruction by the proteasome — its discovery earned the 2004 Nobel Prize in Chemistry.' },
-  { name: 'insulin B',  seq: 'FVNQHLCGSHLVEALYLVCG', pdb: '4INS', desc: 'Insulin B-chain (20aa) — the hormone sequence that regulates blood sugar', significance: 'The B-chain of insulin binds to the insulin receptor, triggering glucose uptake. Mutations here cause hereditary diabetes.' },
-  { name: 'VHH CDR3',   seq: 'AAEGRTFGSYYSY',        pdb: '1ZVH', desc: 'VHH CDR3 loop (13aa) — nanobody antigen-binding region', significance: 'The hypervariable loop that gives camelid nanobodies their antigen specificity — now widely used as compact biologics and research tools.' }
+  { name: 'trp-cage',   seq: 'NLYIQWLKDGGPSSGRPPPS', ss: 'CHHHHHHHHHHHHHHCCCCC', pdb: '1L2Y', desc: 'Trp-cage (20aa) — smallest known folding protein; W rings out as the highest note', significance: 'A 20-residue mini-protein that folds in microseconds, making it a key model system for studying protein folding dynamics.' },
+  { name: 'ubiquitin',  seq: 'MQIFVKTLTGKTITLEVEPS', ss: 'EEEEEEECCEEEEEEEECCC', pdb: '1UBQ', desc: 'Ubiquitin N-terminus (20aa) — the cell\'s molecular tag for degradation', significance: 'A universal molecular tag that marks proteins for destruction by the proteasome — its discovery earned the 2004 Nobel Prize in Chemistry.' },
+  { name: 'insulin B',  seq: 'FVNQHLCGSHLVEALYLVCG', ss: 'CCCCCCCCHHHHHHHHHHHH', pdb: '4INS', desc: 'Insulin B-chain (20aa) — the hormone sequence that regulates blood sugar', significance: 'The B-chain of insulin binds to the insulin receptor, triggering glucose uptake. Mutations here cause hereditary diabetes.' },
+  { name: 'VHH CDR3',   seq: 'AAEGRTFGSYYSY',        ss: 'CCCCCCCCCCCCC',        pdb: '1ZVH', desc: 'VHH CDR3 loop (13aa) — nanobody antigen-binding region', significance: 'The hypervariable loop that gives camelid nanobodies their antigen specificity — now widely used as compact biologics and research tools.' }
 ];
 
-const KB = {
+const KB_CHROMATIC = {
   'a': 'C4', 'w': 'C#4', 's': 'D4', 'e': 'D#4', 'd': 'E4', 'f': 'F4', 't': 'F#4',
   'g': 'G4', 'y': 'G#4', 'h': 'A4', 'u': 'A#4', 'j': 'B4',
   'k': 'C5', 'o': 'C#5', 'l': 'D5', 'p': 'D#5', ';': 'E5', "'": 'F5', ']': 'F#5',
   '\\': 'G5'
 };
+const KB_PENTATONIC = {
+  'a': 'C3', 's': 'D3', 'd': 'E3', 'f': 'G3', 'g': 'A3',
+  'h': 'C4', 'j': 'D4', 'k': 'E4', 'l': 'G4', ';': 'A4',
+  'q': 'C5', 'w': 'D5', 'e': 'E5', 'r': 'G5', 't': 'A5',
+  'y': 'C6', 'u': 'D6', 'i': 'E6', 'o': 'G6', 'p': 'A6'
+};
+let KB = { ...KB_CHROMATIC };
+
+function isPentatonic() {
+  const m = MAPPINGS.find(m => m.id === activeMapping);
+  return m && m.type === 'pentatonic';
+}
+
+function getNoteIndex(note) {
+  return isPentatonic() ? (PENT_NI[note] ?? -1) : (NI[note] ?? -1);
+}
 
 /* ── State ── */
 let NA = {};
@@ -35,6 +56,7 @@ let seq = [], playing = false, paused = false, playIdx = 0, timers = [], ctx = n
 let presetActive = '';
 let activeComplex = null, contactMap = new Map();
 let detailsOpen = false;
+let composing = false, compSeq = [];
 const kbDown = new Map();
 
 function rebuildNA() { NA = {}; Object.entries(AM).forEach(([aa, n]) => NA[n] = aa); }
@@ -43,9 +65,22 @@ rebuildNA();
 /* ── Audio ── */
 function getCtx() { if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); return ctx; }
 
-function playNote(freq, dur) {
+/**
+ * Map amino acid hydrophobicity to a sustain multiplier.
+ * Most hydrophobic (I=4.5) → 2.0x sustain, least (R=-4.5) → 0.5x sustain.
+ * Non-hydrophobic AAs get 1.0x (neutral).
+ */
+function hySustain(aa) {
+  if (!aa || HY[aa] === undefined) return 1.0;
+  // Normalize from [-4.5, 4.5] to [0.5, 2.0]
+  return 0.5 + ((HY[aa] + 4.5) / 9.0) * 1.5;
+}
+
+function playNote(freq, dur, sustain, vel) {
+  sustain = sustain || 1.0;
+  vel = vel ?? 1.0;
   const c = getCtx(); if (c.state === 'suspended') c.resume();
-  const hold = dur * 1.6;
+  const hold = dur * 1.6 * sustain;
   const t = c.currentTime, master = c.createGain();
   const resonance = c.createBiquadFilter();
   resonance.type = 'peaking'; resonance.frequency.value = freq; resonance.Q.value = 3.5; resonance.gain.value = 6;
@@ -54,6 +89,7 @@ function playNote(freq, dur) {
   master.connect(resonance); resonance.connect(res2); res2.connect(c.destination);
   const partials = [[1, 0.38], [2, 0.15], [3, 0.08], [4, 0.04], [0.5, 0.06]];
   partials.forEach(([mult, amp]) => {
+    amp *= vel;
     const o = c.createOscillator(), g = c.createGain();
     o.type = 'sine'; o.frequency.value = freq * mult;
     if (mult > 1) o.detune.value = Math.random() * 4 - 2;
@@ -65,44 +101,136 @@ function playNote(freq, dur) {
     g.gain.exponentialRampToValueAtTime(0.001, t + Math.max(decay, 0.15));
     o.start(t); o.stop(t + hold);
   });
-  master.gain.setValueAtTime(0.9, t);
-  master.gain.linearRampToValueAtTime(0.75, t + 0.05);
-  master.gain.setValueAtTime(0.65, t + hold * 0.4);
+  master.gain.setValueAtTime(0.9 * vel, t);
+  master.gain.linearRampToValueAtTime(0.75 * vel, t + 0.05);
+  master.gain.setValueAtTime(0.65 * vel, t + hold * 0.4);
   master.gain.exponentialRampToValueAtTime(0.001, t + hold * 0.98);
+}
+
+/* ── Rhythm engine ── */
+let rhythmEnabled = false;
+
+function getActiveSS() {
+  if (activeComplex && activeComplex.chainA.ss) return activeComplex.chainA.ss;
+  if (presetActive) { const p = PS.find(p => p.name === presetActive); if (p && p.ss) return p.ss; }
+  return null;
+}
+
+function toggleRhythm() {
+  rhythmEnabled = document.getElementById('rhythmCheck').checked;
+  updateSSBadges();
+}
+
+function updateRhythmUI() {
+  const ss = getActiveSS();
+  const toggle = document.getElementById('rhythmToggle');
+  const hint = document.getElementById('rhythmHint');
+  if (!toggle) return;
+  if (ss) {
+    toggle.style.display = 'flex';
+    const nH = (ss.match(/H/g) || []).length;
+    const nE = (ss.match(/E/g) || []).length;
+    const nC = (ss.match(/C/g) || []).length;
+    const parts = [];
+    if (nH) parts.push(nH + 'H');
+    if (nE) parts.push(nE + 'E');
+    if (nC) parts.push(nC + 'C');
+    hint.textContent = parts.join(' ');
+  } else {
+    toggle.style.display = 'none';
+  }
+}
+
+function updateSSBadges() {
+  const ss = rhythmEnabled ? getActiveSS() : null;
+  document.querySelectorAll('.aa-badge').forEach((el, i) => {
+    el.classList.remove('ss-H', 'ss-E', 'ss-C');
+    if (ss && i < ss.length) el.classList.add('ss-' + ss[i]);
+  });
+}
+
+function computeTimings(startIdx, bpm) {
+  const baseDur = 60 / bpm;
+  const ss = rhythmEnabled ? getActiveSS() : null;
+  const timings = [];
+  let offset = 0;
+
+  const segPos = [];
+  if (ss) {
+    let segStart = 0;
+    for (let i = 0; i < seq.length; i++) {
+      if (i > 0 && ss[i] !== ss[i - 1]) segStart = i;
+      segPos[i] = i - segStart;
+    }
+  }
+
+  for (let i = startIdx; i < seq.length; i++) {
+    let dur = baseDur;
+    let vel = 1.0;
+
+    if (ss && i < ss.length) {
+      const ssType = ss[i];
+      const gp = segPos[i] || 0;
+
+      if (i > startIdx && ss[i] !== ss[i - 1]) {
+        offset += baseDur * 0.25;
+      }
+
+      if (ssType === 'H') {
+        const beat = gp % 3;
+        dur = baseDur * (beat === 0 ? 1.15 : 0.92);
+        vel = beat === 0 ? 1.0 : 0.65;
+      } else if (ssType === 'E') {
+        const beat = gp % 4;
+        const accent = beat === 0;
+        const medium = beat === 2;
+        dur = baseDur * (accent ? 1.08 : 1.0);
+        vel = accent ? 1.0 : (medium ? 0.8 : 0.6);
+      } else {
+        dur = baseDur * (0.88 + Math.random() * 0.24);
+        vel = 0.75 + Math.random() * 0.25;
+      }
+    }
+
+    timings.push({ offset, dur: dur * 0.85, vel });
+    offset += dur;
+  }
+  return timings;
 }
 
 /* ── Playback ── */
 function stopPlay() {
   playing = false; paused = false; playIdx = 0;
   timers.forEach(clearTimeout); timers = [];
-  document.getElementById('playBtn').textContent = 'play sequence'; setActive(-1);
+  document.getElementById('playBtn').textContent = '🎵 play sequence'; setActive(-1);
 }
 
 function pausePlay() {
   paused = true; playing = false;
   timers.forEach(clearTimeout); timers = [];
-  document.getElementById('playBtn').textContent = 'play sequence';
+  document.getElementById('playBtn').textContent = '🎵 play sequence';
 }
 
 function startFrom(startIdx) {
   playing = true; paused = false;
   document.getElementById('playBtn').textContent = 'pause';
   const bpm = parseInt(document.getElementById('tempoSlider').value);
-  const nd = 60 / bpm;
+  const timings = computeTimings(startIdx, bpm);
   seq.slice(startIdx).forEach((aa, j) => {
     const i = startIdx + j;
+    const ti = timings[j];
     const t = setTimeout(() => {
       if (!playing) return;
       playIdx = i + 1;
-      const note = AM[aa]; if (note) playNote(FR[note], nd * 0.85);
+      const note = AM[aa]; if (note) playNote(FR[note], ti.dur, hySustain(aa), ti.vel);
       const contact = contactMap.get(i);
       if (contact) {
         const pNote = AM[contact.aa];
-        if (pNote) playNote(FR[pNote], nd * 0.85);
+        if (pNote) playNote(FR[pNote], ti.dur, hySustain(contact.aa), ti.vel);
       }
       setActive(i);
-      if (i === seq.length - 1) setTimeout(() => { if (playing) stopPlay(); }, nd * 900);
-    }, j * nd * 1000);
+      if (i === seq.length - 1) setTimeout(() => { if (playing) stopPlay(); }, ti.dur * 1100);
+    }, ti.offset * 1000);
     timers.push(t);
   });
 }
@@ -195,7 +323,7 @@ function renderSeqMel() {
     const unit = document.createElement('div');
     unit.className = 'seq-unit';
     const badge = document.createElement('div');
-    badge.className = 'aa-badge'; badge.style.background = c.bg; badge.style.color = c.tx;
+    badge.className = 'aa-badge' + (HP.has(aa) ? ' hydrophobic' : ''); badge.style.background = c.bg; badge.style.color = c.tx;
     badge.textContent = aa; badge.title = AN[aa] || aa;
     unit.appendChild(badge);
     const contact = contactMap.get(i);
@@ -212,8 +340,8 @@ function renderSeqMel() {
       unit.appendChild(pb);
     }
     unit.onclick = () => {
-      if (note) playNote(FR[note], 0.4);
-      if (contact) { const pn = AM[contact.aa]; if (pn) playNote(FR[pn], 0.4); }
+      if (note) playNote(FR[note], 0.4, hySustain(aa));
+      if (contact) { const pn = AM[contact.aa]; if (pn) playNote(FR[pn], 0.4, hySustain(contact.aa)); }
       setActive(i);
     };
     wrap.appendChild(unit);
@@ -222,13 +350,19 @@ function renderSeqMel() {
 
 function renderPiano() {
   const wrap = document.getElementById('pianoWrap'); wrap.innerHTML = '';
+  if (isPentatonic()) {
+    wrap.style.width = (20 * PENT_W + 3 * 4) + 'px';
+    renderPianoPentatonic(wrap);
+    return;
+  }
+  wrap.style.width = '576px';
   WN.forEach((note, i) => {
     const aa = NA[note], g = aa ? GR[aa] : null, c = aa ? GC[g] : null;
     const el = document.createElement('div');
-    el.className = 'wkey piano-key-' + note.replace('#', 's');
+    el.className = 'wkey piano-key-' + note.replace('#', 's') + (aa && HP.has(aa) ? ' hydrophobic' : '');
     el.style.cssText = `left:${i * WW}px;width:${WW - 1}px;height:${WH}px;background:${c ? c.bg : 'var(--color-background-primary)'}`;
     el.innerHTML = aa ? `<div class="klabel" style="color:${c ? c.tx : 'var(--color-text-tertiary)'}">${aa}</div><div class="klabel-sub" style="color:${c ? c.tx : 'var(--color-text-tertiary)'}">${A3[aa]}</div>` : '';
-    el.onclick = () => { if (aa) { playNote(FR[note], 0.5); showAADisplay([aa]); } };
+    el.onclick = () => { if (aa) { playNote(FR[note], 0.5, hySustain(aa)); showAADisplay([aa]); if (composing) addComposeAA(aa); } };
     el.onmouseenter = () => showTooltip(el, aa, note);
     el.onmouseleave = hideTooltip;
     wrap.appendChild(el);
@@ -238,10 +372,30 @@ function renderPiano() {
     const wi = BP[note], left = wi * WW + WW * 0.7 - BW / 2;
     const bkBg = c ? c.bk : '#444441', bkTx = c ? c.bg : '#F1EFE8';
     const el = document.createElement('div');
-    el.className = 'bkey piano-key-' + note.replace('#', 's');
+    el.className = 'bkey piano-key-' + note.replace('#', 's') + (aa && HP.has(aa) ? ' hydrophobic' : '');
     el.style.cssText = `left:${left}px;width:${BW}px;height:${BH}px;background:${bkBg}`;
     el.innerHTML = aa ? `<div class="klabel" style="color:${bkTx}">${aa}</div><div class="klabel-sub" style="color:${bkTx}">${A3[aa]}</div>` : '';
-    el.onclick = () => { if (aa) { playNote(FR[note], 0.5); showAADisplay([aa]); } };
+    el.onclick = () => { if (aa) { playNote(FR[note], 0.5, hySustain(aa)); showAADisplay([aa]); if (composing) addComposeAA(aa); } };
+    el.onmouseenter = () => showTooltip(el, aa, note);
+    el.onmouseleave = hideTooltip;
+    wrap.appendChild(el);
+  });
+}
+
+function renderPianoPentatonic(wrap) {
+  const octaveGap = 4;
+  PENT_MORD.forEach((note, i) => {
+    const aa = NA[note], g = aa ? GR[aa] : null, c = aa ? GC[g] : null;
+    const octave = Math.floor(i / 5);
+    const left = i * PENT_W + octave * octaveGap;
+    const el = document.createElement('div');
+    el.className = 'wkey pent-key piano-key-' + note;
+    el.style.cssText = `left:${left}px;width:${PENT_W - 1}px;height:${WH}px;background:${c ? c.bg : 'var(--color-background-primary)'}`;
+    const octLabel = i % 5 === 0 ? `<div class="pent-oct">${note.slice(-1)}</div>` : '';
+    el.innerHTML = aa
+      ? `<div class="klabel" style="color:${c ? c.tx : 'var(--color-text-tertiary)'}">${aa}</div><div class="klabel-sub" style="color:${c ? c.tx : 'var(--color-text-tertiary)'}">${A3[aa]}</div>${octLabel}`
+      : octLabel;
+    el.onclick = () => { if (aa) { playNote(FR[note], 0.5, hySustain(aa)); showAADisplay([aa]); } };
     el.onmouseenter = () => showTooltip(el, aa, note);
     el.onmouseleave = hideTooltip;
     wrap.appendChild(el);
@@ -256,6 +410,10 @@ function renderLegend() {
     el.innerHTML = `<div class="leg-dot" style="background:${c.bk}"></div><span>${c.label}</span>`;
     leg.appendChild(el);
   });
+  const hy = document.createElement('div');
+  hy.className = 'leg';
+  hy.innerHTML = '<div class="leg-dot" style="background:transparent;border-bottom:3px solid rgba(100,140,180,0.65);border-radius:0"></div><span>Hydrophobic (longer sustain)</span>';
+  leg.appendChild(hy);
 }
 
 function toggleDetails() {
@@ -267,7 +425,7 @@ function toggleDetails() {
 function renderPanelRef() {
   const panel = document.getElementById('panelRef');
   const m = MAPPINGS.find(m => m.id === activeMapping);
-  const sorted = Object.entries(m.map).sort((a, b) => NI[a[1]] - NI[b[1]]);
+  const sorted = Object.entries(m.map).sort((a, b) => getNoteIndex(a[1]) - getNoteIndex(b[1]));
   let html = '<div class="panel-ref">';
   if (activeMapping === 'frequency') {
     sorted.forEach(([aa, note]) => {
@@ -313,7 +471,8 @@ function loadPreset(p) {
   document.getElementById('seqInput').value = p.seq;
   seq = p.seq.toUpperCase().split('').filter(aa => AM[aa]);
   renderPresets(); renderSeqMel();
-  renderInfoPanel();
+  const ib1 = document.getElementById('infoBar'); if (ib1) ib1.textContent = `${p.name} (${p.seq.length} aa)`;
+  renderInfoPanel(); updateRhythmUI(); updateSSBadges();
 }
 
 function loadPresetClear(p) {
@@ -325,7 +484,8 @@ function loadCustom() {
   stopPlay(); presetActive = ''; activeComplex = null; contactMap = new Map();
   seq = document.getElementById('seqInput').value.toUpperCase().split('').filter(aa => AM[aa]);
   renderPresets(); renderHarmonyBtns(); renderSeqMel();
-  renderInfoPanel();
+  const ib2 = document.getElementById('infoBar'); if (ib2) ib2.textContent = seq.length ? `${seq.length} amino acids loaded` : 'no valid amino acids found';
+  renderInfoPanel(); updateRhythmUI(); updateSSBadges();
 }
 
 /* ── Mapping ── */
@@ -342,6 +502,12 @@ function renderMappingBtns() {
 
 function switchMapping(id) {
   stopPlay(); activeMapping = id; setMapping(id); rebuildNA();
+  Object.keys(KB).forEach(k => delete KB[k]);
+  Object.assign(KB, isPentatonic() ? KB_PENTATONIC : KB_CHROMATIC);
+  const hint = document.getElementById('kbHint');
+  if (hint) hint.innerHTML = isPentatonic()
+    ? 'or play with your keyboard — A&thinsp;S&thinsp;D&thinsp;F&thinsp;G for octave 3, H&thinsp;J&thinsp;K&thinsp;L&thinsp;; for octave 4, Q&thinsp;W&thinsp;E&thinsp;R&thinsp;T for octave 5, Y&thinsp;U&thinsp;I&thinsp;O&thinsp;P for octave 6'
+    : 'or play with your keyboard — A&thinsp;S&thinsp;D&thinsp;F… for white keys, W&thinsp;E&thinsp;T&thinsp;Y… for black keys';
   renderMappingBtns(); renderPanelRef(); renderPiano(); renderSeqMel();
   renderInfoPanel();
 }
@@ -373,7 +539,11 @@ function loadComplex(cx) {
   document.getElementById('seqInput').value = cx.chainA.seq;
   seq = cx.chainA.seq.toUpperCase().split('').filter(aa => AM[aa]);
   renderPresets(); renderHarmonyBtns(); renderSeqMel();
-  renderInfoPanel();
+  const ib3 = document.getElementById('infoBar');
+  if (ib3) ib3.innerHTML = `<span style="font-weight:500">${cx.name}</span> `
+    + `<span style="color:var(--color-text-tertiary)">(${cx.pdb})</span> `
+    + `<span style="color:var(--color-text-secondary);font-size:12px">${cx.contacts.length} contacts</span>`;
+  renderInfoPanel(); updateRhythmUI(); updateSSBadges();
 }
 
 /* ── Keyboard ── */
@@ -384,14 +554,16 @@ function updateKbInfo() {
 
 document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (composing && e.key === 'Backspace') { e.preventDefault(); undoCompose(); return; }
   const note = KB[e.key.toLowerCase()];
   if (!note || kbDown.has(e.key)) return;
   const hint = document.getElementById('kbHint'); if (hint) hint.style.display = 'none';
   kbDown.set(e.key, note);
-  playNote(FR[note], 0.5);
+  playNote(FR[note], 0.5, hySustain(NA[note]));
   const cls = 'piano-key-' + note.replace('#', 's');
   document.querySelectorAll('.' + cls).forEach(el => el.classList.add('lit'));
   updateKbInfo();
+  if (composing) { const aa = NA[note]; if (aa) addComposeAA(aa); }
 });
 
 document.addEventListener('keyup', e => {
@@ -403,15 +575,260 @@ document.addEventListener('keyup', e => {
   updateKbInfo();
 });
 
+/* ── 3D Viewer ── */
+let activeViewer = null;
+
+function waitFor3Dmol() {
+  if (typeof $3Dmol !== 'undefined') return Promise.resolve();
+  return new Promise(resolve => {
+    const check = setInterval(() => {
+      if (typeof $3Dmol !== 'undefined') { clearInterval(check); resolve(); }
+    }, 100);
+  });
+}
+
+function initPdbViewer(pdbId, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const pdbData = typeof PDB_DATA !== 'undefined' && PDB_DATA[pdbId.toUpperCase()];
+  if (!pdbData) {
+    container.innerHTML = `<img class="info-panel-img" src="https://cdn.rcsb.org/images/structures/${pdbId.toLowerCase()}_assembly-1.jpeg" alt="structure" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover"/>`;
+    return;
+  }
+  container.innerHTML = '<div class="pdb-viewer-loading">loading viewer...</div>';
+
+  waitFor3Dmol().then(() => {
+    if (!document.getElementById(containerId)) return;
+    container.innerHTML = '';
+    const viewer = $3Dmol.createViewer(container, { backgroundColor: 'white' });
+    viewer.addModel(pdbData, 'pdb');
+    viewer.setStyle({}, { cartoon: { color: 'spectrum' } });
+    viewer.zoomTo();
+    viewer.render();
+    viewer.spin('y', 0.5);
+    activeViewer = viewer;
+  });
+}
+
+/* ── Composition Mode ── */
+function toggleCompose() {
+  composing = !composing;
+  const btn = document.getElementById('composeBtn');
+  const bar = document.getElementById('composeBar');
+  const seqRow = document.querySelector('.seq-input-row');
+  const seqWrap = document.querySelector('.seq-mel-wrap');
+  if (composing) {
+    stopPlay();
+    compSeq = [];
+    seq = [];
+    document.getElementById('seqInput').value = '';
+    renderSeqMel();
+    btn.textContent = 'exit'; btn.classList.add('active');
+    bar.style.display = 'flex';
+    if (seqRow) seqRow.style.display = 'none';
+    if (seqWrap) seqWrap.style.display = 'none';
+    document.getElementById('composeSeq').innerHTML = '';
+    updateComposeCount();
+    updateSuggestions();
+    renderComposeInfo();
+  } else {
+    btn.textContent = '🎼 compose mode'; btn.classList.remove('active');
+    bar.style.display = 'none';
+    if (seqRow) seqRow.style.display = '';
+    if (seqWrap) seqWrap.style.display = '';
+    document.getElementById('composeSeq').innerHTML = '';
+    clearSuggestions();
+    renderInfoPanel();
+  }
+}
+
+function addComposeAA(aa) {
+  if (!aa) return;
+  compSeq.push(aa);
+  seq = [...compSeq];
+  document.getElementById('seqInput').value = compSeq.join('');
+  renderComposeSeq();
+  updateComposeCount();
+  updateSuggestions();
+  renderComposeInfo();
+}
+
+function undoCompose() {
+  if (compSeq.length === 0) return;
+  compSeq.pop();
+  seq = [...compSeq];
+  document.getElementById('seqInput').value = compSeq.join('');
+  renderComposeSeq();
+  updateComposeCount();
+  updateSuggestions();
+  renderComposeInfo();
+}
+
+function clearCompose() {
+  compSeq = [];
+  seq = [];
+  document.getElementById('seqInput').value = '';
+  renderComposeSeq();
+  updateComposeCount();
+  updateSuggestions();
+  renderComposeInfo();
+}
+
+function renderComposeSeq() {
+  const wrap = document.getElementById('composeSeq');
+  wrap.innerHTML = '';
+  compSeq.forEach(aa => {
+    const g = GR[aa] || 'ali', c = GC[g];
+    const el = document.createElement('div');
+    el.className = 'cbadge';
+    el.style.background = c.bg; el.style.color = c.tx;
+    el.textContent = aa;
+    wrap.appendChild(el);
+  });
+  if (wrap.scrollWidth > wrap.clientWidth) {
+    wrap.scrollLeft = wrap.scrollWidth;
+  }
+}
+
+function updateComposeCount() {
+  const el = document.getElementById('composeCount');
+  if (el) {
+    const remaining = 20 - compSeq.length;
+    el.textContent = remaining > 0 ? compSeq.length + ' aa (' + remaining + ' more to fold)' : compSeq.length + ' aa';
+  }
+  const foldBtn = document.getElementById('foldBtn');
+  if (foldBtn) foldBtn.disabled = compSeq.length < 20;
+}
+
+function clearSuggestions() {
+  document.querySelectorAll('.suggested').forEach(el => {
+    el.classList.remove('suggested');
+    el.style.removeProperty('--suggest-color');
+  });
+}
+
+function updateSuggestions() {
+  clearSuggestions();
+  const lastAA = compSeq.length > 0 ? compSeq[compSeq.length - 1] : null;
+  const top4 = getTop4(lastAA);
+  top4.forEach(aa => {
+    const note = AM[aa];
+    if (!note) return;
+    const cls = 'piano-key-' + note.replace('#', 's');
+    const g = GR[aa], c = GC[g];
+    document.querySelectorAll('.' + cls).forEach(el => {
+      el.classList.add('suggested');
+      el.style.setProperty('--suggest-color', c ? c.bk : '#534AB7');
+    });
+  });
+}
+
+function renderComposeInfo() {
+  const el = document.getElementById('infoPanelContent');
+  if (!el) return;
+  if (compSeq.length === 0) {
+    el.innerHTML = '<div class="info-panel-title">compose mode</div>'
+      + '<div class="info-panel-desc">Play keys to build an amino acid sequence. Glowing keys show the most likely next residues for a foldable protein.</div>'
+      + '<div class="info-panel-subtitle">min 20 aa to fold</div>';
+    return;
+  }
+  const groups = { ali: 0, pol: 0, aro: 0, pos: 0, neg: 0 };
+  compSeq.forEach(aa => { const g = GR[aa]; if (g) groups[g]++; });
+  const total = compSeq.length;
+  let html = '<div class="info-panel-title">your sequence</div>';
+  html += '<div class="info-panel-subtitle">' + total + ' amino acids</div>';
+  html += '<div style="margin:6px 0;font-size:11px;color:var(--color-text-secondary)">';
+  ['ali', 'pol', 'aro', 'pos', 'neg'].forEach(g => {
+    const c = GC[g], pct = total > 0 ? Math.round(100 * groups[g] / total) : 0;
+    if (groups[g] > 0) html += '<div style="display:flex;align-items:center;gap:4px;margin:2px 0"><div style="width:8px;height:8px;border-radius:50%;background:' + c.bk + '"></div>' + c.label.split('(')[0].trim() + ': ' + pct + '%</div>';
+  });
+  html += '</div>';
+  if (total >= 20) {
+    html += '<div style="margin-top:8px;font-size:11px;color:#534AB7;font-weight:500">Ready to fold!</div>';
+  } else {
+    html += '<div style="margin-top:8px;font-size:11px;color:var(--color-text-tertiary)">' + (20 - total) + ' more aa to fold</div>';
+  }
+  html += '<div id="infoPanelNow"></div>';
+  el.innerHTML = html;
+}
+
+async function foldSequence() {
+  if (compSeq.length < 20) return;
+  const seqStr = compSeq.join('');
+  const el = document.getElementById('infoPanelContent');
+  el.innerHTML = '<div class="info-panel-title">folding...</div>'
+    + '<div class="fold-loading">Sending ' + seqStr.length + ' residues to ESMFold</div>';
+
+  try {
+    const resp = await fetch('https://api.esmatlas.com/foldSequence/v1/pdb/', {
+      method: 'POST',
+      body: seqStr,
+      headers: { 'Content-Type': 'text/plain' }
+    });
+    if (!resp.ok) throw new Error('ESMFold returned ' + resp.status);
+    const pdbData = await resp.text();
+    showFold(pdbData, seqStr);
+  } catch (err) {
+    el.innerHTML = '<div class="info-panel-title">fold error</div>'
+      + '<div class="fold-error">' + err.message + '</div>'
+      + '<div class="info-panel-desc">The ESMFold API may be unavailable or blocking browser requests. Your sequence:</div>'
+      + '<div style="font-family:var(--font-mono);font-size:10px;word-break:break-all;margin:6px 0;padding:6px;background:var(--color-background-secondary);border-radius:4px">' + seqStr + '</div>';
+  }
+}
+
+function parsePLDDT(pdbData) {
+  const bFactors = [];
+  pdbData.split('\n').forEach(line => {
+    if (line.startsWith('ATOM') && line.substring(12, 16).trim() === 'CA') {
+      const bf = parseFloat(line.substring(60, 66));
+      if (!isNaN(bf)) bFactors.push(bf);
+    }
+  });
+  if (bFactors.length === 0) return null;
+  // ESMFold may return pLDDT on 0–1 scale; normalize to 0–100
+  if (bFactors.every(b => b <= 1)) bFactors.forEach((b, i) => { bFactors[i] = b * 100; });
+  const avg = bFactors.reduce((a, b) => a + b, 0) / bFactors.length;
+  return { avg: avg.toFixed(1), min: Math.min(...bFactors).toFixed(1), max: Math.max(...bFactors).toFixed(1) };
+}
+
+function showFold(pdbData, seqStr) {
+  const el = document.getElementById('infoPanelContent');
+  const conf = parsePLDDT(pdbData);
+  let html = '<div class="info-panel-title">your protein</div>'
+    + '<div class="info-panel-subtitle">' + seqStr.length + ' amino acids</div>'
+    + '<div id="foldViewer" class="fold-viewer"></div>';
+  if (conf) {
+    const color = conf.avg >= 70 ? '#3a8a5c' : conf.avg >= 50 ? '#EF9F27' : '#dc2626';
+    html += '<div style="margin:6px 0;font-size:11px">'
+      + '<span style="font-weight:600;color:' + color + '">pLDDT ' + conf.avg + '</span>'
+      + '<span style="color:var(--color-text-tertiary)"> (' + conf.min + '\u2013' + conf.max + ')</span>'
+      + '</div>';
+  }
+  html += '<div class="fold-status">colored by confidence: <span style="color:#dc2626">low</span> \u2192 <span style="color:#3a8a5c">high</span></div>'
+    + '<div style="margin-top:8px;font-size:9px;color:var(--color-text-tertiary);line-height:1.4">Folded with <a href="https://esmatlas.com" target="_blank" style="color:var(--color-text-tertiary)">ESMFold</a> (Lin et al., Science 2023)</div>';
+  el.innerHTML = html;
+
+  waitFor3Dmol().then(() => {
+    const viewerDiv = document.getElementById('foldViewer');
+    if (!viewerDiv) return;
+    const viewer = $3Dmol.createViewer(viewerDiv, { backgroundColor: 'white' });
+    viewer.addModel(pdbData, 'pdb');
+    viewer.setStyle({}, { cartoon: { colorscheme: { prop: 'b', gradient: 'roygb', min: 50, max: 90 } } });
+    viewer.zoomTo();
+    viewer.render();
+    viewer.spin('y', 1);
+  });
+}
+
 /* ── Info Panel (right) ── */
 function renderInfoPanel() {
   const el = document.getElementById('infoPanelContent');
   if (!el) return;
+  if (activeViewer) { activeViewer = null; }
 
   if (activeComplex) {
     const cx = activeComplex;
-    const imgUrl = `https://cdn.rcsb.org/images/structures/${cx.pdb.toLowerCase()}_assembly-1.jpeg`;
-    let html = `<img class="info-panel-img" src="${imgUrl}" alt="${cx.name} structure" onerror="this.style.display='none'"/>`;
+    let html = `<div id="pdbViewer" class="pdb-viewer"></div>`;
     html += `<div class="info-panel-title">${cx.name}</div>`;
     html += `<div class="info-panel-subtitle">${cx.pdb} · ${cx.contacts.length} contacts</div>`;
     html += `<div class="info-panel-stats">${cx.chainA.name} melody + ${cx.chainB.name} harmony</div>`;
@@ -431,17 +848,18 @@ function renderInfoPanel() {
     html += '</div>';
     html += '<div id="infoPanelNow"></div>';
     el.innerHTML = html;
+    initPdbViewer(cx.pdb, 'pdbViewer');
 
   } else if (presetActive) {
     const p = PS.find(p => p.name === presetActive);
     if (p) {
-      const imgUrl = `https://cdn.rcsb.org/images/structures/${p.pdb.toLowerCase()}_assembly-1.jpeg`;
-      let html = `<img class="info-panel-img" src="${imgUrl}" alt="${p.name} structure" onerror="this.style.display='none'"/>`;
+      let html = `<div id="pdbViewer" class="pdb-viewer"></div>`;
       html += `<div class="info-panel-title">${p.name}</div>`;
       html += `<div class="info-panel-subtitle">${p.pdb} · ${p.seq.length} amino acids</div>`;
       html += `<div class="info-panel-desc">${p.significance}</div>`;
       html += '<div id="infoPanelNow"></div>';
       el.innerHTML = html;
+      initPdbViewer(p.pdb, 'pdbViewer');
     }
 
   } else if (seq.length) {

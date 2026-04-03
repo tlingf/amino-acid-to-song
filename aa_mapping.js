@@ -26,6 +26,18 @@ const MAPPINGS = [
     }
   },
   {
+    id: 'pentatonic-harmony',
+    name: 'Pentatonic (harmony)',
+    type: 'pentatonic',
+    desc: 'C-major pentatonic across 4 octaves — every interval is consonant. Salt bridges (E–K, D–R) land on perfect fifths, hydrophobics (L–I–F) cluster in octave 4, aromatics nearby. Cannot sound bad.',
+    map: {
+      P: 'C3',  D: 'D3',  H: 'E3',  M: 'G3',  R: 'A3',
+      G: 'C4',  L: 'D4',  I: 'E4',  F: 'G4',  W: 'A4',
+      E: 'C5',  V: 'D5',  A: 'E5',  K: 'G5',  S: 'A5',
+      T: 'C6',  C: 'D6',  N: 'E6',  Y: 'G6',  Q: 'A6'
+    }
+  },
+  {
     id: 'binding-chords',
     name: 'Binding chords',
     desc: 'Optimized for harmony: salt bridges (E–K, D–R) land on perfect fifths, hydrophobic contacts (L–I, F–I) on major thirds, aromatics (F–Y) on fifths, H-bonds (T–N, E–H) on minor thirds. Common AAs on octave 4 white keys.',
@@ -144,12 +156,21 @@ const AB = {
 /* Hydrophobic residues */
 const HP = new Set(['G', 'A', 'V', 'P', 'L', 'I', 'M', 'F', 'W']);
 
-/* Note → frequency (Hz) */
+/* Kyte-Doolittle hydrophobicity scale (higher = more hydrophobic) */
+const HY = {
+  I: 4.5, V: 4.2, L: 3.8, F: 2.8, C: 2.5, M: 1.9, A: 1.8,
+  G: -0.4, T: -0.7, S: -0.8, W: -0.9, Y: -1.3, P: -1.6,
+  H: -3.2, D: -3.5, E: -3.5, N: -3.5, Q: -3.5, K: -3.9, R: -4.5
+};
+
+/* Note → frequency (Hz) — chromatic C4–G5 + pentatonic C3–A6 */
 const FR = {
   'C4': 261.63, 'C#4': 277.18, 'D4': 293.66, 'D#4': 311.13, 'E4': 329.63,
   'F4': 349.23, 'F#4': 369.99, 'G4': 392.00, 'G#4': 415.30, 'A4': 440.00,
   'A#4': 466.16, 'B4': 493.88, 'C5': 523.25, 'C#5': 554.37, 'D5': 587.33,
-  'D#5': 622.25, 'E5': 659.25, 'F5': 698.46, 'F#5': 739.99, 'G5': 783.99
+  'D#5': 622.25, 'E5': 659.25, 'F5': 698.46, 'F#5': 739.99, 'G5': 783.99,
+  'C3': 130.81, 'D3': 146.83, 'E3': 164.81, 'G3': 196.00, 'A3': 220.00,
+  'A5': 880.00, 'C6': 1046.50, 'D6': 1174.66, 'E6': 1318.51, 'G6': 1567.98, 'A6': 1760.00
 };
 
 /*
@@ -167,7 +188,7 @@ const COMPLEXES = [
     name: 'p53–MDM2',
     pdb: '1YCR',
     desc: 'Tumor suppressor p53 binds MDM2\'s hydrophobic cleft — F19, W23, L26 anchor the interaction that controls cell fate',
-    chainA: { name: 'p53', seq: 'SQETFSDLWKLLPEN' },
+    chainA: { name: 'p53', seq: 'SQETFSDLWKLLPEN', ss: 'CCCCHHHHHHHHCCC' },
     chainB: { name: 'MDM2' },
     contacts: [
       [2,  'K', 4.2],   // E17→K94  salt bridge
@@ -187,7 +208,7 @@ const COMPLEXES = [
     name: 'Insulin dimer',
     pdb: '4INS',
     desc: 'Insulin B-chain self-associates — symmetric aromatic stacking of F24, F25, Y26 at the dimer interface',
-    chainA: { name: 'Insulin B', seq: 'FVNQHLCGSHLVEALYLVCGERGFFYTPKT' },
+    chainA: { name: 'Insulin B', seq: 'FVNQHLCGSHLVEALYLVCGERGFFYTPKT', ss: 'CCCCCCCCHHHHHHHHHHHHCCCEEECCCC' },
     chainB: { name: 'Insulin B\u2032' },
     contacts: [
       [12, 'E', 4.8],   // E13→E13' weak electrostatic
@@ -203,7 +224,7 @@ const COMPLEXES = [
     name: 'GCN4 zipper',
     pdb: '2ZTA',
     desc: 'Leucine zipper coiled-coil — Leu residues interdigitate every 7 residues; Glu–Lys salt bridges stabilize the dimer',
-    chainA: { name: 'GCN4', seq: 'RMKQLEDKVEELLSKNYHLENEVARLKKLVGER' },
+    chainA: { name: 'GCN4', seq: 'RMKQLEDKVEELLSKNYHLENEVARLKKLVGER', ss: 'CHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHCC' },
     chainB: { name: 'GCN4\u2032' },
     contacts: [
       [1,  'V', 3.9],   // M1→V'   a–a' packing
@@ -224,7 +245,7 @@ const COMPLEXES = [
     name: 'Barnase–Barstar',
     pdb: '1BRS',
     desc: 'Tightest known enzyme–inhibitor pair (Kd~10⁻¹⁴ M) — Asp–Arg salt bridges dominate the interface',
-    chainA: { name: 'Barstar', seq: 'KKAVINGEQIRSISDLHQTLKKELALPEYYGENLDALWDCLTGWVEYPLVLEWRQFEQSKQLTENGAESVLQVFREAKAEGCDITIILS' },
+    chainA: { name: 'Barstar', seq: 'KKAVINGEQIRSISDLHQTLKKELALPEYYGENLDALWDCLTGWVEYPLVLEWRQFEQSKQLTENGAESVLQVFREAKAEGCDITIILS', ss: 'CEEEEEHHHCCCHHHHHHHHHHHCCCCCCCCCCHHHHHHHHHHCCCCCEEEEEECHHHHHHHCCCCHHHHHHHHHHHHHCCCCEEEEEC' },
     chainB: { name: 'Barnase' },
     contacts: [
       [28, 'R', 3.8],   // Y29→R  hydrogen bond

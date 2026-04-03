@@ -55,6 +55,8 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
 .seq-unit { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 26px; flex-shrink: 0 }
 .aa-badge { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 5px; font-size: 13px; font-weight: 500; cursor: default; opacity: 0.6; transition: transform 0.1s, opacity 0.1s }
 .aa-badge.active { transform: scale(1.35); opacity: 1; box-shadow: 0 0 0 2px var(--color-border-primary) }
+.aa-badge.hydrophobic { border-bottom: 2.5px solid rgba(100, 140, 180, 0.55) }
+.aa-badge.hydrophobic.active { border-bottom-color: rgba(100, 140, 180, 0.85) }
 
 /* Controls */
 .controls { display: flex; align-items: center; gap: 12px; margin: 0.5rem 0 1rem; flex-wrap: wrap }
@@ -77,11 +79,29 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
 .wkey:hover, .bkey:hover { filter: brightness(0.88) }
 .wkey.lit { filter: brightness(0.75) }
 .bkey.lit { filter: brightness(1.35) }
+.wkey.hydrophobic { border-bottom: 3px solid rgba(100, 140, 180, 0.45) }
+.bkey.hydrophobic { box-shadow: inset 0 -3px 0 rgba(140, 180, 220, 0.5) }
 .klabel { font-size: 11px; font-weight: 600; line-height: 1.1; text-align: center; pointer-events: none }
 .klabel-sub { font-size: 9px; font-weight: 400; opacity: 0.7; line-height: 1; margin-top: 1px; pointer-events: none }
 .klabel-note { font-size: 8px; opacity: 0.55; line-height: 1 }
 .key-tooltip { position: absolute; bottom: 194px; left: 50%; transform: translateX(-50%); background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 5px 10px; font-size: 12px; white-space: nowrap; pointer-events: none; display: none; z-index: 10; color: var(--color-text-primary); box-shadow: none }
 .key-tooltip span { color: var(--color-text-secondary); margin-left: 4px; font-size: 11px }
+
+/* Rhythm toggle */
+.rhythm-toggle { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--color-text-secondary); cursor: pointer; user-select: none }
+.rhythm-toggle input[type="checkbox"] { accent-color: #3a8a5c }
+.rhythm-label { font-weight: 500 }
+.rhythm-ss-hint { font-size: 10px; color: var(--color-text-tertiary) }
+
+/* SS coloring on sequence badges */
+.aa-badge.ss-H { border-bottom: 2px solid #e07a3a }
+.aa-badge.ss-E { border-bottom: 2px solid #3a7ae0 }
+.aa-badge.ss-C { border-bottom: 2px solid #aaa }
+
+/* Pentatonic piano */
+.pent-key { border-radius: 0 0 5px 5px }
+.pent-key.lit { filter: brightness(0.75) }
+.pent-oct { position: absolute; top: 4px; font-size: 8px; opacity: 0.4; pointer-events: none; font-weight: 500 }
 
 /* Keyboard hint */
 .kb-hint { font-size: 11px; color: var(--color-text-tertiary); margin-top: 4px }
@@ -130,6 +150,8 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
 /* Right info panel */
 .info-panel { flex-shrink: 0; width: 220px; overflow-y: auto; max-height: calc(100vh - 3rem); font-size: 12px }
 .info-panel-img { width: 100%; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); margin-bottom: 8px }
+.pdb-viewer { width: 100%; height: 260px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); overflow: hidden; margin-bottom: 8px; position: relative }
+.pdb-viewer-loading { text-align: center; padding: 60px 10px; color: var(--color-text-tertiary); font-size: 12px }
 .info-panel-title { font-size: 14px; font-weight: 600; color: var(--color-text-primary); margin-bottom: 2px }
 .info-panel-subtitle { font-size: 11px; color: var(--color-text-tertiary); margin-bottom: 6px }
 .info-panel-stats { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 6px }
@@ -148,3 +170,30 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
 .footer-blurb { font-size: 12px; color: var(--color-text-tertiary); text-align: center; margin: 1.5rem 0 0.75rem }
 .footer-blurb a { color: var(--color-text-secondary); text-decoration: none }
 .footer-blurb a:hover { text-decoration: underline }
+
+/* Composition mode */
+.compose-btn { padding: 6px 18px; border-radius: var(--border-radius-md); border: 1.5px solid #534AB7; background: #f0eeff; color: #534AB7; cursor: pointer; font-size: 14px; font-weight: 600 }
+.compose-btn:hover { opacity: 0.85 }
+.compose-btn.active { background: #534AB7; color: #fff }
+
+.compose-bar { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border: 0.5px solid #534AB7; border-radius: var(--border-radius-md); font-size: 12px; color: var(--color-text-secondary); margin-bottom: 0.5rem }
+.compose-label { font-weight: 600; color: #534AB7; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px }
+.compose-count { font-family: var(--font-mono); font-size: 12px; color: var(--color-text-primary) }
+.compose-action { padding: 3px 8px; border-radius: 4px; border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); cursor: pointer; font-size: 11px }
+.compose-action:hover { background: var(--color-background-secondary) }
+.compose-fold { padding: 3px 10px; border-radius: 4px; border: 1px solid #534AB7; background: #534AB7; color: #fff; cursor: pointer; font-size: 11px; font-weight: 600; margin-left: auto }
+.compose-fold:hover { opacity: 0.85 }
+.compose-fold:disabled { opacity: 0.4; cursor: default }
+
+.compose-seq { display: flex; gap: 2px; overflow-x: auto; padding: 4px 0; min-height: 0 }
+.compose-seq:empty { display: none }
+.compose-seq .cbadge { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 4px; font-size: 11px; font-weight: 600; flex-shrink: 0 }
+
+.wkey.suggested { box-shadow: 0 0 12px 3px var(--suggest-color, #534AB7); z-index: 1; animation: suggestPulse 1.5s ease-in-out infinite }
+.bkey.suggested { box-shadow: 0 0 10px 2px var(--suggest-color, #534AB7); animation: suggestPulse 1.5s ease-in-out infinite }
+@keyframes suggestPulse { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(0.92); } }
+
+.fold-viewer { width: 100%; height: 300px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); overflow: hidden; position: relative }
+.fold-status { font-size: 11px; color: var(--color-text-tertiary); margin: 4px 0 }
+.fold-loading { text-align: center; padding: 40px 10px; color: var(--color-text-tertiary); font-size: 12px }
+.fold-error { font-size: 11px; color: #dc2626; margin: 4px 0; line-height: 1.4 }

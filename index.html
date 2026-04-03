@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>AA Melody Player</title>
+<title>AA Melody Player 🎵</title>
 <link rel="stylesheet" href="styles.css"/>
+<script src="https://3Dmol.org/build/3Dmol-min.js" defer></script>
 </head>
 <body>
-<h1>AA Melody Player <span class="h1-sub">Listen to your proteins</span></h1>
+<h1>AA Melody Player 🎵 <span class="h1-sub">Listen to your proteins</span></h1>
 <p class="blurb">Amino acids, <span class="blurb-accent">like notes in a song</span>, form sequences that fold and then bind to each other, <span class="blurb-accent">like harmony in music</span>, that create the machinery of life.</p>
 
 <div class="pmp">
@@ -32,14 +33,28 @@
     <div class="seq-mel" id="seqMel"></div>
   </div>
   <div class="controls">
-    <button class="play-btn" id="playBtn" onclick="togglePlay()">play sequence</button>
+    <button class="play-btn" id="playBtn" onclick="togglePlay()">🎵 play sequence</button>
+    <button class="compose-btn" id="composeBtn" onclick="toggleCompose()">🎼 compose mode</button>
     <div class="tempo-row">
       <span>tempo</span>
       <input type="range" min="40" max="300" value="120" step="1" id="tempoSlider" style="width:100px" oninput="document.getElementById('tempoOut').textContent=this.value"/>
       <span id="tempoOut" style="min-width:36px;font-weight:500;color:var(--color-text-primary)">120</span>
     </div>
+    <label class="rhythm-toggle" id="rhythmToggle" style="display:none" title="Helix = 3/4 waltz, Strand = 4/4 march, Coil = free tempo">
+      <input type="checkbox" id="rhythmCheck" onchange="toggleRhythm()"/>
+      <span class="rhythm-label">rhythm</span>
+      <span class="rhythm-ss-hint" id="rhythmHint"></span>
+    </label>
+  </div>
+  <div class="compose-bar" id="composeBar" style="display:none">
+    <span class="compose-label">composing</span>
+    <span class="compose-count" id="composeCount">0 aa</span>
+    <button class="compose-action" onclick="undoCompose()">undo</button>
+    <button class="compose-action" onclick="clearCompose()">clear</button>
+    <button class="compose-fold" id="foldBtn" onclick="foldSequence()" disabled>fold it!</button>
   </div>
   <div class="piano-area">
+    <div class="compose-seq" id="composeSeq"></div>
     <div class="key-tooltip" id="keyTooltip"></div>
     <div class="piano-scroll"><div class="piano-wrap" id="pianoWrap"></div></div>
   </div>
@@ -58,6 +73,8 @@
 
 <script src="aa_mapping.js"></script>
 <script src="aa_structures.js"></script>
+<script src="aa_bigrams.js"></script>
+<script src="pdb_data.js"></script>
 <script src="player.js"></script>
 </body>
 </html>
