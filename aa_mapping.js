@@ -187,7 +187,7 @@ const COMPLEXES = [
     id: 'p53-mdm2',
     name: 'p53–MDM2',
     pdb: '1YCR',
-    desc: 'Tumor suppressor p53 binds MDM2\'s hydrophobic cleft — F19, W23, L26 anchor the interaction that controls cell fate',
+    desc: 'p53 is the "guardian of the genome" — it tells damaged cells to stop growing or self-destruct. MDM2 keeps p53 in check by binding and silencing it. In over half of all cancers, this balance is broken. Cancer drugs are being designed to block this exact handshake and reactivate p53.',
     chainA: { name: 'p53', seq: 'SQETFSDLWKLLPEN', ss: 'CCCCHHHHHHHHCCC' },
     chainB: { name: 'MDM2' },
     contacts: [
@@ -207,7 +207,7 @@ const COMPLEXES = [
     id: 'insulin-dimer',
     name: 'Insulin dimer',
     pdb: '4INS',
-    desc: 'Insulin B-chain self-associates — symmetric aromatic stacking of F24, F25, Y26 at the dimer interface',
+    desc: 'Insulin molecules naturally pair up when stored in the pancreas. This self-pairing controls how quickly insulin is released into the blood. Understanding this interface is how scientists engineered fast-acting insulins that millions of diabetics depend on daily.',
     chainA: { name: 'Insulin B', seq: 'FVNQHLCGSHLVEALYLVCGERGFFYTPKT', ss: 'CCCCCCCCHHHHHHHHHHHHCCCEEECCCC' },
     chainB: { name: 'Insulin B\u2032' },
     contacts: [
@@ -223,7 +223,7 @@ const COMPLEXES = [
     id: 'gcn4-zipper',
     name: 'GCN4 zipper',
     pdb: '2ZTA',
-    desc: 'Leucine zipper coiled-coil — Leu residues interdigitate every 7 residues; Glu–Lys salt bridges stabilize the dimer',
+    desc: 'A "leucine zipper" — two protein helices that wind around each other like a twisted rope. This motif turns genes on and off inside your cells and is one of nature\'s most common ways to build protein partnerships. It\'s also a workhorse in biotech for designing new proteins.',
     chainA: { name: 'GCN4', seq: 'RMKQLEDKVEELLSKNYHLENEVARLKKLVGER', ss: 'CHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHCC' },
     chainB: { name: 'GCN4\u2032' },
     contacts: [
@@ -244,7 +244,7 @@ const COMPLEXES = [
     id: 'barnase-barstar',
     name: 'Barnase–Barstar',
     pdb: '1BRS',
-    desc: 'Tightest known enzyme–inhibitor pair (Kd~10⁻¹⁴ M) — Asp–Arg salt bridges dominate the interface',
+    desc: 'One of the tightest protein locks in nature — barstar grips barnase so strongly it\'s nearly irreversible. This pair is a textbook example of how cells neutralize dangerous enzymes, and it\'s widely used in lab experiments as a molecular "super-glue" to link proteins together.',
     chainA: { name: 'Barstar', seq: 'KKAVINGEQIRSISDLHQTLKKELALPEYYGENLDALWDCLTGWVEYPLVLEWRQFEQSKQLTENGAESVLQVFREAKAEGCDITIILS', ss: 'CEEEEEHHHCCCHHHHHHHHHHHCCCCCCCCCCHHHHHHHHHHCCCCCEEEEEECHHHHHHHCCCCHHHHHHHHHHHHHCCCCEEEEEC' },
     chainB: { name: 'Barnase' },
     contacts: [

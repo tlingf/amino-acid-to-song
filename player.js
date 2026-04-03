@@ -20,10 +20,10 @@ const PENT_W = 36;
 const AF = { L: 9.66, A: 8.25, G: 7.07, V: 6.87, E: 6.75, S: 6.56, I: 5.96, K: 5.84, R: 5.53, D: 5.45, T: 5.34, P: 4.70, N: 4.06, Q: 3.93, F: 3.86, Y: 2.92, M: 2.42, H: 2.27, C: 1.37, W: 1.08 };
 
 const PS = [
-  { name: 'trp-cage',   seq: 'NLYIQWLKDGGPSSGRPPPS', ss: 'CHHHHHHHHHHHHHHCCCCC', pdb: '1L2Y', desc: 'Trp-cage (20aa) — smallest known folding protein; W rings out as the highest note', significance: 'A 20-residue mini-protein that folds in microseconds, making it a key model system for studying protein folding dynamics.' },
-  { name: 'ubiquitin',  seq: 'MQIFVKTLTGKTITLEVEPS', ss: 'EEEEEEECCEEEEEEEECCC', pdb: '1UBQ', desc: 'Ubiquitin N-terminus (20aa) — the cell\'s molecular tag for degradation', significance: 'A universal molecular tag that marks proteins for destruction by the proteasome — its discovery earned the 2004 Nobel Prize in Chemistry.' },
-  { name: 'insulin B',  seq: 'FVNQHLCGSHLVEALYLVCG', ss: 'CCCCCCCCHHHHHHHHHHHH', pdb: '4INS', desc: 'Insulin B-chain (20aa) — the hormone sequence that regulates blood sugar', significance: 'The B-chain of insulin binds to the insulin receptor, triggering glucose uptake. Mutations here cause hereditary diabetes.' },
-  { name: 'VHH CDR3',   seq: 'AAEGRTFGSYYSY',        ss: 'CCCCCCCCCCCCC',        pdb: '1ZVH', desc: 'VHH CDR3 loop (13aa) — nanobody antigen-binding region', significance: 'The hypervariable loop that gives camelid nanobodies their antigen specificity — now widely used as compact biologics and research tools.' }
+  { name: 'trp-cage',   seq: 'NLYIQWLKDGGPSSGRPPPS', ss: 'CHHHHHHHHHHHHHHCCCCC', pdb: '1L2Y', desc: 'Trp-cage (20aa) — smallest known folding protein; W rings out as the highest note', significance: 'A 20-residue mini-protein designed in 2002 by the Andersen lab. It folds in microseconds around a central tryptophan (W) residue buried by proline rings, making it one of the most important model systems for studying protein folding dynamics and validating molecular simulations.' },
+  { name: 'ubiquitin',  seq: 'MQIFVKTLTGKTITLEVEPS', ss: 'EEEEEEECCEEEEEEEECCC', pdb: '1UBQ', desc: 'Ubiquitin N-terminus (20aa) — the cell\'s molecular tag for degradation', significance: 'Ubiquitin is a small 76-residue protein found in virtually all eukaryotic cells. It acts as a molecular tag — when chains of ubiquitin are attached to a target protein, the cell\'s proteasome recognizes and degrades it. This quality-control system is essential for cell cycle regulation, DNA repair, and immune signaling. Its discovery earned Aaron Ciechanover, Avram Hershko, and Irwin Rose the 2004 Nobel Prize in Chemistry.' },
+  { name: 'insulin B',  seq: 'FVNQHLCGSHLVEALYLVCG', ss: 'CCCCCCCCHHHHHHHHHHHH', pdb: '4INS', desc: 'Insulin B-chain (20aa) — the hormone sequence that regulates blood sugar', significance: 'Insulin is a peptide hormone produced by pancreatic beta cells that regulates blood glucose. It consists of two chains (A and B) linked by disulfide bonds. The B-chain\'s central alpha-helix is critical for binding the insulin receptor and triggering glucose uptake into cells. Mutations in this region can cause hereditary diabetes (MIDY), and engineered B-chain variants are the basis of fast-acting therapeutic insulins.' },
+  { name: 'VHH CDR3',   seq: 'AAEGRTFGSYYSY',        ss: 'CCCCCCCCCCCCC',        pdb: '1ZVH', desc: 'VHH CDR3 loop (13aa) — nanobody antigen-binding region', significance: 'Camelids (llamas, camels, alpacas) produce unique heavy-chain-only antibodies. The VHH domain — or nanobody — is their single variable region, and the CDR3 loop is the primary determinant of antigen specificity. At only ~15 kDa, nanobodies are the smallest known antigen-binding fragments, prized for their stability, ease of engineering, and ability to access epitopes that conventional antibodies cannot reach. They are now used as research tools, diagnostics, and FDA-approved therapeutics.' }
 ];
 
 const KB_CHROMATIC = {
@@ -67,20 +67,20 @@ function getCtx() { if (!ctx) ctx = new (window.AudioContext || window.webkitAud
 
 /**
  * Map amino acid hydrophobicity to a sustain multiplier.
- * Most hydrophobic (I=4.5) → 2.0x sustain, least (R=-4.5) → 0.5x sustain.
+ * Most hydrophobic (I=4.5) → 2.0x sustain, least (R=-4.5) → 1.0x sustain.
  * Non-hydrophobic AAs get 1.0x (neutral).
  */
 function hySustain(aa) {
   if (!aa || HY[aa] === undefined) return 1.0;
-  // Normalize from [-4.5, 4.5] to [0.5, 2.0]
-  return 0.5 + ((HY[aa] + 4.5) / 9.0) * 1.5;
+  // Normalize from [-4.5, 4.5] to [1.0, 2.0]
+  return 1.0 + ((HY[aa] + 4.5) / 9.0);
 }
 
 function playNote(freq, dur, sustain, vel) {
   sustain = sustain || 1.0;
   vel = vel ?? 1.0;
   const c = getCtx(); if (c.state === 'suspended') c.resume();
-  const hold = dur * 1.6 * sustain;
+  const hold = dur * 2.2 * sustain;
   const t = c.currentTime, master = c.createGain();
   const resonance = c.createBiquadFilter();
   resonance.type = 'peaking'; resonance.frequency.value = freq; resonance.Q.value = 3.5; resonance.gain.value = 6;
@@ -108,7 +108,7 @@ function playNote(freq, dur, sustain, vel) {
 }
 
 /* ── Rhythm engine ── */
-let rhythmEnabled = false;
+let rhythmEnabled = true;
 
 function getActiveSS() {
   if (activeComplex && activeComplex.chainA.ss) return activeComplex.chainA.ss;
@@ -117,7 +117,6 @@ function getActiveSS() {
 }
 
 function toggleRhythm() {
-  rhythmEnabled = document.getElementById('rhythmCheck').checked;
   updateSSBadges();
 }
 
@@ -282,8 +281,12 @@ function setActive(idx) {
     const wrap = document.getElementById('seqMel');
     const activeEl = wrap.querySelectorAll('.seq-unit')[idx];
     if (activeEl && wrap.scrollWidth > wrap.clientWidth) {
-      const left = activeEl.offsetLeft - wrap.clientWidth / 2 + activeEl.offsetWidth / 2;
-      wrap.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
+      const elLeft = activeEl.offsetLeft - wrap.scrollLeft;
+      const margin = wrap.clientWidth * 0.25;
+      if (elLeft < margin || elLeft > wrap.clientWidth - margin) {
+        const left = activeEl.offsetLeft - wrap.clientWidth / 2 + activeEl.offsetWidth / 2;
+        wrap.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
+      }
     }
   }
 }
@@ -348,6 +351,11 @@ function renderSeqMel() {
   });
 }
 
+function keyStructHTML(aa, maxDim) {
+  if (!aa) return '';
+  return `<div class="key-struct">${renderSideChainSVG(aa, maxDim, false)}</div>`;
+}
+
 function renderPiano() {
   const wrap = document.getElementById('pianoWrap'); wrap.innerHTML = '';
   if (isPentatonic()) {
@@ -360,9 +368,10 @@ function renderPiano() {
     const aa = NA[note], g = aa ? GR[aa] : null, c = aa ? GC[g] : null;
     const el = document.createElement('div');
     el.className = 'wkey piano-key-' + note.replace('#', 's') + (aa && HP.has(aa) ? ' hydrophobic' : '');
+    if (g) el.dataset.group = g;
     el.style.cssText = `left:${i * WW}px;width:${WW - 1}px;height:${WH}px;background:${c ? c.bg : 'var(--color-background-primary)'}`;
-    el.innerHTML = aa ? `<div class="klabel" style="color:${c ? c.tx : 'var(--color-text-tertiary)'}">${aa}</div><div class="klabel-sub" style="color:${c ? c.tx : 'var(--color-text-tertiary)'}">${A3[aa]}</div>` : '';
-    el.onclick = () => { if (aa) { playNote(FR[note], 0.5, hySustain(aa)); showAADisplay([aa]); if (composing) addComposeAA(aa); } };
+    el.innerHTML = aa ? `${keyStructHTML(aa, 35)}<div class="klabel" style="color:${c ? c.tx : 'var(--color-text-tertiary)'}">${aa}</div><div class="klabel-sub" style="color:${c ? c.tx : 'var(--color-text-tertiary)'}">${A3[aa]}</div>` : '';
+    el.onclick = () => { if (aa) { playNote(FR[note], 0.5, hySustain(aa)); showAADisplay([aa]); if (!composing) toggleCompose(); addComposeAA(aa); } };
     el.onmouseenter = () => showTooltip(el, aa, note);
     el.onmouseleave = hideTooltip;
     wrap.appendChild(el);
@@ -373,9 +382,10 @@ function renderPiano() {
     const bkBg = c ? c.bk : '#444441', bkTx = c ? c.bg : '#F1EFE8';
     const el = document.createElement('div');
     el.className = 'bkey piano-key-' + note.replace('#', 's') + (aa && HP.has(aa) ? ' hydrophobic' : '');
+    if (g) el.dataset.group = g;
     el.style.cssText = `left:${left}px;width:${BW}px;height:${BH}px;background:${bkBg}`;
-    el.innerHTML = aa ? `<div class="klabel" style="color:${bkTx}">${aa}</div><div class="klabel-sub" style="color:${bkTx}">${A3[aa]}</div>` : '';
-    el.onclick = () => { if (aa) { playNote(FR[note], 0.5, hySustain(aa)); showAADisplay([aa]); if (composing) addComposeAA(aa); } };
+    el.innerHTML = aa ? `${keyStructHTML(aa, 22)}<div class="klabel" style="color:${bkTx}">${aa}</div><div class="klabel-sub" style="color:${bkTx}">${A3[aa]}</div>` : '';
+    el.onclick = () => { if (aa) { playNote(FR[note], 0.5, hySustain(aa)); showAADisplay([aa]); if (!composing) toggleCompose(); addComposeAA(aa); } };
     el.onmouseenter = () => showTooltip(el, aa, note);
     el.onmouseleave = hideTooltip;
     wrap.appendChild(el);
@@ -390,10 +400,11 @@ function renderPianoPentatonic(wrap) {
     const left = i * PENT_W + octave * octaveGap;
     const el = document.createElement('div');
     el.className = 'wkey pent-key piano-key-' + note;
+    if (g) el.dataset.group = g;
     el.style.cssText = `left:${left}px;width:${PENT_W - 1}px;height:${WH}px;background:${c ? c.bg : 'var(--color-background-primary)'}`;
     const octLabel = i % 5 === 0 ? `<div class="pent-oct">${note.slice(-1)}</div>` : '';
     el.innerHTML = aa
-      ? `<div class="klabel" style="color:${c ? c.tx : 'var(--color-text-tertiary)'}">${aa}</div><div class="klabel-sub" style="color:${c ? c.tx : 'var(--color-text-tertiary)'}">${A3[aa]}</div>${octLabel}`
+      ? `${keyStructHTML(aa, 28)}<div class="klabel" style="color:${c ? c.tx : 'var(--color-text-tertiary)'}">${aa}</div><div class="klabel-sub" style="color:${c ? c.tx : 'var(--color-text-tertiary)'}">${A3[aa]}</div>${octLabel}`
       : octLabel;
     el.onclick = () => { if (aa) { playNote(FR[note], 0.5, hySustain(aa)); showAADisplay([aa]); } };
     el.onmouseenter = () => showTooltip(el, aa, note);
@@ -554,6 +565,7 @@ function updateKbInfo() {
 
 document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (composing && e.key === 'Escape') { e.preventDefault(); toggleCompose(); return; }
   if (composing && e.key === 'Backspace') { e.preventDefault(); undoCompose(); return; }
   const note = KB[e.key.toLowerCase()];
   if (!note || kbDown.has(e.key)) return;
@@ -563,7 +575,8 @@ document.addEventListener('keydown', e => {
   const cls = 'piano-key-' + note.replace('#', 's');
   document.querySelectorAll('.' + cls).forEach(el => el.classList.add('lit'));
   updateKbInfo();
-  if (composing) { const aa = NA[note]; if (aa) addComposeAA(aa); }
+  if (!composing) toggleCompose();
+  const aa = NA[note]; if (aa) addComposeAA(aa);
 });
 
 document.addEventListener('keyup', e => {
@@ -617,38 +630,50 @@ function toggleCompose() {
   const bar = document.getElementById('composeBar');
   const seqRow = document.querySelector('.seq-input-row');
   const seqWrap = document.querySelector('.seq-mel-wrap');
+  const harmonyWrap = document.getElementById('harmonyWrap');
+  const playBtn = document.getElementById('playBtn');
   if (composing) {
     stopPlay();
+    activeComplex = null; contactMap = null;
     compSeq = [];
     seq = [];
     document.getElementById('seqInput').value = '';
     renderSeqMel();
-    btn.textContent = 'exit'; btn.classList.add('active');
+    btn.textContent = 'exit compose mode'; btn.classList.add('active');
     bar.style.display = 'flex';
     if (seqRow) seqRow.style.display = 'none';
     if (seqWrap) seqWrap.style.display = 'none';
+    if (harmonyWrap) harmonyWrap.style.display = 'none';
+    if (playBtn) playBtn.style.display = 'none';
     document.getElementById('composeSeq').innerHTML = '';
+    document.body.classList.add('compose-active');
     updateComposeCount();
+    updateComposePlay();
     updateSuggestions();
     renderComposeInfo();
   } else {
+    stopPlay();
     btn.textContent = '🎼 compose mode'; btn.classList.remove('active');
     bar.style.display = 'none';
     if (seqRow) seqRow.style.display = '';
     if (seqWrap) seqWrap.style.display = '';
+    if (harmonyWrap) harmonyWrap.style.display = '';
+    if (playBtn) playBtn.style.display = '';
     document.getElementById('composeSeq').innerHTML = '';
+    document.body.classList.remove('compose-active');
     clearSuggestions();
     renderInfoPanel();
   }
 }
 
 function addComposeAA(aa) {
-  if (!aa) return;
+  if (!aa || compSeq.length >= 300) return;
   compSeq.push(aa);
   seq = [...compSeq];
   document.getElementById('seqInput').value = compSeq.join('');
   renderComposeSeq();
   updateComposeCount();
+  updateComposePlay();
   updateSuggestions();
   renderComposeInfo();
 }
@@ -660,16 +685,24 @@ function undoCompose() {
   document.getElementById('seqInput').value = compSeq.join('');
   renderComposeSeq();
   updateComposeCount();
+  updateComposePlay();
   updateSuggestions();
   renderComposeInfo();
 }
 
+function updateComposePlay() {
+  const btn = document.getElementById('composePlayBtn');
+  if (btn) btn.disabled = compSeq.length === 0;
+}
+
 function clearCompose() {
+  stopPlay();
   compSeq = [];
   seq = [];
   document.getElementById('seqInput').value = '';
   renderComposeSeq();
   updateComposeCount();
+  updateComposePlay();
   updateSuggestions();
   renderComposeInfo();
 }
@@ -693,8 +726,9 @@ function renderComposeSeq() {
 function updateComposeCount() {
   const el = document.getElementById('composeCount');
   if (el) {
-    const remaining = 20 - compSeq.length;
-    el.textContent = remaining > 0 ? compSeq.length + ' aa (' + remaining + ' more to fold)' : compSeq.length + ' aa';
+    const n = compSeq.length;
+    if (n < 20) el.textContent = n + ' aa (' + (20 - n) + ' more to fold)';
+    else el.textContent = n + ' aa';
   }
   const foldBtn = document.getElementById('foldBtn');
   if (foldBtn) foldBtn.disabled = compSeq.length < 20;
@@ -791,20 +825,43 @@ function parsePLDDT(pdbData) {
   return { avg: avg.toFixed(1), min: Math.min(...bFactors).toFixed(1), max: Math.max(...bFactors).toFixed(1) };
 }
 
+function helixImg() {
+  return '<img src="img/alpha-helix.png" alt="alpha helix" style="height:28px;vertical-align:middle;margin-right:4px">';
+}
+function sheetImg() {
+  return '<img src="img/beta-sheet.png" alt="beta sheet" style="height:28px;vertical-align:middle;margin-right:4px">';
+}
+function computePropensity(seqStr) {
+  let hSum = 0, sSum = 0, n = seqStr.length;
+  for (let i = 0; i < n; i++) {
+    const aa = seqStr[i];
+    hSum += (HELIX_PROP[aa] || 1.0);
+    sSum += (SHEET_PROP[aa] || 1.0);
+  }
+  // Normalize to 0–100 using each scale's own min/max
+  // Helix: 0.57 (G,P) – 1.51 (E);  Sheet: 0.37 (E) – 1.70 (V)
+  const hPct = Math.round(Math.min(100, Math.max(0, ((hSum / n) - 0.57) / (1.51 - 0.57) * 100)));
+  const sPct = Math.round(Math.min(100, Math.max(0, ((sSum / n) - 0.37) / (1.70 - 0.37) * 100)));
+  return { helix: hPct, sheet: sPct };
+}
+
 function showFold(pdbData, seqStr) {
   const el = document.getElementById('infoPanelContent');
   const conf = parsePLDDT(pdbData);
+  // Show structure immediately
   let html = '<div class="info-panel-title">your protein</div>'
     + '<div class="info-panel-subtitle">' + seqStr.length + ' amino acids</div>'
     + '<div id="foldViewer" class="fold-viewer"></div>';
   if (conf) {
     const color = conf.avg >= 70 ? '#3a8a5c' : conf.avg >= 50 ? '#EF9F27' : '#dc2626';
     html += '<div style="margin:6px 0;font-size:11px">'
+      + '<span style="color:var(--color-text-tertiary)">Model confidence: </span>'
       + '<span style="font-weight:600;color:' + color + '">pLDDT ' + conf.avg + '</span>'
       + '<span style="color:var(--color-text-tertiary)"> (' + conf.min + '\u2013' + conf.max + ')</span>'
       + '</div>';
   }
   html += '<div class="fold-status">colored by confidence: <span style="color:#dc2626">low</span> \u2192 <span style="color:#3a8a5c">high</span></div>'
+    + '<div id="foldPropensity"></div>'
     + '<div style="margin-top:8px;font-size:9px;color:var(--color-text-tertiary);line-height:1.4">Folded with <a href="https://esmatlas.com" target="_blank" style="color:var(--color-text-tertiary)">ESMFold</a> (Lin et al., Science 2023)</div>';
   el.innerHTML = html;
 
@@ -817,6 +874,29 @@ function showFold(pdbData, seqStr) {
     viewer.zoomTo();
     viewer.render();
     viewer.spin('y', 1);
+
+    // Append propensity feedback after structure is visible
+    const propDiv = document.getElementById('foldPropensity');
+    if (propDiv) {
+      const prop = computePropensity(seqStr);
+      function propBar(label, svg, pct, color) {
+        return '<div style="display:flex;align-items:center;gap:6px;margin:4px 0">'
+          + svg
+          + '<span style="min-width:68px;font-weight:500;font-size:11px">' + label + '</span>'
+          + '<div style="flex:1;height:6px;background:#eee;border-radius:3px;overflow:hidden">'
+          + '<div style="width:' + pct + '%;height:100%;background:' + color + ';border-radius:3px"></div></div>'
+          + '<span style="font-size:10px;color:var(--color-text-tertiary);min-width:28px;text-align:right">' + pct + '%</span>'
+          + '</div>';
+      }
+      propDiv.innerHTML = '<div style="margin:10px 0 6px;padding:8px 10px;background:#f8f7fc;border-radius:6px;font-size:11px">'
+        + '<div style="font-weight:600;margin-bottom:6px;color:var(--color-text-primary)">amino acid tendency</div>'
+        + propBar('alpha helix', helixImg(), prop.helix, '#e07838')
+        + propBar('beta sheet', sheetImg(), prop.sheet, '#3878c0')
+        + '<div style="margin-top:8px;font-size:10px;color:var(--color-text-tertiary);line-height:1.5">'
+        + 'Can you compose an alpha helix? Try lots of <b style="color:#e07838">A, E, L, M</b>.<br>'
+        + 'What about a beta sheet? Load up on <b style="color:#3878c0">V, I, Y, F, W</b>.'
+        + '</div></div>';
+    }
   });
 }
 

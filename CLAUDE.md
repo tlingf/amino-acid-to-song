@@ -22,7 +22,5 @@ All JS is loaded via `<script>` tags in index.html in dependency order:
 
 - State is in module-level variables in player.js (e.g., `seq`, `playing`, `activeMapping`, `activeComplex`, `contactMap`).
 - Audio uses Web Audio API oscillators with multi-partial synthesis (not samples).
-- Piano keys are rendered dynamically and support both click and computer keyboard input (bottom row = white keys, top row = black keys).
-- Three mapping modes: "Complexity (harmony)" (default, tuned for consonant binding pairs), "Complexity", and "Frequency".
 - Harmony mode overlays a second voice at interface contact positions when a protein complex is selected.
 - Variable names are terse: `AM` = amino acid map, `NA` = note-to-amino-acid reverse map, `NI` = note index, `WN`/`BN` = white/black notes, `KB` = keyboard bindings, `PS` = presets, `GR` = group, `GC` = group colors.

@@ -90,7 +90,7 @@ function renderStructSVG(aa) {
 }
 
 /* Compact side-chain-only SVG for the panel reference */
-function renderSideChainSVG(aa) {
+function renderSideChainSVG(aa, maxDim = 50, showLabels = true) {
   const sc = SC[aa];
   if (!sc || !sc.a.length) return '<span style="font-size:9px;color:var(--color-text-tertiary)">H</span>';
   const ca = { x: 42, y: 44, l: 'Cα', cls: '' };
@@ -99,11 +99,14 @@ function renderSideChainSVG(aa) {
   let minX = 999, maxX = 0, minY = 999, maxY = 0;
   atoms.forEach(a => { minX = Math.min(minX, a.x); maxX = Math.max(maxX, a.x); minY = Math.min(minY, a.y); maxY = Math.max(maxY, a.y); });
   const pad = 12, vw = maxX - minX + pad * 2, vh = maxY - minY + pad * 2;
-  const scale = 50 / Math.max(vw, vh, 1);
+  const scale = maxDim / Math.max(vw, vh, 1);
   const sw = Math.round(vw * scale), sh = Math.round(vh * scale);
   const ox = -minX + pad, oy = -minY + pad;
+  const atomSVG = showLabels
+    ? _renderAtomsSVG(atoms)
+    : atoms.map(a => a.cls ? `<circle class="atom-${a.cls}" cx="${a.x}" cy="${a.y}" r="2.5"/>` : '').join('');
   return `<svg width="${sw}" height="${sh}" viewBox="${-ox} ${-oy} ${vw} ${vh}" xmlns="http://www.w3.org/2000/svg">`
     + _renderBondsSVG(atoms, bonds)
-    + _renderAtomsSVG(atoms)
+    + atomSVG
     + '</svg>';
 }

@@ -22,8 +22,10 @@
 <div class="main-panel">
   <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px;display:none">preset</div>
   <div class="presets" id="presets" style="display:none"></div>
-  <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px">harmony · binding pairs</div>
-  <div class="presets" id="harmonyBtns"></div>
+  <div id="harmonyWrap">
+    <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px">example binding proteins</div>
+    <div class="presets" id="harmonyBtns"></div>
+  </div>
   <div class="seq-input-row">
     <input type="text" id="seqInput" placeholder="Amino acid sequence (one-letter codes)..." maxlength="200" onkeydown="if(event.key==='Enter')loadCustom()"/>
     <button type="button" onclick="loadCustom()">submit</button>
@@ -41,14 +43,13 @@
       <span id="tempoOut" style="min-width:36px;font-weight:500;color:var(--color-text-primary)">120</span>
     </div>
     <label class="rhythm-toggle" id="rhythmToggle" style="display:none" title="Helix = 3/4 waltz, Strand = 4/4 march, Coil = free tempo">
-      <input type="checkbox" id="rhythmCheck" onchange="toggleRhythm()"/>
-      <span class="rhythm-label">rhythm</span>
       <span class="rhythm-ss-hint" id="rhythmHint"></span>
     </label>
   </div>
   <div class="compose-bar" id="composeBar" style="display:none">
     <span class="compose-label">composing</span>
     <span class="compose-count" id="composeCount">0 aa</span>
+    <button class="compose-action" id="composePlayBtn" onclick="togglePlay()" disabled>▶ play</button>
     <button class="compose-action" onclick="undoCompose()">undo</button>
     <button class="compose-action" onclick="clearCompose()">clear</button>
     <button class="compose-fold" id="foldBtn" onclick="foldSequence()" disabled>fold it!</button>
