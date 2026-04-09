@@ -62,6 +62,7 @@ let presetActive = '';
 let activeComplex = null, contactMap = new Map();
 let detailsOpen = false;
 let composing = false, compSeq = [], compFolded = false, compFoldPdb = null, compFoldSeq = null;
+let compMatch = null, searchInProgress = false;
 const kbDown = new Map();
 
 function rebuildNA() { NA = {}; Object.entries(AM).forEach(([aa, n]) => NA[n] = aa); }
@@ -853,6 +854,7 @@ function updateComposePlay() {
 function clearCompose() {
   stopPlay();
   compFolded = false; compFoldPdb = null; compFoldSeq = null;
+  compMatch = null;
   compSeq = [];
   seq = [];
   document.getElementById('seqInput').value = '';
@@ -869,6 +871,8 @@ function resetComposeButtons() {
   if (fb) { fb.textContent = 'fold it!'; fb.disabled = true; fb.style.marginLeft = ''; }
   const cpb = document.getElementById('composePlayBtn');
   if (cpb) { cpb.className = 'compose-action'; cpb.textContent = '▶ play'; cpb.style.marginLeft = ''; }
+  const fmb = document.getElementById('findMatchBtn');
+  if (fmb) { fmb.textContent = 'find match'; fmb.disabled = true; fmb.classList.remove('searching'); }
 }
 
 function renderComposeSeq() {
@@ -896,6 +900,8 @@ function updateComposeCount() {
   }
   const foldBtn = document.getElementById('foldBtn');
   if (foldBtn) foldBtn.disabled = compSeq.length < 20;
+  const findBtn = document.getElementById('findMatchBtn');
+  if (findBtn) findBtn.disabled = compSeq.length < 10 || searchInProgress;
 }
 
 function clearSuggestions() {
@@ -1190,6 +1196,176 @@ function setupMobileCollapsibles() {
     panel.appendChild(btn);
     panel.appendChild(body);
   });
+}
+
+/* ── Find closest protein (RCSB PDB sequence search) ── */
+
+async function searchRCSB(seqStr) {
+  const query = {
+    query: {
+      type: 'terminal',
+      service: 'sequence',
+      parameters: {
+        evalue_cutoff: 1,
+        identity_cutoff: 0.1,
+        sequence_type: 'protein',
+        value: seqStr
+      }
+    },
+    request_options: {
+      scoring_strategy: 'sequence',
+      sort: [{ sort_by: 'score', direction: 'desc' }],
+      paginate: { start: 0, rows: 5 }
+    },
+    return_type: 'polymer_entity'
+  };
+  const resp = await fetch('https://search.rcsb.org/rcsbsearch/v2/query', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(query)
+  });
+  if (resp.status === 204) return []; // no matches
+  if (!resp.ok) throw new Error('RCSB search returned ' + resp.status);
+  const data = await resp.json();
+  if (!data.result_set || data.result_set.length === 0) return [];
+
+  // Parse results — identifier is like "4HHB_1" (pdbId_entityId)
+  const results = data.result_set.map(r => {
+    const parts = r.identifier.split('_');
+    const pdbId = parts[0];
+    const entityId = parts[1] || '1';
+    const score = r.score || 0;
+    return { pdbId, entityId, score };
+  });
+
+  // Fetch entity details for all results in parallel
+  const detailed = await Promise.all(results.map(async r => {
+    try {
+      const eResp = await fetch('https://data.rcsb.org/rest/v1/core/polymer_entity/' + r.pdbId + '/' + r.entityId);
+      if (!eResp.ok) return { ...r, name: r.pdbId, organism: '', description: '', sequence: '' };
+      const e = await eResp.json();
+      return {
+        ...r,
+        name: e.rcsb_polymer_entity?.pdbx_description || r.pdbId,
+        organism: e.rcsb_entity_source_organism?.[0]?.ncbi_scientific_name || '',
+        description: e.entity_poly?.pdbx_seq_one_letter_code_can || '',
+        sequence: (e.entity_poly?.pdbx_seq_one_letter_code_can || '').replace(/\s/g, '')
+      };
+    } catch {
+      return { ...r, name: r.pdbId, organism: '', description: '', sequence: '' };
+    }
+  }));
+  return detailed;
+}
+
+async function findClosestProtein() {
+  const seqStr = compSeq.length > 0 ? compSeq.join('') : seq.join('');
+  if (seqStr.length < 10) return;
+  if (searchInProgress) return;
+
+  const truncated = seqStr.slice(0, 400);
+  searchInProgress = true;
+  const btn = document.getElementById('findMatchBtn');
+  if (btn) { btn.textContent = 'searching...'; btn.classList.add('searching'); btn.disabled = true; }
+
+  const el = document.getElementById('infoPanelContent');
+  el.innerHTML = '<div class="info-panel-title">searching...</div>'
+    + '<div class="fold-loading">Searching RCSB PDB for similar proteins (' + truncated.length + ' residues)</div>';
+
+  try {
+    const results = await searchRCSB(truncated);
+    searchInProgress = false;
+    if (btn) { btn.textContent = 'find match'; btn.classList.remove('searching'); btn.disabled = false; }
+    if (results.length === 0) {
+      el.innerHTML = '<div class="info-panel-title">no matches found</div>'
+        + '<div class="info-panel-desc">No proteins in the PDB matched with at least 10% sequence identity. Your sequence may be too short or too novel.</div>';
+      return;
+    }
+    compMatch = results;
+    showProteinMatch(results, 0);
+  } catch (err) {
+    searchInProgress = false;
+    if (btn) { btn.textContent = 'find match'; btn.classList.remove('searching'); btn.disabled = false; }
+    el.innerHTML = '<div class="info-panel-title">search error</div>'
+      + '<div class="fold-error">' + err.message + '</div>'
+      + '<div class="info-panel-desc">The RCSB PDB API may be temporarily unavailable. Your sequence:</div>'
+      + '<div style="font-family:var(--font-mono);font-size:10px;word-break:break-all;margin:6px 0;padding:6px;background:var(--color-background-secondary);border-radius:4px">' + truncated + '</div>';
+  }
+}
+
+function showProteinMatch(results, activeIdx) {
+  const el = document.getElementById('infoPanelContent');
+  const top = results[activeIdx];
+  const identity = Math.round(top.score * 100);
+
+  let html = '<div class="info-panel-title">' + top.name + '</div>';
+  if (top.organism) html += '<div class="info-panel-subtitle" style="font-style:italic">' + top.organism + '</div>';
+  html += '<div class="info-panel-subtitle">PDB <a href="https://www.rcsb.org/structure/' + top.pdbId + '" target="_blank" style="color:inherit;text-decoration:underline dotted">' + top.pdbId + '</a></div>';
+  html += '<div class="info-panel-stats">Sequence identity: <strong>' + identity + '%</strong></div>';
+  html += '<div id="matchViewer" class="fold-viewer"></div>';
+
+  // Play button
+  if (top.sequence) {
+    html += '<button class="match-play-btn" onclick="loadMatchedProtein(' + activeIdx + ')">&#9654; play this protein</button>';
+  }
+
+  // List all matches
+  if (results.length > 1) {
+    html += '<div class="match-list">';
+    html += '<div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:4px">top matches</div>';
+    results.forEach((r, i) => {
+      const pct = Math.round(r.score * 100);
+      html += '<div class="match-row' + (i === activeIdx ? ' active' : '') + '" onclick="showProteinMatch(compMatch,' + i + ')">'
+        + '<span class="match-identity">' + pct + '%</span>'
+        + '<span class="match-name">' + r.name + '</span>'
+        + (r.organism ? '<span class="match-organism">' + r.organism + '</span>' : '')
+        + '</div>';
+    });
+    html += '</div>';
+  }
+
+  html += '<div style="margin-top:8px;font-size:9px;color:var(--color-text-tertiary);line-height:1.4">Searched via <a href="https://search.rcsb.org" target="_blank" style="color:var(--color-text-tertiary)">RCSB PDB</a></div>';
+  el.innerHTML = html;
+
+  // Load 3D structure
+  waitFor3Dmol().then(async () => {
+    const viewerDiv = document.getElementById('matchViewer');
+    if (!viewerDiv) return;
+    viewerDiv.innerHTML = '<div class="pdb-viewer-loading">loading structure...</div>';
+    try {
+      const pdbResp = await fetch('https://files.rcsb.org/download/' + top.pdbId + '.pdb');
+      if (!pdbResp.ok) throw new Error('PDB fetch failed');
+      const pdbData = await pdbResp.text();
+      if (!document.getElementById('matchViewer')) return;
+      viewerDiv.innerHTML = '';
+      const viewer = $3Dmol.createViewer(viewerDiv, { backgroundColor: 'white' });
+      viewer.addModel(pdbData, 'pdb');
+      viewer.setStyle({}, { cartoon: { color: 'spectrum' } });
+      viewer.zoomTo();
+      viewer.render();
+      viewer.spin('y', 1);
+    } catch {
+      viewerDiv.innerHTML = '<img class="info-panel-img" src="https://cdn.rcsb.org/images/structures/' + top.pdbId.toLowerCase() + '_assembly-1.jpeg" alt="structure" onerror="this.style.display=\'none\'" style="width:100%;height:100%;object-fit:cover"/>';
+    }
+  });
+}
+
+function loadMatchedProtein(idx) {
+  if (!compMatch || !compMatch[idx]) return;
+  const r = compMatch[idx];
+  const raw = r.sequence.toUpperCase().split('').filter(aa => AM[aa]);
+  if (!raw.length) return;
+  if (!composing) toggleCompose();
+  compSeq = [...raw];
+  seq = [...raw];
+  compFolded = false; compFoldPdb = null; compFoldSeq = null;
+  document.getElementById('seqInput').value = raw.join('');
+  renderComposeSeq();
+  updateComposeCount();
+  updateComposePlay();
+  updateSuggestions();
+  renderComposeInfo();
+  togglePlay();
 }
 
 /* ── Init ── */
