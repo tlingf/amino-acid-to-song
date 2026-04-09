@@ -1038,6 +1038,7 @@ async function foldSequence() {
     const cpb = document.getElementById('composePlayBtn');
     if (cpb) { cpb.disabled = false; cpb.className = 'compose-fold compose-play-folded'; cpb.textContent = '▶ play your protein'; cpb.style.marginLeft = 'auto'; }
     showFold(pdbData, seqStr);
+    findClosestProtein(true);
     togglePlay();
   } catch (err) {
     el.innerHTML = '<div class="info-panel-title">fold error</div>'
@@ -1116,7 +1117,8 @@ function showFold(pdbData, seqStr) {
   }
   html += '<div class="fold-status">colored by confidence: <span style="color:#dc2626">low</span> \u2192 <span style="color:#3a8a5c">high</span></div>'
     + '<div id="foldPropensity"></div>'
-    + '<div style="margin-top:8px;font-size:9px;color:var(--color-text-tertiary);line-height:1.4">Folded with <a href="https://esmatlas.com" target="_blank" style="color:var(--color-text-tertiary)">ESMFold</a> (Lin et al., Science 2023)</div>';
+    + '<div style="margin-top:8px;font-size:9px;color:var(--color-text-tertiary);line-height:1.4">Folded with <a href="https://esmatlas.com" target="_blank" style="color:var(--color-text-tertiary)">ESMFold</a> (Lin et al., Science 2023)</div>'
+    + '<div id="matchResults" style="margin-top:10px;border-top:0.5px solid var(--color-border-tertiary);padding-top:8px"><div style="font-size:11px;color:var(--color-text-tertiary)">searching for similar proteins...</div></div>';
   el.innerHTML = html;
 
   waitFor3Dmol().then(() => {
@@ -1319,7 +1321,7 @@ async function searchRCSB(seqStr) {
   return detailed;
 }
 
-async function findClosestProtein() {
+async function findClosestProtein(append) {
   const seqStr = compSeq.length > 0 ? compSeq.join('') : seq.join('');
   if (seqStr.length < 10) return;
   if (searchInProgress) return;
@@ -1329,29 +1331,63 @@ async function findClosestProtein() {
   const btn = document.getElementById('findMatchBtn');
   if (btn) { btn.textContent = 'searching...'; btn.classList.add('searching'); btn.disabled = true; }
 
-  const el = document.getElementById('infoPanelContent');
-  el.innerHTML = '<div class="info-panel-title">searching...</div>'
-    + '<div class="fold-loading">Searching RCSB PDB for similar proteins (' + truncated.length + ' residues)</div>';
+  // If not appending below fold, show standalone loading state
+  if (!append) {
+    const el = document.getElementById('infoPanelContent');
+    el.innerHTML = '<div class="info-panel-title">searching...</div>'
+      + '<div class="fold-loading">Searching RCSB PDB for similar proteins (' + truncated.length + ' residues)</div>';
+  }
 
   try {
     const results = await searchRCSB(truncated);
     searchInProgress = false;
     if (btn) { btn.textContent = 'find match'; btn.classList.remove('searching'); btn.disabled = false; }
-    if (results.length === 0) {
+
+    if (append) {
+      renderMatchInline(results);
+    } else if (results.length === 0) {
+      const el = document.getElementById('infoPanelContent');
       el.innerHTML = '<div class="info-panel-title">no matches found</div>'
         + '<div class="info-panel-desc">No proteins in the PDB matched with at least 10% sequence identity. Your sequence may be too short or too novel.</div>';
-      return;
+    } else {
+      compMatch = results;
+      showProteinMatch(results, 0);
     }
-    compMatch = results;
-    showProteinMatch(results, 0);
   } catch (err) {
     searchInProgress = false;
     if (btn) { btn.textContent = 'find match'; btn.classList.remove('searching'); btn.disabled = false; }
-    el.innerHTML = '<div class="info-panel-title">search error</div>'
-      + '<div class="fold-error">' + err.message + '</div>'
-      + '<div class="info-panel-desc">The RCSB PDB API may be temporarily unavailable. Your sequence:</div>'
-      + '<div style="font-family:var(--font-mono);font-size:10px;word-break:break-all;margin:6px 0;padding:6px;background:var(--color-background-secondary);border-radius:4px">' + truncated + '</div>';
+    if (append) {
+      const md = document.getElementById('matchResults');
+      if (md) md.innerHTML = '';
+    } else {
+      const el = document.getElementById('infoPanelContent');
+      el.innerHTML = '<div class="info-panel-title">search error</div>'
+        + '<div class="fold-error">' + err.message + '</div>'
+        + '<div class="info-panel-desc">The RCSB PDB API may be temporarily unavailable. Your sequence:</div>'
+        + '<div style="font-family:var(--font-mono);font-size:10px;word-break:break-all;margin:6px 0;padding:6px;background:var(--color-background-secondary);border-radius:4px">' + truncated + '</div>';
+    }
   }
+}
+
+function renderMatchInline(results) {
+  const md = document.getElementById('matchResults');
+  if (!md) return;
+  if (!results || results.length === 0) {
+    md.innerHTML = '<div style="font-size:11px;color:var(--color-text-tertiary)">No similar proteins found in PDB</div>';
+    return;
+  }
+  compMatch = results;
+  let html = '<div style="font-size:11px;font-weight:600;color:var(--color-text-primary);margin-bottom:4px">similar known proteins</div>';
+  results.forEach((r, i) => {
+    const pct = Math.round(r.score * 100);
+    html += '<div class="match-row" onclick="showProteinMatch(compMatch,' + i + ')">'
+      + '<span class="match-identity">' + pct + '%</span>'
+      + '<span class="match-name">' + r.name + '</span>'
+      + (r.organism ? '<span class="match-organism">' + r.organism + '</span>' : '')
+      + '</div>';
+  });
+  html += '<div style="font-size:9px;color:var(--color-text-tertiary);margin-top:4px">via <a href="https://search.rcsb.org" target="_blank" style="color:var(--color-text-tertiary)">RCSB PDB</a></div>';
+  md.innerHTML = html;
 }
 
 function showProteinMatch(results, activeIdx) {
