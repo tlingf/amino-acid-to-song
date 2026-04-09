@@ -92,8 +92,13 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
 .bkey.hydrophobic { box-shadow: inset 0 -3px 0 rgba(140, 180, 220, 0.5) }
 .klabel { font-size: 11px; font-weight: 600; line-height: 1.1; text-align: center; pointer-events: none }
 .klabel-sub { font-size: 9px; font-weight: 400; opacity: 0.7; line-height: 1; margin-top: 1px; pointer-events: none }
+.klabel-pair { font-size: 13px; font-weight: 600; line-height: 1.1; text-align: center; pointer-events: none }
+.klabel-pair-sep { opacity: 0.4; margin: 0 1px; font-weight: 400 }
 .klabel-note { font-size: 8px; opacity: 0.55; line-height: 1 }
+.bkey-disabled { pointer-events: none }
 .key-struct { opacity: 0.55; pointer-events: none; margin-bottom: 2px; line-height: 0 }
+.key-struct-pair { display: flex; flex-direction: column; align-items: center; gap: 0; pointer-events: none; opacity: 0.55 }
+.key-struct-pair .key-struct { margin-bottom: 0; opacity: 1 }
 .key-struct svg .bond { stroke: currentColor; stroke-width: 1.5 }
 .key-struct svg circle { fill: currentColor }
 .key-struct svg .atom-N { fill: #2563eb }

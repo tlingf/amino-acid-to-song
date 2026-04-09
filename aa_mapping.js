@@ -15,10 +15,34 @@
 
 const MAPPINGS = [
   {
+    id: 'keyboard',
+    name: 'AA letters (white keys)',
+    type: 'direct',
+    layout: 'whiteOnly',
+    desc: 'Type amino acid letters directly — similar AAs share a key (BLOSUM62 ≥ 1, same property group). White keys only, 14 notes from G3 to F5.',
+    map: {
+      W: 'G3',
+      H: 'A3',
+      P: 'B3',
+      G: 'C4',
+      F: 'D4',  Y: 'D4',
+      A: 'E4',
+      V: 'F4',  I: 'F4',
+      L: 'G4',  M: 'G4',
+      K: 'A4',  R: 'A4',
+      D: 'B4',  E: 'B4',
+      S: 'C5',  T: 'C5',
+      N: 'D5',
+      Q: 'E5',
+      C: 'F5'
+    }
+  },
+  {
     id: 'pentatonic-harmony',
-    name: 'Pentatonic (harmony)',
-    type: 'pentatonic',
-    desc: 'C-major pentatonic across 4 octaves — every interval is consonant. Common hydrophobics (L A V G I) on octave 4, salt bridges (E–K, D–R) as perfect fifths on octave 5, polar AAs high on octave 6.',
+    name: 'AA letters (pentatonic)',
+    type: 'direct',
+    layout: 'pentatonic',
+    desc: 'C-major pentatonic across 4 octaves — every interval is consonant. Each amino acid gets its own note.',
     map: {
       P: 'C3',  F: 'D3',  H: 'E3',  M: 'G3',  W: 'A3',
       L: 'C4',  A: 'D4',  V: 'E4',  G: 'G4',  I: 'A4',
@@ -28,8 +52,9 @@ const MAPPINGS = [
   },
   {
     id: 'complexity-harmony',
-    name: 'Complexity',
-    desc: 'Same complexity ladder, but black keys placed for binding-pair consonance (salt bridges = perfect fifths/fourths, aromatics = thirds/fourths).',
+    name: 'Complexity order',
+    layout: 'chromatic',
+    desc: 'Complexity ladder with black keys for binding-pair consonance (salt bridges = perfect fifths/fourths, aromatics = thirds/fourths).',
     map: {
       G: 'C4',   P: 'C#4',  A: 'D4',   C: 'D#4',  S: 'E4',
       T: 'F4',   M: 'F#4',  V: 'G4',   R: 'G#4',  L: 'A4',
@@ -38,21 +63,10 @@ const MAPPINGS = [
     }
   },
   {
-    id: 'keyboard',
-    name: 'Keyboard letters',
-    type: 'direct',
-    desc: 'Type amino acid letters directly — each key plays the corresponding residue on a pentatonic scale.',
-    map: {
-      P: 'C3',  F: 'D3',  H: 'E3',  M: 'G3',  W: 'A3',
-      L: 'C4',  A: 'D4',  V: 'E4',  G: 'G4',  I: 'A4',
-      E: 'C5',  D: 'D5',  Y: 'E5',  K: 'G5',  R: 'A5',
-      S: 'C6',  T: 'D6',  N: 'E6',  Q: 'G6',  C: 'A6'
-    }
-  },
-  {
     id: 'frequency',
-    name: 'Frequency',
-    desc: 'Common AAs on octave 4, rare on octave 5. Simple AAs on white keys, complex on black. Binding pairs harmonized.',
+    name: 'Frequency order',
+    layout: 'chromatic',
+    desc: 'Common AAs on octave 4, rare on octave 5. Simple AAs on white keys, complex on black.',
     map: {
       L: 'C4',   F: 'C#4',  A: 'D4',   P: 'D#4',  V: 'E4',
       E: 'F4',   M: 'F#4',  G: 'G4',   Y: 'G#4',  S: 'A4',
@@ -148,7 +162,7 @@ const FR = {
   'F4': 349.23, 'F#4': 369.99, 'G4': 392.00, 'G#4': 415.30, 'A4': 440.00,
   'A#4': 466.16, 'B4': 493.88, 'C5': 523.25, 'C#5': 554.37, 'D5': 587.33,
   'D#5': 622.25, 'E5': 659.25, 'F5': 698.46, 'F#5': 739.99, 'G5': 783.99,
-  'C3': 130.81, 'D3': 146.83, 'E3': 164.81, 'G3': 196.00, 'A3': 220.00,
+  'C3': 130.81, 'D3': 146.83, 'E3': 164.81, 'F3': 174.61, 'G3': 196.00, 'G#3': 207.65, 'A3': 220.00, 'A#3': 233.08, 'B3': 246.94,
   'A5': 880.00, 'C6': 1046.50, 'D6': 1174.66, 'E6': 1318.51, 'G6': 1567.98, 'A6': 1760.00
 };
 

@@ -17,6 +17,11 @@ const WW = 48, BW = 30, WH = 178, BH = 112;
 const PENT_MORD = ['C3','D3','E3','G3','A3','C4','D4','E4','G4','A4','C5','D5','E5','G5','A5','C6','D6','E6','G6','A6'];
 const PENT_NI = {}; PENT_MORD.forEach((n, i) => PENT_NI[n] = i);
 const PENT_W = 36;
+/* White-only layout (grouped mapping, G3–F5) */
+const WO_WN = ['G3','A3','B3','C4','D4','E4','F4','G4','A4','B4','C5','D5','E5','F5'];
+const WO_BN = ['G#3','A#3','C#4','D#4','F#4','G#4','A#4','C#5','D#5'];
+const WO_BP = { 'G#3': 0, 'A#3': 1, 'C#4': 3, 'D#4': 4, 'F#4': 6, 'G#4': 7, 'A#4': 8, 'C#5': 10, 'D#5': 11 };
+const WO_NI = {}; WO_WN.forEach((n, i) => WO_NI[n] = i);
 const AF = { L: 9.66, A: 8.25, G: 7.07, V: 6.87, E: 6.75, S: 6.56, I: 5.96, K: 5.84, R: 5.53, D: 5.45, T: 5.34, P: 4.70, N: 4.06, Q: 3.93, F: 3.86, Y: 2.92, M: 2.42, H: 2.27, C: 1.37, W: 1.08 };
 
 const PS = [
@@ -26,32 +31,40 @@ const PS = [
   { name: 'VHH nanobody', seq: 'DVQLVESGGGSVQAGGSLRLSCAASGYIASINYLGWFRQAPGKEREGVAAVSPAGGTPYYADSVKGRFTVSLDNAENTVYLQMNSLKPEDTALYYCAAARQGWYIPLNSYGYNYWGQGTQVTVS', ss: 'CEEEEEECCEEECCCCCEEEEEEEEECHHHEEEEEEEEECCCCCCEEEEEECCCCCCEEECCCCECCEEEEEECCCCEEEEEECCCCHHHCEEEEEEEEECCCCCCCCHHHEEEECCCEEEEEC', pdb: '1ZVH', desc: 'VHH nanobody (124aa) \u2014 a complete single-domain antibody from a llama', significance: 'Camelids (llamas, camels, alpacas) produce unique heavy-chain-only antibodies. The VHH domain \u2014 or nanobody \u2014 is their single variable region containing four framework regions (FR1\u2013FR4) that form a \u03B2-sandwich scaffold, and three hypervariable CDR loops that determine antigen specificity. At only ~15 kDa, nanobodies are the smallest known antigen-binding fragments. They are prized for their stability, ease of engineering, and ability to access hidden epitopes that conventional antibodies cannot reach \u2014 now used as research tools, diagnostics, and FDA-approved therapeutics (e.g. caplacizumab).' }
 ];
 
+/* Keyboard bindings */
 const KB_CHROMATIC = {
   'a': 'C4', 'w': 'C#4', 's': 'D4', 'e': 'D#4', 'd': 'E4', 'f': 'F4', 't': 'F#4',
   'g': 'G4', 'y': 'G#4', 'h': 'A4', 'u': 'A#4', 'j': 'B4',
   'k': 'C5', 'o': 'C#5', 'l': 'D5', 'p': 'D#5', ';': 'E5', "'": 'F5', ']': 'F#5',
   '\\': 'G5'
 };
-const KB_PENTATONIC = {
-  'a': 'C3', 's': 'D3', 'd': 'E3', 'f': 'G3', 'g': 'A3',
-  'h': 'C4', 'j': 'D4', 'k': 'E4', 'l': 'G4', ';': 'A4',
-  'q': 'C5', 'w': 'D5', 'e': 'E5', 'r': 'G5', 't': 'A5',
-  'y': 'C6', 'u': 'D6', 'i': 'E6', 'o': 'G6', 'p': 'A6'
-};
-let KB = { ...KB_CHROMATIC };
-
+let KB = {};
 function isDirect() {
   const m = MAPPINGS.find(m => m.id === activeMapping);
   return m && m.type === 'direct';
 }
-
-function isPentatonic() {
-  const m = MAPPINGS.find(m => m.id === activeMapping);
-  return m && (m.type === 'pentatonic' || m.type === 'direct');
+function rebuildKB() {
+  Object.keys(KB).forEach(k => delete KB[k]);
+  if (isDirect()) {
+    Object.entries(AM).forEach(([aa, note]) => { KB[aa.toLowerCase()] = note; });
+  } else {
+    Object.assign(KB, KB_CHROMATIC);
+  }
 }
 
+function getLayout() {
+  const m = MAPPINGS.find(m => m.id === activeMapping);
+  return m ? m.layout : 'chromatic';
+}
+
+function isPentatonic() { return getLayout() === 'pentatonic'; }
+function isWhiteOnly() { return getLayout() === 'whiteOnly'; }
+
 function getNoteIndex(note) {
-  return isPentatonic() ? (PENT_NI[note] ?? -1) : (NI[note] ?? -1);
+  const layout = getLayout();
+  if (layout === 'whiteOnly') return WO_NI[note] ?? -1;
+  if (layout === 'pentatonic') return PENT_NI[note] ?? -1;
+  return NI[note] ?? -1;
 }
 
 /* ── State ── */
@@ -66,6 +79,7 @@ const kbDown = new Map();
 
 function rebuildNA() { NA = {}; Object.entries(AM).forEach(([aa, n]) => NA[n] = aa); }
 rebuildNA();
+rebuildKB();
 
 /* ── Audio ── */
 function getCtx() { if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); return ctx; }
@@ -375,6 +389,12 @@ function keyStructHTML(aa, maxDim) {
 
 function renderPiano() {
   const wrap = document.getElementById('pianoWrap'); wrap.innerHTML = '';
+  if (isWhiteOnly()) {
+    wrap.style.width = (WO_WN.length * WW) + 'px';
+    renderPianoWhiteOnly(wrap);
+    scalePianoForMobile();
+    return;
+  }
   if (isPentatonic()) {
     wrap.style.width = (20 * PENT_W + 3 * 4) + 'px';
     renderPianoPentatonic(wrap);
@@ -409,6 +429,41 @@ function renderPiano() {
     wrap.appendChild(el);
   });
   scalePianoForMobile();
+}
+
+function renderPianoWhiteOnly(wrap) {
+  /* Build note→[aa,...] lookup for keys with multiple AAs */
+  const noteAAs = {};
+  Object.entries(AM).forEach(([aa, note]) => {
+    if (!noteAAs[note]) noteAAs[note] = [];
+    noteAAs[note].push(aa);
+  });
+  WO_WN.forEach((note, i) => {
+    const aas = noteAAs[note] || [];
+    const firstAA = aas[0], g = firstAA ? GR[firstAA] : null, c = firstAA ? GC[g] : null;
+    const el = document.createElement('div');
+    el.className = 'wkey piano-key-' + note.replace('#', 's') + (firstAA && HP.has(firstAA) ? ' hydrophobic' : '');
+    if (g) el.dataset.group = g;
+    el.style.cssText = `left:${i * WW}px;width:${WW - 1}px;height:${WH}px;background:${c ? c.bg : 'var(--color-background-primary)'}`;
+    if (aas.length === 1) {
+      el.innerHTML = `${keyStructHTML(firstAA, 35)}<div class="klabel" style="color:${c ? c.tx : 'var(--color-text-tertiary)'}">${firstAA}</div><div class="klabel-sub" style="color:${c ? c.tx : 'var(--color-text-tertiary)'}">${A3[firstAA]}</div>`;
+    } else if (aas.length === 2) {
+      const tx = c ? c.tx : 'var(--color-text-tertiary)';
+      el.innerHTML = `<div class="key-struct-pair">${keyStructHTML(aas[0], 24)}${keyStructHTML(aas[1], 24)}</div><div class="klabel-pair" style="color:${tx}"><span>${aas[0]}</span><span class="klabel-pair-sep">/</span><span>${aas[1]}</span></div><div class="klabel-sub" style="color:${tx}">${A3[aas[0]]}/${A3[aas[1]]}</div>`;
+    }
+    el.onclick = () => { if (firstAA) { playNote(FR[note], 0.5, hySustain(firstAA)); showAADisplay(aas); if (!composing) toggleCompose(); addComposeAA(firstAA); } };
+    el.onmouseenter = () => showTooltip(el, firstAA, note);
+    el.onmouseleave = hideTooltip;
+    wrap.appendChild(el);
+  });
+  /* Render disabled black keys */
+  WO_BN.forEach(note => {
+    const wi = WO_BP[note], left = wi * WW + WW * 0.7 - BW / 2;
+    const el = document.createElement('div');
+    el.className = 'bkey bkey-disabled';
+    el.style.cssText = `left:${left}px;width:${BW}px;height:${BH}px;background:#d0cfc8;opacity:0.45;cursor:default`;
+    wrap.appendChild(el);
+  });
 }
 
 function renderPianoPentatonic(wrap) {
@@ -576,20 +631,17 @@ function renderMappingBtns() {
   });
 }
 
+function kbHintText() {
+  const layout = getLayout();
+  if (layout === 'whiteOnly') return 'type amino acid letters — similar AAs share a key (white keys only)';
+  if (layout === 'pentatonic') return 'type amino acid letters — each AA on its own pentatonic note';
+  return 'play with your keyboard — A&thinsp;S&thinsp;D&thinsp;F&thinsp;G&thinsp;H&thinsp;J&thinsp;K&thinsp;L for white keys, W&thinsp;E&thinsp;T&thinsp;Y&thinsp;U&thinsp;O&thinsp;P for black keys';
+}
+
 function switchMapping(id) {
-  stopPlay(); activeMapping = id; setMapping(id); rebuildNA();
-  Object.keys(KB).forEach(k => delete KB[k]);
-  if (isDirect()) {
-    Object.entries(AM).forEach(([aa, note]) => { KB[aa.toLowerCase()] = note; });
-  } else {
-    Object.assign(KB, isPentatonic() ? KB_PENTATONIC : KB_CHROMATIC);
-  }
+  stopPlay(); activeMapping = id; setMapping(id); rebuildNA(); rebuildKB();
   const hint = document.getElementById('kbHint');
-  if (hint) { hint.style.display = ''; hint.innerHTML = isDirect()
-    ? 'type amino acid letters directly — A&thinsp;G&thinsp;V&thinsp;L&thinsp;I&thinsp;S&thinsp;T&thinsp;C&thinsp;M&thinsp;P&thinsp;D&thinsp;E&thinsp;N&thinsp;Q&thinsp;K&thinsp;R&thinsp;H&thinsp;F&thinsp;W&thinsp;Y'
-    : isPentatonic()
-    ? 'or play with your keyboard — A&thinsp;S&thinsp;D&thinsp;F&thinsp;G for octave 3, H&thinsp;J&thinsp;K&thinsp;L&thinsp;; for octave 4, Q&thinsp;W&thinsp;E&thinsp;R&thinsp;T for octave 5, Y&thinsp;U&thinsp;I&thinsp;O&thinsp;P for octave 6'
-    : 'or play with your keyboard — A&thinsp;S&thinsp;D&thinsp;F… for white keys, W&thinsp;E&thinsp;T&thinsp;Y… for black keys'; }
+  if (hint) { hint.style.display = ''; hint.innerHTML = kbHintText(); }
   renderMappingBtns(); renderPanelRef(); renderPiano(); renderSeqMel();
   renderInfoPanel();
 }
@@ -615,7 +667,9 @@ function loadComplex(cx) {
     contactMap.set(idxA, { aa: partnerAA, dist });
   });
   if (activeMapping !== 'complexity-harmony') {
-    activeMapping = 'complexity-harmony'; setMapping('complexity-harmony'); rebuildNA();
+    activeMapping = 'complexity-harmony'; setMapping('complexity-harmony'); rebuildNA(); rebuildKB();
+    const hint = document.getElementById('kbHint');
+    if (hint) { hint.style.display = ''; hint.innerHTML = kbHintText(); }
     renderMappingBtns(); renderPiano();
   }
   document.getElementById('seqInput').value = cx.chainA.seq;
@@ -629,9 +683,15 @@ function loadComplex(cx) {
 }
 
 /* ── Keyboard ── */
+function aaFromKey(key, note) {
+  if (isDirect()) return key.toUpperCase();
+  return NA[note] || null;
+}
+
 function updateKbInfo() {
   if (kbDown.size === 0) { showAADisplay([]); return; }
-  showAADisplay([...kbDown.values()].map(n => NA[n]).filter(Boolean));
+  const aas = [...kbDown.entries()].map(([k, n]) => aaFromKey(k, n)).filter(Boolean);
+  showAADisplay(aas);
 }
 
 document.addEventListener('keydown', e => {
@@ -641,13 +701,14 @@ document.addEventListener('keydown', e => {
   const note = KB[e.key.toLowerCase()];
   if (!note || kbDown.has(e.key)) return;
   const hint = document.getElementById('kbHint'); if (hint) hint.style.display = 'none';
+  const aa = aaFromKey(e.key, note);
   kbDown.set(e.key, note);
-  playNote(FR[note], 0.5, hySustain(NA[note]));
+  playNote(FR[note], 0.5, hySustain(aa));
   const cls = 'piano-key-' + note.replace('#', 's');
   document.querySelectorAll('.' + cls).forEach(el => el.classList.add('lit'));
   updateKbInfo();
   if (!composing) toggleCompose();
-  const aa = NA[note]; if (aa) addComposeAA(aa);
+  if (aa) addComposeAA(aa);
 });
 
 document.addEventListener('keyup', e => {
