@@ -28,6 +28,7 @@ const PS = [
   { name: 'hemoglobin', seq: 'VHLTPEEKSAVTALWGKVNVDEVGGEALGRLLVVYPWTQRFFESFGDLSTPDAVMGNPKVKAHGKKVLGAFSDGLAHLDNLKGTFATLSELHCDKLHVDP', ss: 'CCCCHHHHHHHHHHHCCCCHHHHHHHHHHHHHHHCHHHHHHCHHHCCCCCHHHHHHCHHHHHHHHHHHHHHHHHHCCHHHHHHHHHHHHHHHHHHHCCCC', pdb: '4HHB', desc: 'Hemoglobin \u03B2 (100aa) \u2014 the oxygen carrier that colors your blood red', significance: 'Hemoglobin is the protein in red blood cells that carries oxygen from your lungs to every tissue in your body. Its \u03B2-chain contains the classic globin fold \u2014 eight alpha-helices wrapping around a heme group that binds O\u2082. A single mutation in this chain (E6V) causes sickle-cell disease, the first \u201Cmolecular disease\u201D ever identified. Max Perutz solved hemoglobin\'s structure in 1959 and earned the 1962 Nobel Prize \u2014 one of the first protein structures determined by X-ray crystallography.' },
   { name: 'collagen', seq: 'PPGPPGPPGPPGPPAPPGPPGPPGPPGPPG', ss: 'CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC', pdb: '1CAG', desc: 'Collagen I model peptide (30aa) \u2014 the repetitive Gly-X-Y motif that builds skin and bone', significance: 'Collagen is the most abundant protein in the human body, making up roughly 30% of total protein mass. It forms the structural scaffold of skin, bone, tendons, and cartilage. Its hallmark is the Gly-X-Y tripeptide repeat \u2014 where X is often proline and Y is often hydroxyproline \u2014 enabling three chains to wind into a rigid triple helix. Vitamin C is essential for collagen synthesis; its absence causes scurvy. This model peptide from PDB 1CAG captures the core repeat (hydroxyproline shown as proline in the melody).' },
   { name: 'spike protein (COVID-19)', seq: 'SNNLDSKVGGNYNYLYRLFRKSNLKPFERDISTEIYQAGSTPCNGVEGFNCYFPLQSYGFQPTNGVGYQPY', ss: 'CCCCCCCCEEEEEECHHHHCCCCCECCCEEECCCCCHHHCCCCCCCCHHEECCCCCCCCCCECCEECCEEE', pdb: '6M0J', desc: 'SARS-CoV-2 spike RBM (71aa) \u2014 the COVID-19 surface region that latches onto human cells', significance: 'The SARS-CoV-2 spike protein is the viral surface protein responsible for the COVID-19 pandemic. Its receptor-binding motif (RBM) is the exact region that grips the human ACE2 receptor to enter cells. This stretch was the primary target for vaccine design \u2014 the mRNA vaccines by Pfizer-BioNTech and Moderna encode the full spike to train the immune system against it. Mutations in this region drove successive pandemic waves (Delta, Omicron) by altering ACE2 binding affinity and enabling antibody escape.' },
+  { name: 'insulin', seq: 'GIVEQCCTSICSLYQLENYCNFVNQHLCGSHLVEALYLVCGERGFFYTPKT', playSeq: 'FVNQHLCGSHLVEALYLVCGERGFFYTPKT', ss: 'CCCCCCCCCCCHHHHHHCCCCCCCCCCCCCCHHHHHHHHHHHCCCEECCCCC', playSS: 'CCCCCCCCHHHHHHHHHHHHCCCEEECCCC', pdb: '4INS', desc: 'Insulin (51aa) \u2014 the hormone that regulates blood sugar', significance: 'Insulin is a small but vital hormone produced by pancreatic \u03B2-cells. It consists of an A-chain (21aa) and B-chain (30aa) linked by disulfide bonds. When you eat, insulin signals cells to absorb glucose from the blood. Its discovery in 1921 by Banting and Best transformed diabetes from a death sentence into a manageable condition \u2014 one of medicine\u2019s greatest breakthroughs. The B-chain (played here) contains the receptor-binding surface and the aromatic residues (F24, F25, Y26) that drive insulin\u2019s self-association into dimers and hexamers for storage in the pancreas.' },
   { name: 'VHH nanobody', seq: 'DVQLVESGGGSVQAGGSLRLSCAASGYIASINYLGWFRQAPGKEREGVAAVSPAGGTPYYADSVKGRFTVSLDNAENTVYLQMNSLKPEDTALYYCAAARQGWYIPLNSYGYNYWGQGTQVTVS', ss: 'CEEEEEECCEEECCCCCEEEEEEEEECHHHEEEEEEEEECCCCCCEEEEEECCCCCCEEECCCCECCEEEEEECCCCEEEEEECCCCHHHCEEEEEEEEECCCCCCCCHHHEEEECCCEEEEEC', pdb: '1ZVH', desc: 'VHH nanobody (124aa) \u2014 a complete single-domain antibody from a llama', significance: 'Camelids (llamas, camels, alpacas) produce unique heavy-chain-only antibodies. The VHH domain \u2014 or nanobody \u2014 is their single variable region containing four framework regions (FR1\u2013FR4) that form a \u03B2-sandwich scaffold, and three hypervariable CDR loops that determine antigen specificity. At only ~15 kDa, nanobodies are the smallest known antigen-binding fragments. They are prized for their stability, ease of engineering, and ability to access hidden epitopes that conventional antibodies cannot reach \u2014 now used as research tools, diagnostics, and FDA-approved therapeutics (e.g. caplacizumab).' }
 ];
 
@@ -132,7 +133,7 @@ let rhythmEnabled = true;
 
 function getActiveSS() {
   if (activeComplex && activeComplex.chainA.ss) return activeComplex.chainA.ss;
-  if (presetActive) { const p = PS.find(p => p.name === presetActive); if (p && p.ss) return p.ss; }
+  if (presetActive) { const p = PS.find(p => p.name === presetActive); if (p) return p.playSS || p.ss || null; }
   return null;
 }
 
@@ -573,8 +574,9 @@ function renderPresets() {
 
 function loadPreset(p) {
   stopPlay(); presetActive = p.name;
-  document.getElementById('seqInput').value = p.seq;
-  seq = p.seq.toUpperCase().split('').filter(aa => AM[aa]);
+  const playable = p.playSeq || p.seq;
+  document.getElementById('seqInput').value = playable;
+  seq = playable.toUpperCase().split('').filter(aa => AM[aa]);
   renderPresets(); renderSeqMel();
   const ib1 = document.getElementById('infoBar'); if (ib1) ib1.textContent = `${p.name} (${p.seq.length} aa)`;
   renderInfoPanel(); updateRhythmUI(); updateSSBadges();
@@ -1120,6 +1122,7 @@ function showFold(pdbData, seqStr) {
     + '<div style="margin-top:8px;font-size:9px;color:var(--color-text-tertiary);line-height:1.4">Folded with <a href="https://esmatlas.com" target="_blank" style="color:var(--color-text-tertiary)">ESMFold</a> (Lin et al., Science 2023)</div>'
     + '<div id="matchResults" style="margin-top:10px;border-top:0.5px solid var(--color-border-tertiary);padding-top:8px"><div style="font-size:11px;color:var(--color-text-tertiary)">searching for similar proteins...</div></div>';
   el.innerHTML = html;
+  if (compMatch) renderMatchInline(compMatch);
 
   waitFor3Dmol().then(() => {
     const viewerDiv = document.getElementById('foldViewer');
@@ -1202,6 +1205,7 @@ function renderInfoPanel() {
       let html = `<div id="pdbViewer" class="pdb-viewer"></div>`;
       html += `<div class="info-panel-title">${p.name}</div>`;
       html += `<div class="info-panel-subtitle">${p.pdb} · ${p.seq.length} amino acids</div>`;
+      if (p.playSeq) html += `<div class="info-panel-stats" style="font-size:10px;color:var(--color-text-tertiary)">playing ${p.playSeq.length}aa B-chain fragment</div>`;
       html += `<div class="info-panel-desc">${p.significance}</div>`;
       html += '<div id="infoPanelNow"></div>';
       el.innerHTML = html;
@@ -1262,6 +1266,13 @@ function setupMobileCollapsibles() {
 }
 
 /* ── Find closest protein (RCSB PDB sequence search) ── */
+
+function fmtIdentity(score) {
+  const exact = score * 100;
+  if (exact === 100) return '100%';
+  if (Math.round(exact) === 100) return '~100%';
+  return Math.round(exact) + '%';
+}
 
 async function searchRCSB(seqStr) {
   const query = {
@@ -1379,10 +1390,9 @@ function renderMatchInline(results) {
   compMatch = results;
   let html = '<div style="font-size:11px;font-weight:600;color:var(--color-text-primary);margin-bottom:4px">similar known proteins</div>';
   results.forEach((r, i) => {
-    const pct = Math.round(r.score * 100);
-    html += '<div class="match-row" onclick="showProteinMatch(compMatch,' + i + ')">'
-      + '<span class="match-identity">' + pct + '%</span>'
-      + '<span class="match-name">' + r.name + '</span>'
+    html += '<div class="match-row" onclick="showProteinMatch(compMatch,' + i + ')" title="View ' + r.name + '">'
+      + '<span class="match-identity">' + fmtIdentity(r.score) + '</span>'
+      + '<span class="match-name" style="text-decoration:underline dotted;text-underline-offset:2px">' + r.name + '</span>'
       + (r.organism ? '<span class="match-organism">' + r.organism + '</span>' : '')
       + '</div>';
   });
@@ -1393,27 +1403,32 @@ function renderMatchInline(results) {
 function showProteinMatch(results, activeIdx) {
   const el = document.getElementById('infoPanelContent');
   const top = results[activeIdx];
-  const identity = Math.round(top.score * 100);
-
-  let html = '<div class="info-panel-title">' + top.name + '</div>';
-  if (top.organism) html += '<div class="info-panel-subtitle" style="font-style:italic">' + top.organism + '</div>';
-  html += '<div class="info-panel-subtitle">PDB <a href="https://www.rcsb.org/structure/' + top.pdbId + '" target="_blank" style="color:inherit;text-decoration:underline dotted">' + top.pdbId + '</a></div>';
-  html += '<div class="info-panel-stats">Sequence identity: <strong>' + identity + '%</strong></div>';
+  let html = '<a href="https://www.rcsb.org/structure/' + top.pdbId + '" target="_blank" class="info-panel-title" style="display:block;color:inherit;text-decoration:underline dotted;text-underline-offset:2px;cursor:pointer">' + top.name + '</a>';
+  if (top.organism) html += '<div class="info-panel-subtitle" style="font-style:italic">' + top.organism + ' · PDB ' + top.pdbId + '</div>';
+  html += '<div class="info-panel-stats">Sequence identity: <strong>' + fmtIdentity(top.score) + '</strong></div>';
   html += '<div id="matchViewer" class="fold-viewer"></div>';
 
-  // Play button
+  // Action buttons
+  html += '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">';
   if (top.sequence) {
-    html += '<button class="match-play-btn" onclick="loadMatchedProtein(' + activeIdx + ')">&#9654; play this protein</button>';
+    html += '<button class="match-play-btn" onclick="loadMatchedProtein(' + activeIdx + ')">&#9654; play</button>';
+    const userSeq = compSeq.join('') || seq.join('');
+    if (userSeq) {
+      html += '<button class="match-play-btn" style="background:#4a6fa5;border-color:#4a6fa5" onclick="compareWithMatch(' + activeIdx + ')">compare</button>';
+    }
   }
+  if (compFolded && compFoldPdb) {
+    html += '<button class="match-play-btn" style="background:transparent;border-color:var(--color-border-secondary);color:var(--color-text-secondary)" onclick="showFold(compFoldPdb,compFoldSeq)">&larr; back to fold</button>';
+  }
+  html += '</div>';
 
   // List all matches
   if (results.length > 1) {
     html += '<div class="match-list">';
     html += '<div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:4px">top matches</div>';
     results.forEach((r, i) => {
-      const pct = Math.round(r.score * 100);
       html += '<div class="match-row' + (i === activeIdx ? ' active' : '') + '" onclick="showProteinMatch(compMatch,' + i + ')">'
-        + '<span class="match-identity">' + pct + '%</span>'
+        + '<span class="match-identity">' + fmtIdentity(r.score) + '</span>'
         + '<span class="match-name">' + r.name + '</span>'
         + (r.organism ? '<span class="match-organism">' + r.organism + '</span>' : '')
         + '</div>';
@@ -1445,6 +1460,20 @@ function showProteinMatch(results, activeIdx) {
       viewerDiv.innerHTML = '<img class="info-panel-img" src="https://cdn.rcsb.org/images/structures/' + top.pdbId.toLowerCase() + '_assembly-1.jpeg" alt="structure" onerror="this.style.display=\'none\'" style="width:100%;height:100%;object-fit:cover"/>';
     }
   });
+}
+
+function compareWithMatch(idx) {
+  if (!compMatch || !compMatch[idx]) return;
+  const r = compMatch[idx];
+  const userSeq = compSeq.join('') || seq.join('');
+  if (!userSeq || !r.sequence) return;
+  const params = new URLSearchParams({
+    seq1: userSeq,
+    name1: 'Your sequence',
+    seq2: r.sequence,
+    name2: r.name + ' (' + r.pdbId + ')'
+  });
+  window.open('align.html?' + params.toString(), '_blank');
 }
 
 function loadMatchedProtein(idx) {

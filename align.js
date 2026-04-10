@@ -344,5 +344,17 @@ document.getElementById('alignBtn').onclick = runAlignment;
 document.getElementById('addSeqBtn').onclick = () => addSeqInput();
 document.getElementById('exampleBtn').onclick = loadExample;
 
-addSeqInput();
-addSeqInput();
+// Support URL parameters: ?seq1=...&name1=...&seq2=...&name2=...
+const urlParams = new URLSearchParams(window.location.search);
+const urlSeq1 = urlParams.get('seq1');
+const urlSeq2 = urlParams.get('seq2');
+if (urlSeq1 && urlSeq2) {
+  addSeqInput(urlParams.get('name1') || 'Seq 1', urlSeq1);
+  addSeqInput(urlParams.get('name2') || 'Seq 2', urlSeq2);
+  // Auto-expand textareas and run alignment
+  seqInputsEl.querySelectorAll('textarea').forEach(ta => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; });
+  setTimeout(runAlignment, 100);
+} else {
+  addSeqInput();
+  addSeqInput();
+}
