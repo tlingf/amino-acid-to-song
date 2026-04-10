@@ -7,50 +7,79 @@ const EXAMPLES = [
 ];
 
 /* ─── State ─── */
-let seqCount = 0;
 let viewMode = 'full'; // 'compact' or 'full'
+let parsedSeqs = [];    // stored after alignment for renaming
 
 /* ─── DOM refs ─── */
-const seqInputsEl = document.getElementById('seqInputs');
+const seqInputEl = document.getElementById('seqInput');
 const resultsEl = document.getElementById('results');
 const lengthsEl = document.getElementById('lengths');
 const statsGridEl = document.getElementById('statsGrid');
 const alignmentsEl = document.getElementById('alignments');
-const mutationsEl = document.getElementById('mutations');
 
-/* ─── Sequence input management ─── */
-function addSeqInput(name, seq) {
-  seqCount++;
-  const id = seqCount;
-  const div = document.createElement('div');
-  div.className = 'seq-entry';
-  div.dataset.id = id;
-  div.innerHTML = `
-    <input class="seq-name" placeholder="Name" value="${name || 'Seq ' + id}"/>
-    <textarea placeholder="Paste amino acid sequence (one-letter codes)..." rows="1">${seq || ''}</textarea>
-    <button class="remove-btn" title="Remove">&times;</button>
-  `;
-  div.querySelector('.remove-btn').onclick = () => {
-    div.remove();
-    if (seqInputsEl.children.length < 2) addSeqInput();
-  };
-  const ta = div.querySelector('textarea');
-  ta.addEventListener('input', () => {
-    ta.style.height = 'auto';
-    ta.style.height = ta.scrollHeight + 'px';
-  });
-  seqInputsEl.appendChild(div);
-  return div;
-}
-
+/* ─── Parse textarea ───
+   Supports:
+   1. Plain sequences, one per line
+   2. FASTA (>name on its own line, sequence on following lines)
+   3. TSV/CSV (name<tab>sequence or name,sequence per line — e.g. pasted from a spreadsheet)
+*/
 function getSequences() {
-  const entries = seqInputsEl.querySelectorAll('.seq-entry');
-  const seqs = [];
-  entries.forEach(e => {
-    const name = e.querySelector('.seq-name').value.trim() || 'Untitled';
-    const raw = e.querySelector('textarea').value.toUpperCase().replace(/[^A-Z]/g, '');
-    if (raw.length > 0) seqs.push({ name, seq: raw });
+  const text = seqInputEl.value.trim();
+  if (!text) return [];
+  const lines = text.split('\n');
+  const hasFasta = lines.some(l => l.trim().startsWith('>'));
+
+  if (hasFasta) {
+    // FASTA: >name header, then sequence lines until next header
+    const entries = [];
+    let current = null;
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      if (trimmed.startsWith('>')) {
+        if (current) entries.push(current);
+        current = { name: trimmed.slice(1).trim(), buf: '' };
+      } else if (current) {
+        current.buf += trimmed.toUpperCase().replace(/[^A-Z]/g, '');
+      }
+    }
+    if (current) entries.push(current);
+    return entries.filter(e => e.buf).map((e, i) => ({ name: e.name || 'Seq ' + (i + 1), seq: e.buf }));
+  }
+
+  // Check for TSV/CSV: does any non-empty line contain a tab or comma with letters on both sides?
+  const hasTsv = lines.some(l => /\t/.test(l.trim()));
+  const hasCsv = !hasTsv && lines.some(l => {
+    const parts = l.trim().split(',');
+    return parts.length === 2 && parts[0].trim() && /[A-Za-z]/.test(parts[1]);
   });
+
+  if (hasTsv || hasCsv) {
+    const sep = hasTsv ? '\t' : ',';
+    const seqs = [];
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      const idx = trimmed.indexOf(sep);
+      if (idx !== -1) {
+        const name = trimmed.slice(0, idx).trim();
+        const raw = trimmed.slice(idx + 1).trim().toUpperCase().replace(/[^A-Z]/g, '');
+        if (raw) seqs.push({ name: name || 'Seq ' + (seqs.length + 1), seq: raw });
+      } else {
+        const raw = trimmed.toUpperCase().replace(/[^A-Z]/g, '');
+        if (raw) seqs.push({ name: 'Seq ' + (seqs.length + 1), seq: raw });
+      }
+    }
+    return seqs;
+  }
+
+  // Plain: one sequence per non-empty line
+  const seqs = [];
+  let count = 0;
+  for (const line of lines) {
+    const raw = line.trim().toUpperCase().replace(/[^A-Z]/g, '');
+    if (raw) { count++; seqs.push({ name: 'Seq ' + count, seq: raw }); }
+  }
   return seqs;
 }
 
@@ -294,19 +323,14 @@ function runAlignment() {
     alert('Enter at least 2 sequences to align.');
     return;
   }
+  parsedSeqs = seqs;
 
   const matchS = parseFloat(document.getElementById('matchScore').value) || 1;
   const mismatchS = parseFloat(document.getElementById('mismatchScore').value) || -1;
   const gapS = parseFloat(document.getElementById('gapScore').value) || -2;
 
-  // Lengths summary
-  lengthsEl.innerHTML = '';
-  seqs.forEach(s => {
-    const tag = document.createElement('span');
-    tag.className = 'len-tag';
-    tag.innerHTML = `<strong>${esc(s.name)}</strong> ${s.seq.length} aa`;
-    lengthsEl.appendChild(tag);
-  });
+  // Lengths summary with editable names
+  renderLengths();
 
   statsGridEl.innerHTML = '';
   alignmentsEl.innerHTML = '';
@@ -319,29 +343,71 @@ function runAlignment() {
     );
     const stats = alignmentStats(aligned1, aligned2);
     const mutations = getMutations(aligned1, aligned2);
-    alignmentsEl.appendChild(
-      renderAlignmentBlock(aligned1, aligned2, base.name, seqs[j].name, stats, mutations)
-    );
+    const block = renderAlignmentBlock(aligned1, aligned2, base.name, seqs[j].name, stats, mutations);
+    block._seqIdx = j; // track which comparison sequence
+    alignmentsEl.appendChild(block);
   }
 
   resultsEl.style.display = '';
   resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+/* ─── Render lengths bar with editable names ─── */
+function renderLengths() {
+  lengthsEl.innerHTML = '';
+  parsedSeqs.forEach((s, i) => {
+    const tag = document.createElement('span');
+    tag.className = 'len-tag';
+    const nameEl = document.createElement('input');
+    nameEl.className = 'len-name';
+    nameEl.value = s.name;
+    nameEl.size = Math.max(s.name.length, 4);
+    nameEl.addEventListener('input', () => {
+      nameEl.size = Math.max(nameEl.value.length, 4);
+      renameSeq(i, nameEl.value);
+    });
+    tag.appendChild(nameEl);
+    const span = document.createElement('span');
+    span.textContent = ` ${s.seq.length} aa`;
+    tag.appendChild(span);
+    lengthsEl.appendChild(tag);
+  });
+}
+
+/* ─── Rename a sequence and update all labels ─── */
+function renameSeq(idx, newName) {
+  parsedSeqs[idx].name = newName;
+  // Update alignment block headers and row labels
+  const blocks = alignmentsEl.querySelectorAll('.align-block');
+  blocks.forEach(block => {
+    const d = block._alignData;
+    if (!d) return;
+    // Seq 0 (baseline) name appears in all blocks as name1
+    if (idx === 0) d.name1 = newName;
+    // Comparison seq name
+    if (block._seqIdx === idx) {
+      d.name2 = newName;
+      block.querySelector('.abh-title').textContent = newName;
+    }
+    // Re-render the alignment rows to update labels
+    const view = block.querySelector('.align-view');
+    const table = document.createElement('div');
+    table.className = 'align-table';
+    table.appendChild(makeRulerRow(d.a1));
+    table.appendChild(makeRow(d.name1, d.a1, d.a2, true));
+    table.appendChild(makeRow(d.name2, d.a2, d.a1, false));
+    view.innerHTML = '';
+    view.appendChild(table);
+  });
+}
+
 /* ─── Load example ─── */
 function loadExample() {
-  seqInputsEl.innerHTML = '';
-  EXAMPLES.forEach(ex => {
-    const div = addSeqInput(ex.name, ex.seq);
-    const ta = div.querySelector('textarea');
-    ta.style.height = 'auto';
-    ta.style.height = ta.scrollHeight + 'px';
-  });
+  seqInputEl.value = EXAMPLES.map(ex => `>${ex.name}\n${ex.seq}`).join('\n');
 }
 
 /* ─── Init ─── */
 document.getElementById('alignBtn').onclick = runAlignment;
-document.getElementById('addSeqBtn').onclick = () => addSeqInput();
 document.getElementById('exampleBtn').onclick = loadExample;
 
 // Support URL parameters: ?seq1=...&name1=...&seq2=...&name2=...
@@ -349,12 +415,9 @@ const urlParams = new URLSearchParams(window.location.search);
 const urlSeq1 = urlParams.get('seq1');
 const urlSeq2 = urlParams.get('seq2');
 if (urlSeq1 && urlSeq2) {
-  addSeqInput(urlParams.get('name1') || 'Seq 1', urlSeq1);
-  addSeqInput(urlParams.get('name2') || 'Seq 2', urlSeq2);
-  // Auto-expand textareas and run alignment
-  seqInputsEl.querySelectorAll('textarea').forEach(ta => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; });
+  const parts = [];
+  parts.push(`>${urlParams.get('name1') || 'Seq 1'}\n${urlSeq1}`);
+  parts.push(`>${urlParams.get('name2') || 'Seq 2'}\n${urlSeq2}`);
+  seqInputEl.value = parts.join('\n');
   setTimeout(runAlignment, 100);
-} else {
-  addSeqInput();
-  addSeqInput();
 }

@@ -68,27 +68,10 @@ h1 { font-size: 1.35rem; font-weight: 700; }
   margin-bottom: 0.75rem;
 }
 
-/* Sequence inputs */
-.seq-entry {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-  align-items: flex-start;
-}
-.seq-entry .seq-name {
-  width: 120px;
-  flex-shrink: 0;
-  padding: 7px 10px;
-  font-size: 13px;
-  border: 1px solid var(--c-border);
-  border-radius: var(--radius-sm);
-  background: var(--c-bg);
-  color: var(--c-text);
-  font-family: var(--font-sans);
-}
-.seq-entry textarea {
-  flex: 1;
-  padding: 7px 10px;
+/* Sequence input */
+.seq-textarea {
+  width: 100%;
+  padding: 10px 12px;
   font-size: 13px;
   border: 1px solid var(--c-border);
   border-radius: var(--radius-sm);
@@ -96,25 +79,13 @@ h1 { font-size: 1.35rem; font-weight: 700; }
   color: var(--c-text);
   font-family: var(--font-mono);
   resize: vertical;
-  min-height: 38px;
-  line-height: 1.4;
+  line-height: 1.5;
 }
-.seq-entry textarea:focus, .seq-entry .seq-name:focus {
+.seq-textarea:focus {
   outline: none;
   border-color: var(--c-accent);
   box-shadow: 0 0 0 2px var(--c-accent-light);
 }
-.seq-entry .remove-btn {
-  background: none;
-  border: none;
-  color: var(--c-text3);
-  cursor: pointer;
-  font-size: 18px;
-  line-height: 38px;
-  padding: 0 4px;
-  flex-shrink: 0;
-}
-.seq-entry .remove-btn:hover { color: var(--c-mismatch); }
 
 /* Buttons */
 .btn {
@@ -188,6 +159,20 @@ h1 { font-size: 1.35rem; font-weight: 700; }
   color: var(--c-text);
   font-weight: 600;
   margin-right: 4px;
+}
+.len-name {
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c-text);
+  font-family: var(--font-sans);
+  padding: 0;
+  border-bottom: 1px dashed var(--c-border2);
+  outline: none;
+}
+.len-name:focus {
+  border-bottom-color: var(--c-accent);
 }
 
 /* Alignment block */
@@ -351,7 +336,5 @@ footer a:hover { text-decoration: underline; }
 /* Responsive */
 @media (max-width: 600px) {
   .scoring-controls { margin-left: 0; width: 100%; }
-  .seq-entry { flex-wrap: wrap; }
-  .seq-entry .seq-name { width: 100%; }
   .abh-stats { gap: 6px; }
 }
