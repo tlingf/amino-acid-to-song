@@ -52,7 +52,8 @@ const MAPPINGS = [
   },
   {
     id: 'complexity-harmony',
-    name: 'Complexity order',
+    name: 'Piano keyboard',
+    sub: 'ordered by complexity',
     layout: 'chromatic',
     desc: 'Complexity ladder with black keys for binding-pair consonance (salt bridges = perfect fifths/fourths, aromatics = thirds/fourths).',
     map: {
@@ -64,7 +65,8 @@ const MAPPINGS = [
   },
   {
     id: 'frequency',
-    name: 'Frequency order',
+    name: 'Piano keyboard',
+    sub: 'ordered by frequency',
     layout: 'chromatic',
     desc: 'Common AAs on octave 4, rare on octave 5. Simple AAs on white keys, complex on black.',
     map: {

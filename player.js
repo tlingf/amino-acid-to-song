@@ -347,11 +347,19 @@ function hideTooltip() {
 function renderSeqMel() {
   const wrap = document.getElementById('seqMel'); wrap.innerHTML = '';
   const labelWrap = document.getElementById('seqRowLabels'); labelWrap.innerHTML = '';
+  const caption = document.getElementById('bindingCaption');
   if (activeComplex && contactMap.size > 0) {
     labelWrap.innerHTML =
-      `<div class="seq-row-label">${activeComplex.chainA.name}</div>`
+      `<div class="seq-row-label">${activeComplex.chainA.name} residues</div>`
       + `<div class="seq-row-label-dot"></div>`
-      + `<div class="seq-row-label-partner">${activeComplex.chainB.name}</div>`;
+      + `<div class="seq-row-label-partner">${activeComplex.chainB.name} contacts</div>`;
+    if (caption) {
+      caption.style.display = '';
+      caption.innerHTML = `<strong>Binding residues ↓</strong> &nbsp;The two rows below show which <em>${activeComplex.chainA.name}</em> amino acids touch which <em>${activeComplex.chainB.name}</em> partner amino acids at the binding interface.`;
+    }
+  } else if (caption) {
+    caption.style.display = 'none';
+    caption.innerHTML = '';
   }
   seq.forEach((aa, i) => {
     const g = GR[aa] || 'ali', c = GC[g];
@@ -619,7 +627,6 @@ function onSeqInput() {
 
 function loadAndPlay() {
   onSeqInput();
-  if (seq.length) togglePlay();
 }
 
 /* ── Mapping ── */
@@ -627,7 +634,12 @@ function renderMappingBtns() {
   const wrap = document.getElementById('mappingBtns'); wrap.innerHTML = '';
   MAPPINGS.forEach(m => {
     const btn = document.createElement('button');
-    btn.textContent = m.name; btn.className = m.id === activeMapping ? 'active' : '';
+    if (m.sub) {
+      btn.innerHTML = `<span class="map-name">${m.name}</span><span class="map-sub">${m.sub}</span>`;
+    } else {
+      btn.textContent = m.name;
+    }
+    btn.className = m.id === activeMapping ? 'active' : '';
     btn.title = m.desc;
     btn.onclick = () => switchMapping(m.id);
     wrap.appendChild(btn);
@@ -731,6 +743,16 @@ let activeResiMap = null;     // seq index → PDB resi number
 
 const CHAIN_COLORS = ['#8faadc', '#a9d18e', '#c4a4d6', '#f4b183', '#9dc3e6', '#d6a5a5'];
 
+function lightenHex(hex, amt = 0.55) {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  const mix = (c) => Math.round(c + (255 - c) * amt);
+  const toHex = (c) => c.toString(16).padStart(2, '0');
+  return '#' + toHex(mix(r)) + toHex(mix(g)) + toHex(mix(b));
+}
+
 function applyChainStyle(viewer, styleFn) {
   const chains = [...new Set(viewer.selectedAtoms({}).map(a => a.chain))];
   chains.forEach((ch, i) => {
@@ -741,7 +763,7 @@ function applyChainStyle(viewer, styleFn) {
 
 const VIEW_STYLES = [
   { name: 'cartoon',
-    apply: (v, cs, dim, forceGrey) => cs ? v.setStyle({}, { cartoon: { colorscheme: cs, opacity: dim ? 0.4 : 1 } }) : (dim && forceGrey) ? v.setStyle({}, { cartoon: { color: '#d0d0d0', opacity: 0.5 } }) : applyChainStyle(v, c => ({ cartoon: { color: c, opacity: dim ? 0.35 : 1 } })),
+    apply: (v, cs, dim, forceGrey) => cs ? v.setStyle({}, { cartoon: { colorscheme: cs, opacity: dim ? 0.4 : 1 }, stick: { colorscheme: cs, opacity: dim ? 0.15 : 0.35, radius: 0.12 } }) : (dim && forceGrey) ? v.setStyle({}, { cartoon: { color: '#d0d0d0', opacity: 0.5 } }) : applyChainStyle(v, c => ({ cartoon: { color: c, opacity: dim ? 0.35 : 1 }, stick: { color: lightenHex(c), opacity: dim ? 0.15 : 0.35, radius: 0.12 } })),
     highlight: c => ({ stick: { color: c, radius: 0.3 }, sphere: { color: c, scale: 0.5 } }) },
   { name: 'line',
     apply: (v, cs) => cs ? v.setStyle({}, { line: { colorscheme: cs } }) : applyChainStyle(v, c => ({ line: { color: c } })),
@@ -828,7 +850,7 @@ function initPdbViewer(pdbId, containerId) {
     container.innerHTML = '';
     const viewer = $3Dmol.createViewer(container, { backgroundColor: 'white' });
     viewer.addModel(pdbData, 'pdb');
-    applyChainStyle(viewer, c => ({ cartoon: { color: c } }));
+    applyChainStyle(viewer, c => ({ cartoon: { color: c }, stick: { color: lightenHex(c), opacity: 0.35, radius: 0.12 } }));
     viewer.zoomTo();
     viewer.render();
     viewer.spin('y', 0.5);
@@ -931,11 +953,9 @@ function clearCompose() {
 
 function resetComposeButtons() {
   const fb = document.getElementById('foldBtn');
-  if (fb) { fb.textContent = 'fold it!'; fb.disabled = true; fb.style.marginLeft = ''; }
+  if (fb) { fb.textContent = 'fold it!'; fb.disabled = true; fb.style.marginLeft = 'auto'; }
   const cpb = document.getElementById('composePlayBtn');
   if (cpb) { cpb.className = 'compose-action'; cpb.textContent = '▶ play'; cpb.style.marginLeft = ''; }
-  const fmb = document.getElementById('findMatchBtn');
-  if (fmb) { fmb.textContent = 'find match'; fmb.disabled = true; fmb.classList.remove('searching'); }
 }
 
 function renderComposeSeq() {
@@ -963,8 +983,6 @@ function updateComposeCount() {
   }
   const foldBtn = document.getElementById('foldBtn');
   if (foldBtn) foldBtn.disabled = compSeq.length < 20;
-  const findBtn = document.getElementById('findMatchBtn');
-  if (findBtn) findBtn.disabled = compSeq.length < 10 || searchInProgress;
 }
 
 function clearSuggestions() {
@@ -1130,7 +1148,7 @@ function showFold(pdbData, seqStr) {
     const viewer = $3Dmol.createViewer(viewerDiv, { backgroundColor: 'white' });
     viewer.addModel(pdbData, 'pdb');
     const foldCS = { prop: 'b', gradient: 'roygb', min: 50, max: 90 };
-    viewer.setStyle({}, { cartoon: { colorscheme: foldCS } });
+    viewer.setStyle({}, { cartoon: { colorscheme: foldCS }, stick: { colorscheme: foldCS, opacity: 0.35, radius: 0.12 } });
     viewer.zoomTo();
     viewer.render();
     viewer.spin('y', 1);
@@ -1332,6 +1350,20 @@ async function searchRCSB(seqStr) {
   return detailed;
 }
 
+function formatCombinatorics(n) {
+  const log10 = n * Math.log10(20);
+  const exp = Math.floor(log10);
+  const mantissa = Math.pow(10, log10 - exp);
+  return mantissa.toFixed(2) + ' × 10<sup>' + exp + '</sup>';
+}
+
+function noMatchExplainerHTML(n) {
+  return '<div class="info-panel-desc">That\'s not surprising: with <strong>20 amino acids</strong>, there are <strong>20<sup>'
+    + n + '</sup> ≈ ' + formatCombinatorics(n) + '</strong> possible sequences of length '
+    + n + '. The PDB only contains ~230,000 solved structures, so finding a random match is astronomically rare. '
+    + 'Your sequence has carved its own path through that space.</div>';
+}
+
 async function findClosestProtein(append) {
   const seqStr = compSeq.length > 0 ? compSeq.join('') : seq.join('');
   if (seqStr.length < 10) return;
@@ -1339,8 +1371,6 @@ async function findClosestProtein(append) {
 
   const truncated = seqStr.slice(0, 400);
   searchInProgress = true;
-  const btn = document.getElementById('findMatchBtn');
-  if (btn) { btn.textContent = 'searching...'; btn.classList.add('searching'); btn.disabled = true; }
 
   // If not appending below fold, show standalone loading state
   if (!append) {
@@ -1352,21 +1382,20 @@ async function findClosestProtein(append) {
   try {
     const results = await searchRCSB(truncated);
     searchInProgress = false;
-    if (btn) { btn.textContent = 'find match'; btn.classList.remove('searching'); btn.disabled = false; }
 
     if (append) {
-      renderMatchInline(results);
+      renderMatchInline(results, truncated.length);
     } else if (results.length === 0) {
       const el = document.getElementById('infoPanelContent');
       el.innerHTML = '<div class="info-panel-title">no matches found</div>'
-        + '<div class="info-panel-desc">No proteins in the PDB matched with at least 10% sequence identity. Your sequence may be too short or too novel.</div>';
+        + '<div class="info-panel-desc">No proteins in the PDB matched with at least 10% sequence identity.</div>'
+        + noMatchExplainerHTML(truncated.length);
     } else {
       compMatch = results;
       showProteinMatch(results, 0);
     }
   } catch (err) {
     searchInProgress = false;
-    if (btn) { btn.textContent = 'find match'; btn.classList.remove('searching'); btn.disabled = false; }
     if (append) {
       const md = document.getElementById('matchResults');
       if (md) md.innerHTML = '';
@@ -1380,11 +1409,18 @@ async function findClosestProtein(append) {
   }
 }
 
-function renderMatchInline(results) {
+function renderMatchInline(results, seqLen) {
   const md = document.getElementById('matchResults');
   if (!md) return;
   if (!results || results.length === 0) {
-    md.innerHTML = '<div style="font-size:11px;color:var(--color-text-tertiary)">No similar proteins found in PDB</div>';
+    const n = seqLen || (compSeq.length > 0 ? compSeq.length : seq.length);
+    md.innerHTML =
+      '<div style="font-size:11px;font-weight:600;color:var(--color-text-primary);margin-bottom:4px">no similar proteins found</div>'
+      + '<div style="font-size:11px;line-height:1.5;color:var(--color-text-secondary)">'
+      + 'No matches in the PDB with ≥10% identity. That\'s not surprising — with <strong>20 amino acids</strong>, '
+      + 'there are <strong>20<sup>' + n + '</sup> ≈ ' + formatCombinatorics(n) + '</strong> possible sequences of length '
+      + n + '. Only ~230,000 structures have been solved, so a random match is astronomically rare.'
+      + '</div>';
     return;
   }
   compMatch = results;
@@ -1452,7 +1488,7 @@ function showProteinMatch(results, activeIdx) {
       viewerDiv.innerHTML = '';
       const viewer = $3Dmol.createViewer(viewerDiv, { backgroundColor: 'white' });
       viewer.addModel(pdbData, 'pdb');
-      viewer.setStyle({}, { cartoon: { color: 'spectrum' } });
+      viewer.setStyle({}, { cartoon: { color: 'spectrum' }, stick: { color: 'spectrum', opacity: 0.35, radius: 0.12 } });
       viewer.zoomTo();
       viewer.render();
       viewer.spin('y', 1);

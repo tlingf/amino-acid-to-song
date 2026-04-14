@@ -9,7 +9,7 @@
 </head>
 <body>
 <h1>AA Melody Player 🎵 <span class="h1-sub">Listen to your proteins, or compose them</span></h1>
-<p class="blurb">Amino acids (aa), <span class="blurb-accent">like notes in a song</span>, form sequences that fold and then bind to each other, <span class="blurb-accent">like harmony in music</span>, that create the machinery of life.</p>
+<p class="blurb">Amino acids (aa), <span class="blurb-accent">like notes in a song</span>, form sequences that fold and then bind to each other, <span class="blurb-accent">like harmony in music</span>, that create the machinery of life. Amazingly, almost every protein is built from just <span class="blurb-accent">20 amino acids</span>.</p>
 
 <div class="pmp">
 <div class="mapping-panel">
@@ -30,6 +30,7 @@
     <input type="text" id="seqInput" placeholder="Paste amino acid sequence (one-letter codes)..." maxlength="300" oninput="onSeqInput()" onkeydown="if(event.key==='Enter')loadAndPlay()"/>
     <button type="button" onclick="loadAndPlay()">submit</button>
   </div>
+  <div id="bindingCaption" class="binding-caption" style="display:none"></div>
   <div class="seq-mel-wrap">
     <div class="seq-row-labels" id="seqRowLabels"></div>
     <div class="seq-mel" id="seqMel"></div>
@@ -52,8 +53,7 @@
     <button class="compose-action" onclick="undoCompose()">undo</button>
     <button class="compose-action" onclick="clearCompose()">clear</button>
     <button class="compose-action" id="composePlayBtn" onclick="togglePlay()" disabled>▶ play</button>
-    <button class="compose-find" id="findMatchBtn" onclick="findClosestProtein()" disabled>find match</button>
-    <button class="compose-fold" id="foldBtn" onclick="foldSequence()" disabled>fold it!</button>
+    <button class="compose-fold" id="foldBtn" onclick="foldSequence()" disabled style="margin-left:auto">fold it!</button>
   </div>
   <div class="piano-area">
     <div class="compose-seq" id="composeSeq"></div>
