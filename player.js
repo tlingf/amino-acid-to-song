@@ -772,7 +772,7 @@ function applyChainStyle(viewer, styleFn) {
 
 const VIEW_STYLES = [
   { name: 'cartoon',
-    apply: (v, cs, dim, forceGrey) => cs ? v.setStyle({}, { cartoon: { colorscheme: cs, opacity: dim ? 0.2 : 1 }, stick: { colorscheme: cs, opacity: dim ? 0.15 : 0.5, radius: 0.12 } }) : (dim && forceGrey) ? v.setStyle({}, { cartoon: { color: '#d0d0d0', opacity: 0.3 } }) : applyChainStyle(v, c => ({ cartoon: { color: c, opacity: dim ? 0.2 : 1 }, stick: { color: darkenHex(c, 0.25), opacity: dim ? 0.15 : 0.55, radius: 0.13 } })),
+    apply: (v, cs, dim, forceGrey) => cs ? v.setStyle({}, { cartoon: { colorscheme: cs, opacity: dim ? 0.45 : 1 }, stick: { colorscheme: cs, opacity: dim ? 0.25 : 0.8, radius: 0.13 } }) : (dim && forceGrey) ? v.setStyle({}, { cartoon: { color: '#d0d0d0', opacity: 0.45 } }) : applyChainStyle(v, c => ({ cartoon: { color: c, opacity: dim ? 0.45 : 1 }, stick: { color: darkenHex(c, 0.45), opacity: dim ? 0.25 : 0.8, radius: 0.14 } })),
     highlight: c => ({ stick: { color: c, radius: 0.3 }, sphere: { color: c, scale: 0.5 } }) },
   { name: 'line',
     apply: (v, cs) => cs ? v.setStyle({}, { line: { colorscheme: cs } }) : applyChainStyle(v, c => ({ line: { color: c } })),
