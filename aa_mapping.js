@@ -185,7 +185,7 @@ const COMPLEXES = [
     pdbChain: 'A',
     pdbStartResi: 1,
     partnerChain: 'B',
-    desc: 'Insulin is built from two different chains (the 21-aa A-chain and 30-aa B-chain) stitched together by two interchain disulfide bonds (A7\u2013B7 and A20\u2013B19) and a hydrophobic core. Play the A-chain melody and hear the B-chain partner chime in wherever the two halves physically touch inside one insulin molecule.',
+    desc: 'Insulin regulates blood sugar by helping cells absorb glucose for energy. It is built from two different chains stitched together by two interchain disulfide bonds (A7\u2013B7 and A20\u2013B19) and a hydrophobic core. Play the A-chain melody and hear the B-chain partner chime in wherever the two halves physically touch inside one insulin molecule.',
     chainA: { name: 'Insulin A', seq: 'GIVEQCCTSICSLYQLENYCN', ss: 'CCCHHHHHHHHCCCCCHHHHC' },
     chainB: { name: 'Insulin B' },
     // [idxA, partnerAA, dist, partnerResi]

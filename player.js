@@ -6,6 +6,7 @@
  */
 
 /* ── Constants ── */
+const SPIN_SPEED = 0.05;
 /* Chromatic layout */
 const MORD = ['C4','C#4','D4','D#4','E4','F4','F#4','G4','G#4','A4','A#4','B4','C5','C#5','D5','D#5','E5','F5','F#5','G5'];
 const NI = {}; MORD.forEach((n, i) => NI[n] = i);
@@ -305,20 +306,33 @@ function setActive(idx) {
       }
     }
 
-    // Auto-scroll sequence to keep active badge visible
+    // Auto-scroll sequence to keep active badge visible (gentle page-style pan)
     const wrap = composing ? document.getElementById('composeSeq') : document.getElementById('seqMel');
     const activeEl = composing ? wrap.querySelectorAll('.cbadge')[idx] : wrap.querySelectorAll('.seq-unit')[idx];
     if (activeEl && wrap.scrollWidth > wrap.clientWidth) {
       const elLeft = activeEl.offsetLeft - wrap.scrollLeft;
-      const margin = wrap.clientWidth * 0.25;
-      if (elLeft < margin || elLeft > wrap.clientWidth - margin) {
-        const left = activeEl.offsetLeft - wrap.clientWidth / 2 + activeEl.offsetWidth / 2;
-        wrap.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
+      if (elLeft > wrap.clientWidth * 0.85) {
+        const target = Math.max(0, activeEl.offsetLeft - wrap.clientWidth * 0.2);
+        smoothScrollX(wrap, target, 600);
       }
     }
   } else {
     highlightViewerResidue(-1);
   }
+}
+
+function smoothScrollX(el, target, duration) {
+  const start = el.scrollLeft;
+  const delta = target - start;
+  if (Math.abs(delta) < 2) return;
+  const t0 = performance.now();
+  const ease = t => 1 - Math.pow(1 - t, 3);
+  function step(now) {
+    const t = Math.min(1, (now - t0) / duration);
+    el.scrollLeft = start + delta * ease(t);
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
 }
 
 /* ── Tooltip ── */
@@ -880,7 +894,7 @@ function initPdbViewer(pdbId, containerId, opts = {}) {
     applyChainStyle(viewer, c => ({ cartoon: { color: c }, stick: { color: lightenHex(c), opacity: 0.35, radius: 0.12 } }));
     viewer.zoomTo();
     viewer.render();
-    viewer.spin('y', 0.25);
+    viewer.spin('y', SPIN_SPEED);
     activeViewer = viewer;
     activeViewCS = null;
     activeViewStyleIdx = 0;
@@ -901,10 +915,15 @@ function toggleCompose() {
   if (composing) {
     stopPlay();
     activeComplex = null; contactMap = new Map();
+    presetActive = '';
     compFolded = false; compFoldPdb = null; compFoldSeq = null;
     compSeq = [];
     seq = [];
     document.getElementById('seqInput').value = '';
+    document.body.classList.remove('center-view');
+    const center = document.getElementById('centerViewer');
+    if (center) center.innerHTML = '';
+    renderPresets();
     renderSeqMel();
     btn.textContent = 'exit compose mode'; btn.classList.add('active');
     bar.style.display = 'flex';
@@ -929,6 +948,11 @@ function toggleCompose() {
     if (playBtn) playBtn.style.display = '';
     document.getElementById('composeSeq').innerHTML = '';
     document.body.classList.remove('compose-active');
+    document.body.classList.remove('center-view');
+    compFolded = false; compFoldPdb = null; compFoldSeq = null;
+    const center = document.getElementById('centerViewer');
+    if (center) center.innerHTML = '';
+    resetComposeButtons();
     clearSuggestions();
     renderInfoPanel();
   }
@@ -947,7 +971,8 @@ function addComposeAA(aa) {
 }
 
 function undoCompose() {
-  if (compSeq.length === 0 || compFolded) return;
+  if (compSeq.length === 0) return;
+  if (compFolded) backToComposing();
   compSeq.pop();
   seq = [...compSeq];
   document.getElementById('seqInput').value = compSeq.join('');
@@ -970,6 +995,9 @@ function clearCompose() {
   compSeq = [];
   seq = [];
   document.getElementById('seqInput').value = '';
+  const center = document.getElementById('centerViewer');
+  if (center) center.innerHTML = '';
+  document.body.classList.remove('center-view');
   resetComposeButtons();
   renderComposeSeq();
   updateComposeCount();
@@ -978,11 +1006,46 @@ function clearCompose() {
   renderComposeInfo();
 }
 
+function backToComposing() {
+  stopPlay();
+  compFolded = false;
+  compMatch = null;
+  if (activeViewer) { try { activeViewer.spin(false); } catch(e) {} activeViewer = null; }
+  const center = document.getElementById('centerViewer');
+  if (center) center.innerHTML = '';
+  document.body.classList.remove('center-view');
+  resetComposeButtons();
+  updateComposePlay();
+  updateSuggestions();
+  renderComposeInfo();
+}
+
 function resetComposeButtons() {
-  const fb = document.getElementById('foldBtn');
-  if (fb) { fb.textContent = 'fold it!'; fb.disabled = true; fb.style.marginLeft = 'auto'; }
   const cpb = document.getElementById('composePlayBtn');
   if (cpb) { cpb.className = 'compose-action'; cpb.textContent = '▶ play'; cpb.style.marginLeft = ''; }
+  const bb = document.getElementById('backComposeBtn');
+  if (bb) bb.style.display = 'none';
+  updateFoldBtn();
+}
+
+function updateFoldBtn() {
+  const fb = document.getElementById('foldBtn');
+  if (!fb) return;
+  fb.style.marginLeft = 'auto';
+  if (compFolded) {
+    fb.textContent = 'folded ✓';
+    fb.disabled = true;
+    fb.style.marginLeft = '0';
+  } else if (compSeq.length < 20) {
+    fb.textContent = 'fold it!';
+    fb.disabled = true;
+  } else if (compFoldPdb && compSeq.join('') === compFoldSeq) {
+    fb.textContent = 'view fold';
+    fb.disabled = false;
+  } else {
+    fb.textContent = 'fold it!';
+    fb.disabled = false;
+  }
 }
 
 function renderComposeSeq() {
@@ -1008,8 +1071,7 @@ function updateComposeCount() {
     if (n < 20) el.textContent = n + ' aa (' + (20 - n) + ' more to fold)';
     else el.textContent = n + ' aa';
   }
-  const foldBtn = document.getElementById('foldBtn');
-  if (foldBtn) foldBtn.disabled = compSeq.length < 20;
+  updateFoldBtn();
 }
 
 function clearSuggestions() {
@@ -1064,9 +1126,26 @@ function renderComposeInfo() {
   el.innerHTML = html;
 }
 
+function enterFoldedView(pdbData, seqStr, autoPlay) {
+  compFolded = true;
+  document.body.classList.add('center-view');
+  const bb = document.getElementById('backComposeBtn');
+  if (bb) bb.style.display = '';
+  updateFoldBtn();
+  const cpb = document.getElementById('composePlayBtn');
+  if (cpb) { cpb.disabled = false; cpb.className = 'compose-fold compose-play-folded'; cpb.textContent = '▶ play your protein'; cpb.style.marginLeft = 'auto'; }
+  showFold(pdbData, seqStr);
+  findClosestProtein(true);
+  if (autoPlay) togglePlay();
+}
+
 async function foldSequence() {
   if (compSeq.length < 20) return;
   const seqStr = compSeq.join('');
+  if (compFoldPdb && seqStr === compFoldSeq) {
+    enterFoldedView(compFoldPdb, seqStr, false);
+    return;
+  }
   const el = document.getElementById('infoPanelContent');
   el.innerHTML = '<div class="info-panel-title">folding...</div>'
     + '<div class="fold-loading">Sending ' + seqStr.length + ' residues to ESMFold</div>';
@@ -1079,14 +1158,8 @@ async function foldSequence() {
     });
     if (!resp.ok) throw new Error('ESMFold returned ' + resp.status);
     const pdbData = await resp.text();
-    compFolded = true; compFoldPdb = pdbData; compFoldSeq = seqStr;
-    const fb = document.getElementById('foldBtn');
-    if (fb) { fb.disabled = true; fb.textContent = 'folded ✓'; fb.style.marginLeft = '0'; }
-    const cpb = document.getElementById('composePlayBtn');
-    if (cpb) { cpb.disabled = false; cpb.className = 'compose-fold compose-play-folded'; cpb.textContent = '▶ play your protein'; cpb.style.marginLeft = 'auto'; }
-    showFold(pdbData, seqStr);
-    findClosestProtein(true);
-    togglePlay();
+    compFoldPdb = pdbData; compFoldSeq = seqStr;
+    enterFoldedView(pdbData, seqStr, true);
   } catch (err) {
     el.innerHTML = '<div class="info-panel-title">fold error</div>'
       + '<div class="fold-error">' + err.message + '</div>'
@@ -1148,11 +1221,11 @@ function extractSS(viewer) {
 function showFold(pdbData, seqStr) {
   pdbData = normalizePdbBFactors(pdbData);
   const el = document.getElementById('infoPanelContent');
+  const center = document.getElementById('centerViewer');
+  if (center) center.innerHTML = '<div id="foldViewer" class="fold-viewer"></div>';
   const conf = parsePLDDT(pdbData);
-  // Show structure immediately
   let html = '<div class="info-panel-title">your protein</div>'
-    + '<div class="info-panel-subtitle">' + seqStr.length + ' amino acids</div>'
-    + '<div id="foldViewer" class="fold-viewer"></div>';
+    + '<div class="info-panel-subtitle">' + seqStr.length + ' amino acids</div>';
   if (conf) {
     const color = conf.avg >= 70 ? '#3a8a5c' : conf.avg >= 50 ? '#EF9F27' : '#dc2626';
     html += '<div style="margin:6px 0;font-size:11px">'
@@ -1178,7 +1251,7 @@ function showFold(pdbData, seqStr) {
     viewer.setStyle({}, { cartoon: { colorscheme: foldCS }, stick: { colorscheme: foldCS, opacity: 0.35, radius: 0.12 } });
     viewer.zoomTo();
     viewer.render();
-    viewer.spin('y', 0.25);
+    viewer.spin('y', SPIN_SPEED);
     activeViewer = viewer;
     activeViewCS = foldCS;
     activeViewStyleIdx = 0;
@@ -1201,13 +1274,17 @@ function showFold(pdbData, seqStr) {
       propDiv.innerHTML = '<div style="margin:10px 0 6px;padding:8px 10px;background:#f8f7fc;border-radius:6px;font-size:12px">'
         + '<div style="font-weight:600;margin-bottom:6px;color:var(--color-text-primary)">secondary structure</div>'
         + ssBar('alpha helix', helixImg(), ss.helix, '#e07838')
-        + '<div style="font-size:10px;color:var(--color-text-tertiary);line-height:1.3;margin:2px 0 8px 32px">'
-        + '\u03B1-helices are the most common protein shape: coils held together by hydrogen bonds every 4th residue.'
+        + '<div style="font-size:10px;color:var(--color-text-tertiary);line-height:1.4;margin:2px 0 8px 32px">'
+        + '\u03B1-helices are the most common protein shape: coils held together by hydrogen bonds every 4th residue. '
+        + '<strong>To build one</strong>, use lots of <strong>MALEK</strong> residues \u2014 methionine (M), alanine (A), leucine (L), glutamate (E), and lysine (K). '
+        + 'Avoid <strong>proline (P)</strong> and <strong>glycine (G)</strong> \u2014 they\u2019re known as \u201Chelix breakers\u201D because they kink or over-flex the backbone.'
         + '</div>'
         + ssBar('beta sheet', sheetImg(), ss.sheet, '#3878c0')
-        + '<div style="font-size:10px;color:var(--color-text-tertiary);line-height:1.3;margin:2px 0 4px 32px">'
+        + '<div style="font-size:10px;color:var(--color-text-tertiary);line-height:1.4;margin:2px 0 4px 32px">'
         + '\u03B2-sheets are parallel or antiparallel strands connected by hydrogen bonds, with flexible loops linking adjacent strands. '
-        + 'They form the framework of antibodies, and the loops form the antigen-binding sites.'
+        + 'They form the framework of antibodies, and the loops form the antigen-binding sites. '
+        + '<strong>To build one</strong>, use large aromatic residues \u2014 tryptophan (W), tyrosine (Y), phenylalanine (F) \u2014 and C\u03B2-branched residues \u2014 isoleucine (I), valine (V), threonine (T). '
+        + 'Sheets also need <strong>loops to turn back onto themselves</strong>, so sprinkle in glycine (G) or proline (P) between strands.'
         + '</div>'
         + '</div>';
     }
@@ -1219,11 +1296,15 @@ function renderInfoPanel() {
   const el = document.getElementById('infoPanelContent');
   if (!el) return;
   if (activeViewer) { activeViewer = null; activeResiMap = null; }
+  const center = document.getElementById('centerViewer');
+  const hasStructure = !!(activeComplex || presetActive || (compFolded && compFoldPdb));
+  document.body.classList.toggle('center-view', hasStructure);
+  if (!hasStructure && center) center.innerHTML = '';
 
   if (activeComplex) {
     const cx = activeComplex;
-    let html = `<div id="pdbViewer" class="pdb-viewer"></div>`;
-    html += `<div class="info-panel-title">${cx.name}</div>`;
+    if (center) center.innerHTML = `<div id="pdbViewer" class="pdb-viewer"></div>`;
+    let html = `<div class="info-panel-title">${cx.name}</div>`;
     html += `<div class="info-panel-subtitle">${cx.pdb} · ${cx.contacts.length} contacts</div>`;
     html += `<div class="info-panel-stats">${cx.chainA.name} melody + ${cx.chainB.name} harmony</div>`;
     html += `<div class="info-panel-desc">${cx.desc}</div>`;
@@ -1247,8 +1328,8 @@ function renderInfoPanel() {
   } else if (presetActive) {
     const p = PS.find(p => p.name === presetActive);
     if (p) {
-      let html = `<div id="pdbViewer" class="pdb-viewer"></div>`;
-      html += `<div class="info-panel-title">${p.name}</div>`;
+      if (center) center.innerHTML = `<div id="pdbViewer" class="pdb-viewer"></div>`;
+      let html = `<div class="info-panel-title">${p.name}</div>`;
       html += `<div class="info-panel-subtitle">${p.pdb} · ${p.seq.length} amino acids</div>`;
       if (p.playSeq) html += `<div class="info-panel-stats" style="font-size:10px;color:var(--color-text-tertiary)">playing ${p.playSeq.length}aa B-chain fragment</div>`;
       html += `<div class="info-panel-desc">${p.significance}</div>`;
@@ -1518,7 +1599,7 @@ function showProteinMatch(results, activeIdx) {
       viewer.setStyle({}, { cartoon: { color: 'spectrum' }, stick: { color: 'spectrum', opacity: 0.35, radius: 0.12 } });
       viewer.zoomTo();
       viewer.render();
-      viewer.spin('y', 0.25);
+      viewer.spin('y', SPIN_SPEED);
     } catch {
       viewerDiv.innerHTML = '<img class="info-panel-img" src="https://cdn.rcsb.org/images/structures/' + top.pdbId.toLowerCase() + '_assembly-1.jpeg" alt="structure" onerror="this.style.display=\'none\'" style="width:100%;height:100%;object-fit:cover"/>';
     }

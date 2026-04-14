@@ -57,6 +57,7 @@
     <button class="compose-action" onclick="undoCompose()">undo</button>
     <button class="compose-action" onclick="clearCompose()">clear</button>
     <button class="compose-action" id="composePlayBtn" onclick="togglePlay()" disabled>▶ play</button>
+    <button class="compose-action compose-back" id="backComposeBtn" onclick="backToComposing()" style="display:none">← back to composing</button>
     <button class="compose-fold" id="foldBtn" onclick="foldSequence()" disabled style="margin-left:auto">fold it!</button>
   </div>
   <div class="piano-area">
@@ -64,6 +65,7 @@
     <div class="key-tooltip" id="keyTooltip"></div>
     <div class="piano-scroll"><div class="piano-wrap" id="pianoWrap"></div></div>
   </div>
+  <div class="center-viewer" id="centerViewer"></div>
   <div class="kb-hint" id="kbHint"></div>
   <div class="aa-display" id="aaDisplay"></div>
 </div>

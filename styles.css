@@ -255,6 +255,16 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
 .fold-loading { text-align: center; padding: 40px 10px; color: var(--color-text-tertiary); font-size: 12px }
 .fold-error { font-size: 11px; color: #dc2626; margin: 4px 0; line-height: 1.4 }
 
+/* Center viewer: 3D structure moves into the piano slot; right info-panel keeps its width */
+.compose-back { border-color: #534AB7 !important; color: #534AB7 !important }
+.center-viewer { display: none }
+body.center-view .piano-area,
+body.center-view .kb-hint,
+body.center-view .aa-display { display: none }
+body.center-view .center-viewer { display: block }
+body.center-view .center-viewer .fold-viewer,
+body.center-view .center-viewer .pdb-viewer { height: 60vh; min-height: 380px; margin-bottom: 0 }
+
 /* ── Mobile ── */
 .mobile-toggle { display: none }
 
