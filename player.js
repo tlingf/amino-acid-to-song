@@ -747,6 +747,74 @@ document.addEventListener('keyup', e => {
   updateKbInfo();
 });
 
+/* ── MIDI ── */
+const MIDI_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+function midiNoteToName(n) { return MIDI_NAMES[n % 12] + (Math.floor(n / 12) - 1); }
+const midiDown = new Map();
+
+function handleMIDIMessage(msg) {
+  const [status, n, v] = msg.data;
+  const cmd = status & 0xf0;
+  const note = midiNoteToName(n);
+  console.log('[MIDI]', 'status=0x' + status.toString(16), 'note=' + n + '(' + note + ')', 'vel=' + v, 'mapped=' + !!FR[note]);
+  if (!FR[note]) return;
+  const cls = 'piano-key-' + note.replace('#', 's');
+  if (cmd === 0x90 && v > 0) {
+    if (midiDown.has(n)) return;
+    midiDown.set(n, note);
+    const c = getCtx(); if (c.state === 'suspended') c.resume();
+    const aa = NA[note] || null;
+    const vel = 0.4 + 0.6 * (v / 127);
+    playNote(FR[note], 0.5, hySustain(aa), vel);
+    document.querySelectorAll('.' + cls).forEach(el => el.classList.add('lit'));
+    if (!composing) toggleCompose();
+    if (aa) addComposeAA(aa);
+  } else if (cmd === 0x80 || (cmd === 0x90 && v === 0)) {
+    midiDown.delete(n);
+    document.querySelectorAll('.' + cls).forEach(el => el.classList.remove('lit'));
+  }
+}
+
+function updateMIDIStatus(access) {
+  const el = document.getElementById('midiStatus');
+  if (!el) return;
+  const names = [];
+  access.inputs.forEach(inp => { if (inp.state === 'connected') names.push(inp.name); });
+  console.log('[MIDI] inputs:', names.length ? names : '(none)');
+  if (names.length) {
+    el.textContent = '🎹 ' + names.join(', ');
+    el.style.display = '';
+  } else {
+    el.textContent = '🎹 no MIDI device detected';
+    el.style.display = '';
+  }
+}
+
+function initMIDI() {
+  if (!navigator.requestMIDIAccess) {
+    console.warn('[MIDI] Web MIDI not supported in this browser');
+    const el = document.getElementById('midiStatus');
+    if (el) { el.textContent = '🎹 Web MIDI not supported (try Chrome)'; el.style.display = ''; }
+    return;
+  }
+  console.log('[MIDI] requesting access…');
+  navigator.requestMIDIAccess({ sysex: false }).then(access => {
+    console.log('[MIDI] access granted');
+    const attach = () => access.inputs.forEach(inp => { inp.onmidimessage = handleMIDIMessage; });
+    attach();
+    updateMIDIStatus(access);
+    access.onstatechange = e => {
+      console.log('[MIDI] statechange:', e.port && e.port.name, e.port && e.port.state);
+      attach();
+      updateMIDIStatus(access);
+    };
+  }).catch(err => {
+    console.error('[MIDI] access denied or failed:', err);
+    const el = document.getElementById('midiStatus');
+    if (el) { el.textContent = '🎹 MIDI access denied'; el.style.display = ''; }
+  });
+}
+
 /* ── 3D Viewer ── */
 let activeViewer = null;
 let activeViewCS = null;      // colorscheme used by current viewer
@@ -1621,6 +1689,7 @@ function loadMatchedProtein(idx) {
 renderMappingBtns(); renderLegend(); renderPanelRef(); renderPiano();
 renderPresets(); renderHarmonyBtns(); loadComplex(COMPLEXES[0]);
 setupMobileCollapsibles();
+initMIDI();
 
 let _resizeT;
 window.addEventListener('resize', () => {
