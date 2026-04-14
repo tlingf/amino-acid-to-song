@@ -16,7 +16,7 @@ Open `index.html` directly in a browser. No build step, no bundler, no npm. Vani
 ## External Dependencies
 
 - **3Dmol.js**: loaded from CDN (`<script>` in index.html), used for 3D protein visualization with pLDDT coloring.
-- **ESMFold API** (`https://api.esmatlas.com/foldSequence/v1/pdb/`): called in compose mode to predict structure from sequence.
+- ** API** (`https://api.esmatlas.com/foldSequence/v1/pdb/`): called in compose mode to predict structure from sequence.
 
 ## Architecture
 

@@ -204,11 +204,6 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
 .info-panel-contact-aa { font-weight: 600; min-width: 20px }
 .info-panel-contact-dash { color: var(--color-text-tertiary); font-size: 9px }
 .info-panel-contact-dist { margin-left: auto; font-size: 10px; color: var(--color-text-tertiary); font-family: var(--font-mono) }
-#infoPanelNow { border-top: 0.5px solid var(--color-border-tertiary); margin-top: 8px; padding-top: 6px }
-#infoPanelNow:empty { display: none }
-.info-panel-now-label { font-size: 9px; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px }
-.info-panel-now-aa { font-size: 15px; font-weight: 600 }
-.info-panel-now-detail { font-size: 11px; color: var(--color-text-secondary) }
 .footer-blurb { position: fixed; bottom: 6px; right: 8px; font-size: 11px; color: var(--color-text-tertiary); margin: 0; padding: 4px 8px; background: rgba(255,255,255,0.85); border-radius: 4px; z-index: 20 }
 .footer-blurb a { color: var(--color-text-secondary); text-decoration: none }
 .footer-blurb a:hover { text-decoration: underline }
@@ -251,6 +246,8 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
 .match-play-btn { padding: 4px 10px; border-radius: 5px; border: 1px solid #3a8a5c; background: #3a8a5c; color: #fff; cursor: pointer; font-size: 11px; font-weight: 500; margin-top: 6px }
 .match-play-btn:hover { opacity: 0.85 }
 .fold-viewer { width: 100%; height: 300px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); overflow: hidden; position: relative }
+.fold-attribution { text-align: center; font-size: 10px; color: var(--color-text-tertiary); margin-top: 6px; line-height: 1.3 }
+.fold-attribution a { color: var(--color-text-tertiary); text-decoration: underline }
 .fold-status { font-size: 11px; color: var(--color-text-tertiary); margin: 4px 0 }
 .fold-loading { text-align: center; padding: 40px 10px; color: var(--color-text-tertiary); font-size: 12px }
 .fold-error { font-size: 11px; color: #dc2626; margin: 4px 0; line-height: 1.4 }
@@ -258,7 +255,8 @@ h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
 /* Center viewer: 3D structure moves into the piano slot; right info-panel keeps its width */
 .compose-back { border-color: #534AB7 !important; color: #534AB7 !important }
 .center-viewer { display: none }
-body.center-view .piano-area,
+body.center-view .piano-scroll,
+body.center-view .key-tooltip,
 body.center-view .kb-hint,
 body.center-view .aa-display { display: none }
 body.center-view .center-viewer { display: block }

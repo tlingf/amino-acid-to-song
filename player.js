@@ -288,7 +288,6 @@ function setActive(idx) {
     } else {
       showAADisplay([aa]);
     }
-    updateInfoPanelNow(idx);
     highlightViewerResidue(idx);
 
     // Light up piano keys
@@ -1122,12 +1121,12 @@ function renderComposeInfo() {
   } else {
     html += '<div style="margin-top:8px;font-size:11px;color:var(--color-text-tertiary)">' + (20 - total) + ' more aa to fold</div>';
   }
-  html += '<div id="infoPanelNow"></div>';
   el.innerHTML = html;
 }
 
 function enterFoldedView(pdbData, seqStr, autoPlay) {
   compFolded = true;
+  activeFocusChain = null; activeStartResi = null;
   document.body.classList.add('center-view');
   const bb = document.getElementById('backComposeBtn');
   if (bb) bb.style.display = '';
@@ -1222,14 +1221,15 @@ function showFold(pdbData, seqStr) {
   pdbData = normalizePdbBFactors(pdbData);
   const el = document.getElementById('infoPanelContent');
   const center = document.getElementById('centerViewer');
-  if (center) center.innerHTML = '<div id="foldViewer" class="fold-viewer"></div>';
+  if (center) center.innerHTML = '<div id="foldViewer" class="fold-viewer"></div>'
+    + '<div class="fold-attribution">Structure predicted by <a href="https://esmatlas.com" target="_blank">ESMFold</a></div>';
   const conf = parsePLDDT(pdbData);
   let html = '<div class="info-panel-title">your protein</div>'
     + '<div class="info-panel-subtitle">' + seqStr.length + ' amino acids</div>';
   if (conf) {
     const color = conf.avg >= 70 ? '#3a8a5c' : conf.avg >= 50 ? '#EF9F27' : '#dc2626';
     html += '<div style="margin:6px 0;font-size:11px">'
-      + '<span style="color:var(--color-text-tertiary)">Model confidence: </span>'
+      + '<span style="color:var(--color-text-tertiary)">ESMFold Model confidence: </span>'
       + '<span style="font-weight:600;color:' + color + '">pLDDT ' + conf.avg + '</span>'
       + '<span style="color:var(--color-text-tertiary)"> (' + conf.min + '\u2013' + conf.max + ')</span>'
       + '</div>';
@@ -1276,14 +1276,14 @@ function showFold(pdbData, seqStr) {
         + ssBar('alpha helix', helixImg(), ss.helix, '#e07838')
         + '<div style="font-size:10px;color:var(--color-text-tertiary);line-height:1.4;margin:2px 0 8px 32px">'
         + '\u03B1-helices are the most common protein shape: coils held together by hydrogen bonds every 4th residue. '
-        + '<strong>To build one</strong>, use lots of <strong>MALEK</strong> residues \u2014 methionine (M), alanine (A), leucine (L), glutamate (E), and lysine (K). '
-        + 'Avoid <strong>proline (P)</strong> and <strong>glycine (G)</strong> \u2014 they\u2019re known as \u201Chelix breakers\u201D because they kink or over-flex the backbone.'
+        + '<strong>To build one</strong>, use lots of <strong>MALEK</strong> residues: methionine (M), alanine (A), leucine (L), glutamate (E), and lysine (K). '
+        + 'Avoid <strong>proline (P)</strong> and <strong>glycine (G)</strong>: they\u2019re known as \u201Chelix breakers\u201D because they kink or over-flex the backbone.'
         + '</div>'
         + ssBar('beta sheet', sheetImg(), ss.sheet, '#3878c0')
         + '<div style="font-size:10px;color:var(--color-text-tertiary);line-height:1.4;margin:2px 0 4px 32px">'
         + '\u03B2-sheets are parallel or antiparallel strands connected by hydrogen bonds, with flexible loops linking adjacent strands. '
         + 'They form the framework of antibodies, and the loops form the antigen-binding sites. '
-        + '<strong>To build one</strong>, use large aromatic residues \u2014 tryptophan (W), tyrosine (Y), phenylalanine (F) \u2014 and C\u03B2-branched residues \u2014 isoleucine (I), valine (V), threonine (T). '
+        + '<strong>To build one</strong>, use large aromatic residues: tryptophan (W), tyrosine (Y), phenylalanine (F); and C\u03B2-branched residues: isoleucine (I), valine (V), threonine (T). '
         + 'Sheets also need <strong>loops to turn back onto themselves</strong>, so sprinkle in glycine (G) or proline (P) between strands.'
         + '</div>'
         + '</div>';
@@ -1321,7 +1321,6 @@ function renderInfoPanel() {
       </div>`;
     });
     html += '</div>';
-    html += '<div id="infoPanelNow"></div>';
     el.innerHTML = html;
     initPdbViewer(cx.pdb, 'pdbViewer', { chain: cx.pdbChain, startResi: cx.pdbStartResi });
 
@@ -1333,7 +1332,6 @@ function renderInfoPanel() {
       html += `<div class="info-panel-subtitle">${p.pdb} · ${p.seq.length} amino acids</div>`;
       if (p.playSeq) html += `<div class="info-panel-stats" style="font-size:10px;color:var(--color-text-tertiary)">playing ${p.playSeq.length}aa B-chain fragment</div>`;
       html += `<div class="info-panel-desc">${p.significance}</div>`;
-      html += '<div id="infoPanelNow"></div>';
       el.innerHTML = html;
       initPdbViewer(p.pdb, 'pdbViewer', { chain: p.pdbChain, startResi: p.pdbStartResi });
     }
@@ -1345,30 +1343,11 @@ function renderInfoPanel() {
   } else if (seq.length) {
     let html = '<div class="info-panel-title">custom sequence</div>';
     html += `<div class="info-panel-subtitle">${seq.length} amino acids</div>`;
-    html += '<div id="infoPanelNow"></div>';
     el.innerHTML = html;
 
   } else {
     el.innerHTML = '<div class="info-panel-placeholder">select a preset or harmony complex</div>';
   }
-}
-
-function updateInfoPanelNow(idx) {
-  const el = document.getElementById('infoPanelNow');
-  if (!el) return;
-  if (idx < 0 || idx >= seq.length) { el.innerHTML = ''; return; }
-  const aa = seq[idx], note = AM[aa], g = GR[aa], c = GC[g];
-  const contact = contactMap.get(idx);
-  let html = `<div class="info-panel-now-label">now playing</div>`;
-  html += `<span class="info-panel-now-aa" style="color:${c?.bk || 'var(--color-text-primary)'}">${aa}</span> `;
-  html += `<span class="info-panel-now-detail">${AN[aa] || aa} · ${note || '?'}</span>`;
-  if (contact) {
-    const pg = GR[contact.aa], pc = GC[pg];
-    const pNote = AM[contact.aa];
-    html += `<br/><span class="info-panel-now-aa" style="color:${pc?.bk || 'var(--color-text-primary)'}">${contact.aa}</span> `;
-    html += `<span class="info-panel-now-detail">${AN[contact.aa]} · ${pNote || '?'} · ${contact.dist.toFixed(1)} \u00C5</span>`;
-  }
-  el.innerHTML = html;
 }
 
 /* ── Mobile collapsibles ── */
