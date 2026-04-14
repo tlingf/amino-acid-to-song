@@ -20,11 +20,15 @@
   <div id="panelRef" style="display:none"></div>
 </div>
 <div class="main-panel">
-  <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px">example proteins</div>
-  <div class="presets" id="presets"></div>
-  <div id="harmonyWrap">
-    <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px">example binding proteins</div>
-    <div class="presets" id="harmonyBtns"></div>
+  <div class="examples-row">
+    <div id="harmonyWrap" class="examples-group">
+      <span class="examples-label">binding</span>
+      <div class="presets" id="harmonyBtns"></div>
+    </div>
+    <div class="examples-group">
+      <span class="examples-label">proteins</span>
+      <div class="presets" id="presets"></div>
+    </div>
   </div>
   <div class="seq-input-row">
     <input type="text" id="seqInput" placeholder="Paste amino acid sequence (one-letter codes)..." maxlength="300" oninput="onSeqInput()" onkeydown="if(event.key==='Enter')loadAndPlay()"/>

@@ -1,5 +1,5 @@
 /*
- * Protein Melody Player — main application logic
+ * Protein Melody Player - main application logic
  *
  * Depends on: aa_mapping.js (AM, AN, A3, AB, GR, GC, FR, HP, MAPPINGS, COMPLEXES)
  *             aa_structures.js (SC, renderStructSVG, renderSideChainSVG)
@@ -25,11 +25,8 @@ const WO_NI = {}; WO_WN.forEach((n, i) => WO_NI[n] = i);
 const AF = { L: 9.66, A: 8.25, G: 7.07, V: 6.87, E: 6.75, S: 6.56, I: 5.96, K: 5.84, R: 5.53, D: 5.45, T: 5.34, P: 4.70, N: 4.06, Q: 3.93, F: 3.86, Y: 2.92, M: 2.42, H: 2.27, C: 1.37, W: 1.08 };
 
 const PS = [
-  { name: 'hemoglobin', seq: 'VHLTPEEKSAVTALWGKVNVDEVGGEALGRLLVVYPWTQRFFESFGDLSTPDAVMGNPKVKAHGKKVLGAFSDGLAHLDNLKGTFATLSELHCDKLHVDP', ss: 'CCCCHHHHHHHHHHHCCCCHHHHHHHHHHHHHHHCHHHHHHCHHHCCCCCHHHHHHCHHHHHHHHHHHHHHHHHHCCHHHHHHHHHHHHHHHHHHHCCCC', pdb: '4HHB', desc: 'Hemoglobin \u03B2 (100aa) \u2014 the oxygen carrier that colors your blood red', significance: 'Hemoglobin is the protein in red blood cells that carries oxygen from your lungs to every tissue in your body. Its \u03B2-chain contains the classic globin fold \u2014 eight alpha-helices wrapping around a heme group that binds O\u2082. A single mutation in this chain (E6V) causes sickle-cell disease, the first \u201Cmolecular disease\u201D ever identified. Max Perutz solved hemoglobin\'s structure in 1959 and earned the 1962 Nobel Prize \u2014 one of the first protein structures determined by X-ray crystallography.' },
-  { name: 'collagen', seq: 'PPGPPGPPGPPGPPAPPGPPGPPGPPGPPG', ss: 'CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC', pdb: '1CAG', desc: 'Collagen I model peptide (30aa) \u2014 the repetitive Gly-X-Y motif that builds skin and bone', significance: 'Collagen is the most abundant protein in the human body, making up roughly 30% of total protein mass. It forms the structural scaffold of skin, bone, tendons, and cartilage. Its hallmark is the Gly-X-Y tripeptide repeat \u2014 where X is often proline and Y is often hydroxyproline \u2014 enabling three chains to wind into a rigid triple helix. Vitamin C is essential for collagen synthesis; its absence causes scurvy. This model peptide from PDB 1CAG captures the core repeat (hydroxyproline shown as proline in the melody).' },
-  { name: 'spike protein (COVID-19)', seq: 'SNNLDSKVGGNYNYLYRLFRKSNLKPFERDISTEIYQAGSTPCNGVEGFNCYFPLQSYGFQPTNGVGYQPY', ss: 'CCCCCCCCEEEEEECHHHHCCCCCECCCEEECCCCCHHHCCCCCCCCHHEECCCCCCCCCCECCEECCEEE', pdb: '6M0J', desc: 'SARS-CoV-2 spike RBM (71aa) \u2014 the COVID-19 surface region that latches onto human cells', significance: 'The SARS-CoV-2 spike protein is the viral surface protein responsible for the COVID-19 pandemic. Its receptor-binding motif (RBM) is the exact region that grips the human ACE2 receptor to enter cells. This stretch was the primary target for vaccine design \u2014 the mRNA vaccines by Pfizer-BioNTech and Moderna encode the full spike to train the immune system against it. Mutations in this region drove successive pandemic waves (Delta, Omicron) by altering ACE2 binding affinity and enabling antibody escape.' },
-  { name: 'insulin', seq: 'GIVEQCCTSICSLYQLENYCNFVNQHLCGSHLVEALYLVCGERGFFYTPKT', playSeq: 'FVNQHLCGSHLVEALYLVCGERGFFYTPKT', ss: 'CCCCCCCCCCCHHHHHHCCCCCCCCCCCCCCHHHHHHHHHHHCCCEECCCCC', playSS: 'CCCCCCCCHHHHHHHHHHHHCCCEEECCCC', pdb: '4INS', desc: 'Insulin (51aa) \u2014 the hormone that regulates blood sugar', significance: 'Insulin is a small but vital hormone produced by pancreatic \u03B2-cells. It consists of an A-chain (21aa) and B-chain (30aa) linked by disulfide bonds. When you eat, insulin signals cells to absorb glucose from the blood. Its discovery in 1921 by Banting and Best transformed diabetes from a death sentence into a manageable condition \u2014 one of medicine\u2019s greatest breakthroughs. The B-chain (played here) contains the receptor-binding surface and the aromatic residues (F24, F25, Y26) that drive insulin\u2019s self-association into dimers and hexamers for storage in the pancreas.' },
-  { name: 'VHH nanobody', seq: 'DVQLVESGGGSVQAGGSLRLSCAASGYIASINYLGWFRQAPGKEREGVAAVSPAGGTPYYADSVKGRFTVSLDNAENTVYLQMNSLKPEDTALYYCAAARQGWYIPLNSYGYNYWGQGTQVTVS', ss: 'CEEEEEECCEEECCCCCEEEEEEEEECHHHEEEEEEEEECCCCCCEEEEEECCCCCCEEECCCCECCEEEEEECCCCEEEEEECCCCHHHCEEEEEEEEECCCCCCCCHHHEEEECCCEEEEEC', pdb: '1ZVH', desc: 'VHH nanobody (124aa) \u2014 a complete single-domain antibody from a llama', significance: 'Camelids (llamas, camels, alpacas) produce unique heavy-chain-only antibodies. The VHH domain \u2014 or nanobody \u2014 is their single variable region containing four framework regions (FR1\u2013FR4) that form a \u03B2-sandwich scaffold, and three hypervariable CDR loops that determine antigen specificity. At only ~15 kDa, nanobodies are the smallest known antigen-binding fragments. They are prized for their stability, ease of engineering, and ability to access hidden epitopes that conventional antibodies cannot reach \u2014 now used as research tools, diagnostics, and FDA-approved therapeutics (e.g. caplacizumab).' }
+  { name: 'hemoglobin', seq: 'VHLTPEEKSAVTALWGKVNVDEVGGEALGRLLVVYPWTQRFFESFGDLSTPDAVMGNPKVKAHGKKVLGAFSDGLAHLDNLKGTFATLSELHCDKLHVDP', ss: 'CCCCHHHHHHHHHHHCCCCHHHHHHHHHHHHHHHCHHHHHHCHHHCCCCCHHHHHHCHHHHHHHHHHHHHHHHHHCCHHHHHHHHHHHHHHHHHHHCCCC', pdb: '4HHB', desc: 'Hemoglobin \u03B2 (100aa): the oxygen carrier that colors your blood red', significance: 'Hemoglobin is the protein in red blood cells that carries oxygen from your lungs to every tissue in your body. Its \u03B2-chain contains the classic globin fold: eight alpha-helices wrapping around a heme group that binds O\u2082. A single mutation in this chain (E6V) causes sickle-cell disease, the first \u201Cmolecular disease\u201D ever identified. Max Perutz solved hemoglobin\'s structure in 1959 and earned the 1962 Nobel Prize, one of the first protein structures determined by X-ray crystallography.' },
+  { name: 'VHH nanobody', seq: 'DVQLVESGGGSVQAGGSLRLSCAASGYIASINYLGWFRQAPGKEREGVAAVSPAGGTPYYADSVKGRFTVSLDNAENTVYLQMNSLKPEDTALYYCAAARQGWYIPLNSYGYNYWGQGTQVTVS', ss: 'CEEEEEECCEEECCCCCEEEEEEEEECHHHEEEEEEEEECCCCCCEEEEEECCCCCCEEECCCCECCEEEEEECCCCEEEEEECCCCHHHCEEEEEEEEECCCCCCCCHHHEEEECCCEEEEEC', pdb: '1ZVH', desc: 'VHH nanobody (124aa): a complete single-domain antibody from a llama', significance: 'Camelids (llamas, camels, alpacas) produce unique heavy-chain-only antibodies. The VHH domain, or nanobody, is their single variable region containing four framework regions (FR1\u2013FR4) that form a \u03B2-sandwich scaffold, and three hypervariable CDR loops that determine antigen specificity. At only ~15 kDa, nanobodies are the smallest known antigen-binding fragments. They are prized for their stability, ease of engineering, and ability to access hidden epitopes that conventional antibodies cannot reach, now used as research tools, diagnostics, and FDA-approved therapeutics (e.g. caplacizumab).' }
 ];
 
 /* Keyboard bindings */
@@ -74,6 +71,7 @@ let activeMapping = MAPPINGS[0].id;
 let seq = [], playing = false, paused = false, playIdx = 0, timers = [], ctx = null;
 let presetActive = '';
 let activeComplex = null, contactMap = new Map();
+let activeFocusChain = null, activeStartResi = null;
 let detailsOpen = false;
 let composing = false, compSeq = [], compFolded = false, compFoldPdb = null, compFoldSeq = null;
 let compMatch = null, searchInProgress = false;
@@ -380,7 +378,7 @@ function renderSeqMel() {
       const pb = document.createElement('div');
       pb.className = 'partner-badge'; pb.dataset.idx = i;
       pb.style.background = pc.bg; pb.style.color = pc.tx;
-      pb.textContent = paa; pb.title = `${AN[paa]} (${activeComplex.chainB.name}) \u2014 ${contact.dist.toFixed(1)} \u00C5`;
+      pb.textContent = paa; pb.title = `${AN[paa]} (${activeComplex.chainB.name}), ${contact.dist.toFixed(1)} \u00C5`;
       unit.appendChild(pb);
     }
     unit.onclick = () => {
@@ -574,7 +572,8 @@ function renderPresets() {
   const wrap = document.getElementById('presets'); wrap.innerHTML = '';
   PS.forEach(p => {
     const btn = document.createElement('button');
-    btn.textContent = p.name; btn.className = p.name === presetActive ? 'active' : '';
+    btn.innerHTML = p.snippet ? `${p.name}<span class="snippet-badge">snippet</span>` : p.name;
+    btn.className = p.name === presetActive ? 'active' : '';
     btn.onclick = () => loadPresetClear(p);
     wrap.appendChild(btn);
   });
@@ -648,9 +647,9 @@ function renderMappingBtns() {
 
 function kbHintText() {
   const layout = getLayout();
-  if (layout === 'whiteOnly') return 'type amino acid letters — similar AAs share a key (white keys only)';
-  if (layout === 'pentatonic') return 'type amino acid letters — each AA on its own pentatonic note';
-  return 'play with your keyboard — A&thinsp;S&thinsp;D&thinsp;F&thinsp;G&thinsp;H&thinsp;J&thinsp;K&thinsp;L for white keys, W&thinsp;E&thinsp;T&thinsp;Y&thinsp;U&thinsp;O&thinsp;P for black keys';
+  if (layout === 'whiteOnly') return 'type amino acid letters: similar AAs share a key (white keys only)';
+  if (layout === 'pentatonic') return 'type amino acid letters: each AA on its own pentatonic note';
+  return 'play with your keyboard: A&thinsp;S&thinsp;D&thinsp;F&thinsp;G&thinsp;H&thinsp;J&thinsp;K&thinsp;L for white keys, W&thinsp;E&thinsp;T&thinsp;Y&thinsp;U&thinsp;O&thinsp;P for black keys';
 }
 
 function switchMapping(id) {
@@ -678,8 +677,8 @@ function loadComplex(cx) {
   stopPlay();
   activeComplex = cx; presetActive = '';
   contactMap = new Map();
-  cx.contacts.forEach(([idxA, partnerAA, dist]) => {
-    contactMap.set(idxA, { aa: partnerAA, dist });
+  cx.contacts.forEach(([idxA, partnerAA, dist, partnerResi]) => {
+    contactMap.set(idxA, { aa: partnerAA, dist, partnerResi });
   });
   if (activeMapping !== 'complexity-harmony') {
     activeMapping = 'complexity-harmony'; setMapping('complexity-harmony'); rebuildNA(); rebuildKB();
@@ -753,6 +752,16 @@ function lightenHex(hex, amt = 0.55) {
   return '#' + toHex(mix(r)) + toHex(mix(g)) + toHex(mix(b));
 }
 
+function darkenHex(hex, amt = 0.18) {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  const mix = (c) => Math.round(c * (1 - amt));
+  const toHex = (c) => c.toString(16).padStart(2, '0');
+  return '#' + toHex(mix(r)) + toHex(mix(g)) + toHex(mix(b));
+}
+
 function applyChainStyle(viewer, styleFn) {
   const chains = [...new Set(viewer.selectedAtoms({}).map(a => a.chain))];
   chains.forEach((ch, i) => {
@@ -763,7 +772,7 @@ function applyChainStyle(viewer, styleFn) {
 
 const VIEW_STYLES = [
   { name: 'cartoon',
-    apply: (v, cs, dim, forceGrey) => cs ? v.setStyle({}, { cartoon: { colorscheme: cs, opacity: dim ? 0.4 : 1 }, stick: { colorscheme: cs, opacity: dim ? 0.15 : 0.35, radius: 0.12 } }) : (dim && forceGrey) ? v.setStyle({}, { cartoon: { color: '#d0d0d0', opacity: 0.5 } }) : applyChainStyle(v, c => ({ cartoon: { color: c, opacity: dim ? 0.35 : 1 }, stick: { color: lightenHex(c), opacity: dim ? 0.15 : 0.35, radius: 0.12 } })),
+    apply: (v, cs, dim, forceGrey) => cs ? v.setStyle({}, { cartoon: { colorscheme: cs, opacity: dim ? 0.2 : 1 }, stick: { colorscheme: cs, opacity: dim ? 0.15 : 0.5, radius: 0.12 } }) : (dim && forceGrey) ? v.setStyle({}, { cartoon: { color: '#d0d0d0', opacity: 0.3 } }) : applyChainStyle(v, c => ({ cartoon: { color: c, opacity: dim ? 0.2 : 1 }, stick: { color: darkenHex(c, 0.25), opacity: dim ? 0.15 : 0.55, radius: 0.13 } })),
     highlight: c => ({ stick: { color: c, radius: 0.3 }, sphere: { color: c, scale: 0.5 } }) },
   { name: 'line',
     apply: (v, cs) => cs ? v.setStyle({}, { line: { colorscheme: cs } }) : applyChainStyle(v, c => ({ line: { color: c } })),
@@ -798,9 +807,14 @@ function addViewToggle(container, viewer, colorscheme) {
 }
 
 function buildResiMap(viewer) {
+  // If the active preset/complex declared a focus chain + starting residue,
+  // trust that (handles PDBs with multiple chains or gaps at N-terminus).
+  if (activeFocusChain && activeStartResi != null && seq.length) {
+    return Array.from({ length: seq.length }, (_, i) => activeStartResi + i);
+  }
   const cas = viewer.selectedAtoms({ atom: 'CA' });
   if (!cas.length) return null;
-  // Use chain of first CA; map seq index → PDB resi
+  // Fallback: use chain of first CA; map seq index → PDB resi
   const chain = cas[0].chain;
   const residues = cas.filter(a => a.chain === chain);
   const map = new Array(residues.length);
@@ -813,15 +827,26 @@ function highlightViewerResidue(idx) {
   const isPlaying = idx >= 0 && idx < activeResiMap.length;
   const wasCartoon = activeViewStyleIdx === 0;
   const style = isPlaying ? VIEW_STYLES[0] : VIEW_STYLES[activeViewStyleIdx];
-  // Re-apply base style (dimmed when playing)
+  // Re-apply base style (faded when playing) so the yellow highlight dominates.
   style.apply(activeViewer, activeViewCS, isPlaying, isPlaying && !wasCartoon);
   if (isPlaying) {
     const resi = activeResiMap[idx];
-    // Use cartoon highlight when already in cartoon mode, stick+sphere when forced from other modes
-    const hl = wasCartoon
-      ? { cartoon: { color: '#f7c948', opacity: 1 }, stick: { color: '#f7c948' } }
+    // Highlight the active residue + pop its side chain so it's visible against
+    // the faded cartoon.
+    const hlMain = wasCartoon
+      ? { cartoon: { color: '#f7c948', opacity: 1 }, stick: { color: '#f7c948', opacity: 1, radius: 0.28 }, sphere: { color: '#f7c948', scale: 0.3, opacity: 0.6 } }
       : style.highlight('#f7c948');
-    activeViewer.addStyle({ resi }, hl);
+    const selMain = activeFocusChain ? { resi, chain: activeFocusChain } : { resi };
+    activeViewer.addStyle(selMain, hlMain);
+    // If this residue is a binding contact, also light up the partner chain
+    // residue in a complementary color so the interaction reads visually.
+    const contact = contactMap.get(idx);
+    if (contact && contact.partnerResi != null && activeComplex && activeComplex.partnerChain) {
+      const hlP = wasCartoon
+        ? { cartoon: { color: '#e85d75', opacity: 1 }, stick: { color: '#e85d75', opacity: 1, radius: 0.28 }, sphere: { color: '#e85d75', scale: 0.3, opacity: 0.6 } }
+        : style.highlight('#e85d75');
+      activeViewer.addStyle({ resi: contact.partnerResi, chain: activeComplex.partnerChain }, hlP);
+    }
   }
   activeViewer.render();
 }
@@ -835,9 +860,11 @@ function waitFor3Dmol() {
   });
 }
 
-function initPdbViewer(pdbId, containerId) {
+function initPdbViewer(pdbId, containerId, opts = {}) {
   const container = document.getElementById(containerId);
   if (!container) return;
+  activeFocusChain = opts.chain || null;
+  activeStartResi = opts.startResi != null ? opts.startResi : null;
   const pdbData = typeof PDB_DATA !== 'undefined' && PDB_DATA[pdbId.toUpperCase()];
   if (!pdbData) {
     container.innerHTML = `<img class="info-panel-img" src="https://cdn.rcsb.org/images/structures/${pdbId.toLowerCase()}_assembly-1.jpeg" alt="structure" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover"/>`;
@@ -1207,7 +1234,7 @@ function renderInfoPanel() {
       const g2 = GR[partnerAA], c2 = GC[g2];
       html += `<div class="info-panel-contact-row">
         <span class="info-panel-contact-aa" style="color:${c1?.bk || 'var(--color-text-primary)'}">${aa}${idx}</span>
-        <span class="info-panel-contact-dash">\u2014</span>
+        <span class="info-panel-contact-dash">\u2013</span>
         <span class="info-panel-contact-aa" style="color:${c2?.bk || 'var(--color-text-primary)'}">${partnerAA}</span>
         <span class="info-panel-contact-dist">${dist.toFixed(1)} \u00C5</span>
       </div>`;
@@ -1215,7 +1242,7 @@ function renderInfoPanel() {
     html += '</div>';
     html += '<div id="infoPanelNow"></div>';
     el.innerHTML = html;
-    initPdbViewer(cx.pdb, 'pdbViewer');
+    initPdbViewer(cx.pdb, 'pdbViewer', { chain: cx.pdbChain, startResi: cx.pdbStartResi });
 
   } else if (presetActive) {
     const p = PS.find(p => p.name === presetActive);
@@ -1227,7 +1254,7 @@ function renderInfoPanel() {
       html += `<div class="info-panel-desc">${p.significance}</div>`;
       html += '<div id="infoPanelNow"></div>';
       el.innerHTML = html;
-      initPdbViewer(p.pdb, 'pdbViewer');
+      initPdbViewer(p.pdb, 'pdbViewer', { chain: p.pdbChain, startResi: p.pdbStartResi });
     }
 
   } else if (compFolded && compFoldPdb) {
@@ -1321,7 +1348,7 @@ async function searchRCSB(seqStr) {
   const data = await resp.json();
   if (!data.result_set || data.result_set.length === 0) return [];
 
-  // Parse results — identifier is like "4HHB_1" (pdbId_entityId)
+  // Parse results: identifier is like "4HHB_1" (pdbId_entityId)
   const results = data.result_set.map(r => {
     const parts = r.identifier.split('_');
     const pdbId = parts[0];
@@ -1417,7 +1444,7 @@ function renderMatchInline(results, seqLen) {
     md.innerHTML =
       '<div style="font-size:11px;font-weight:600;color:var(--color-text-primary);margin-bottom:4px">no similar proteins found</div>'
       + '<div style="font-size:11px;line-height:1.5;color:var(--color-text-secondary)">'
-      + 'No matches in the PDB with ≥10% identity. That\'s not surprising — with <strong>20 amino acids</strong>, '
+      + 'No matches in the PDB with ≥10% identity. That\'s not surprising: with <strong>20 amino acids</strong>, '
       + 'there are <strong>20<sup>' + n + '</sup> ≈ ' + formatCombinatorics(n) + '</strong> possible sequences of length '
       + n + '. Only ~230,000 structures have been solved, so a random match is astronomically rare.'
       + '</div>';

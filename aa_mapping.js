@@ -4,13 +4,13 @@
  * Multiple named mappings, each assigning the 20 standard amino acids to
  * chromatic semitones across two octaves (C4–G5).
  *
- * MAPPINGS — array of { id, name, desc, map } objects
- * AM       — the active aa→note map (mutable, changed by setMapping)
- * AN       — one-letter AA code → full name
- * GR       — one-letter AA code → property group key
- * GC       — group key → colour / label config
- * HP       — set of hydrophobic residues
- * FR       — note → frequency (Hz, equal temperament A4=440)
+ * MAPPINGS - array of { id, name, desc, map } objects
+ * AM       - the active aa→note map (mutable, changed by setMapping)
+ * AN       - one-letter AA code → full name
+ * GR       - one-letter AA code → property group key
+ * GC       - group key → colour / label config
+ * HP       - set of hydrophobic residues
+ * FR       - note → frequency (Hz, equal temperament A4=440)
  */
 
 const MAPPINGS = [
@@ -19,7 +19,7 @@ const MAPPINGS = [
     name: 'AA letters (white keys)',
     type: 'direct',
     layout: 'whiteOnly',
-    desc: 'Type amino acid letters directly — similar AAs share a key (BLOSUM62 ≥ 1, same property group). White keys only, 14 notes from G3 to F5.',
+    desc: 'Type amino acid letters directly. Similar AAs share a key (BLOSUM62 ≥ 1, same property group). White keys only, 14 notes from G3 to F5.',
     map: {
       W: 'G3',
       H: 'A3',
@@ -42,7 +42,7 @@ const MAPPINGS = [
     name: 'AA letters (pentatonic)',
     type: 'direct',
     layout: 'pentatonic',
-    desc: 'C-major pentatonic across 4 octaves — every interval is consonant. Each amino acid gets its own note.',
+    desc: 'C-major pentatonic across 4 octaves, with every interval consonant. Each amino acid gets its own note.',
     map: {
       P: 'C3',  F: 'D3',  H: 'E3',  M: 'G3',  W: 'A3',
       L: 'C4',  A: 'D4',  V: 'E4',  G: 'G4',  I: 'A4',
@@ -111,10 +111,10 @@ const GR = {
 /* Group colours & labels */
 const GC = {
   ali: { bg: '#FAEEDA', tx: '#633806', bk: '#EF9F27', label: 'Nonpolar Aliphatic (G A V L I P M)', role: 'Bury deep; water-repelling (hydrophobic)' },
-  pol: { bg: '#E1F5EE', tx: '#085041', bk: '#1D9E75', label: 'Polar (S T C N Q)', role: 'H-bonds & signaling switches' },
-  aro: { bg: '#EEEDFE', tx: '#3C3489', bk: '#534AB7', label: 'Aromatic (F Y W)', role: 'Ring-stacking & UV absorption' },
-  pos: { bg: '#FAECE7', tx: '#712B13', bk: '#D85A30', label: 'Basic + (H K R)', role: 'Positive charge; bind DNA' },
-  neg: { bg: '#E6F1FB', tx: '#0C447C', bk: '#378ADD', label: 'Acidic \u2212 (D E)', role: 'Negative charge; bind metals' }
+  pol: { bg: '#E1F5EE', tx: '#085041', bk: '#1D9E75', label: 'Polar (S T C N Q)', role: '' },
+  aro: { bg: '#EEEDFE', tx: '#3C3489', bk: '#534AB7', label: 'Aromatic (F Y W)', role: '' },
+  pos: { bg: '#FAECE7', tx: '#712B13', bk: '#D85A30', label: 'Basic + (H K R)', role: '' },
+  neg: { bg: '#E6F1FB', tx: '#0C447C', bk: '#378ADD', label: 'Acidic \u2212 (D E)', role: '' }
 };
 
 /* Amino acid → three-letter abbreviation */
@@ -126,23 +126,23 @@ const A3 = {
 
 /* Amino acid → short description */
 const AB = {
-  G: 'Smallest amino acid. Extreme flexibility — found in tight turns and loops.',
-  A: 'Simple and compact. A helix-lover — the most common residue in α-helices.',
+  G: 'Smallest amino acid. Extreme flexibility, found in tight turns and loops.',
+  A: 'Simple and compact. A helix-lover, the most common residue in α-helices.',
   V: 'Branched and bulky. Prefers buried β-sheets; resists helix formation.',
-  P: 'The only cyclic residue. Acts as a structural "kink" — breaks helices and introduces rigid turns.',
+  P: 'The only cyclic residue. Acts as a structural "kink" that breaks helices and introduces rigid turns.',
   L: 'Long hydrophobic side chain. A workhorse in protein cores and coiled-coils.',
   I: 'Branched at Cβ like Val. Strong β-sheet preference; common in membrane proteins.',
   M: 'Flexible sulfur-containing chain. Often the start codon residue (initiator Met).',
-  S: 'Small polar hydroxyl. Frequent phosphorylation site — a key signaling switch.',
+  S: 'Small polar hydroxyl. Frequent phosphorylation site, a key signaling switch.',
   T: 'Polar with a methyl branch. Also a phosphorylation target; common in glycoproteins.',
   F: 'Benzene ring, no hydroxyl. Drives hydrophobic packing; participates in π-stacking.',
   C: 'Thiol side chain. Forms disulfide bonds (S–S) that cross-link and stabilize structure.',
   N: 'Short polar amide. Caps helix ends; common in N-linked glycosylation sites (N-X-S/T).',
   Q: 'Longer polar amide. Participates in coiled-coil "polar layers" and hydrogen-bond networks.',
-  Y: 'Phenol ring — aromatic + hydroxyl. Phosphorylation target in kinase signaling cascades.',
-  H: 'Imidazole ring, pKa ≈ 6. Switches charge near physiological pH — critical in enzyme catalysis.',
+  Y: 'Phenol ring (aromatic + hydroxyl). Phosphorylation target in kinase signaling cascades.',
+  H: 'Imidazole ring, pKa ≈ 6. Switches charge near physiological pH, critical in enzyme catalysis.',
   K: 'Long flexible amine. Ubiquitination and acetylation target; key in histone regulation.',
-  W: 'Largest amino acid. Indole ring absorbs UV at 280 nm — anchors membrane-protein interfaces.',
+  W: 'Largest amino acid. Indole ring absorbs UV at 280 nm; anchors membrane-protein interfaces.',
   D: 'Short acidic carboxyl. Chelates metal ions (Ca²⁺, Mg²⁺); common in enzyme active sites.',
   E: 'Longer acidic carboxyl. Strong helix former; prominent in salt bridges with Arg/Lys.',
   R: 'Guanidinium group, always charged. Forms bidentate salt bridges; reads DNA in the major groove.'
@@ -158,7 +158,7 @@ const HY = {
   H: -3.2, D: -3.5, E: -3.5, N: -3.5, Q: -3.5, K: -3.9, R: -4.5
 };
 
-/* Note → frequency (Hz) — chromatic C4–G5 + pentatonic C3–A6 */
+/* Note → frequency (Hz) - chromatic C4–G5 + pentatonic C3–A6 */
 const FR = {
   'C4': 261.63, 'C#4': 277.18, 'D4': 293.66, 'D#4': 311.13, 'E4': 329.63,
   'F4': 349.23, 'F#4': 369.99, 'G4': 392.00, 'G#4': 415.30, 'A4': 440.00,
@@ -179,39 +179,74 @@ const FR = {
  */
 const COMPLEXES = [
   {
-    id: 'insulin-dimer',
-    name: 'Insulin dimer',
+    id: 'insulin-AB',
+    name: 'Insulin A\u2194B (intra-hormone)',
     pdb: '4INS',
-    desc: 'Insulin molecules naturally pair up when stored in the pancreas. This self-pairing controls how quickly insulin is released into the blood. Understanding this interface is how scientists engineered fast-acting insulins that millions of diabetics depend on daily.',
-    chainA: { name: 'Insulin B', seq: 'FVNQHLCGSHLVEALYLVCGERGFFYTPKT', ss: 'CCCCCCCCHHHHHHHHHHHHCCCEEECCCC' },
-    chainB: { name: 'Insulin B\u2032' },
+    pdbChain: 'A',
+    pdbStartResi: 1,
+    partnerChain: 'B',
+    desc: 'Insulin is built from two different chains (the 21-aa A-chain and 30-aa B-chain) stitched together by two interchain disulfide bonds (A7\u2013B7 and A20\u2013B19) and a hydrophobic core. Play the A-chain melody and hear the B-chain partner chime in wherever the two halves physically touch inside one insulin molecule.',
+    chainA: { name: 'Insulin A', seq: 'GIVEQCCTSICSLYQLENYCN', ss: 'CCCHHHHHHHHCCCCCHHHHC' },
+    chainB: { name: 'Insulin B' },
+    // [idxA, partnerAA, dist, partnerResi]
     contacts: [
-      [12, 'E', 4.8],   // E13→E13' weak electrostatic
-      [13, 'A', 4.2],   // A14→A14'
-      [16, 'L', 3.9],   // L17→L17' hydrophobic
-      [23, 'F', 3.5],   // F24→F24' aromatic stacking
-      [24, 'F', 3.4],   // F25→F25' aromatic stacking
-      [25, 'Y', 3.6],   // Y26→Y26' aromatic–hydroxyl
+      [1,  'V', 3.7, 12],  // I2  \u2194 V12  hydrophobic core
+      [2,  'F', 4.0, 24],  // V3  \u2194 F24
+      [6,  'C', 3.0,  7],  // C7  \u2194 C7   interchain disulfide
+      [12, 'Y', 3.9, 16],  // L13 \u2194 Y16
+      [15, 'L', 4.0, 11],  // L16 \u2194 L11
+      [18, 'F', 3.6, 24],  // Y19 \u2194 F24  aromatic stack
+      [19, 'C', 3.0, 19],  // C20 \u2194 C19  interchain disulfide
+      [20, 'F', 4.5,  1],  // N21 \u2194 F1   C-term \u2194 N-term contact
+    ]
+  },
+  {
+    id: 'spike-ace2',
+    name: 'Spike\u2013ACE2 (COVID-19)',
+    pdb: '6M0J',
+    pdbChain: 'E',
+    pdbStartResi: 438,
+    partnerChain: 'A',
+    desc: 'The SARS-CoV-2 spike protein grabs human cells via the ACE2 receptor: the molecular handshake that started the COVID-19 pandemic. This interface was the bullseye for vaccine design and the mutation site (N501Y, E484K, L452R\u2026) that drove each pandemic wave.',
+    chainA: { name: 'Spike RBM', seq: 'SNNLDSKVGGNYNYLYRLFRKSNLKPFERDISTEIYQAGSTPCNGVEGFNCYFPLQSYGFQPTNGVGYQPY', ss: 'CCCCCCCCEEEEEECHHHHCCCCCECCCEEECCCCCHHHCCCCCCCCHHEECCCCCCCCCCECCEECCEEE' },
+    chainB: { name: 'ACE2' },
+    // indices are 0-indexed into the RBM (seq starts at spike residue S438)
+    // [idxA, partnerAA, dist, partnerResi (on ACE2 chain A)]
+    contacts: [
+      [15, 'H', 3.4,  34],   // Y453 → H34
+      [48, 'M', 3.6,  82],   // F486 → M82  hydrophobic
+      [49, 'Q', 2.9,  24],   // N487 → Q24  H-bond
+      [51, 'Y', 3.5,  83],   // Y489 → Y83  aromatic stack
+      [55, 'E', 3.3,  35],   // Q493 → E35  H-bond
+      [57, 'K', 3.5, 353],   // Y495 → K353
+      [60, 'Y', 3.2,  41],   // Q498 → Y41
+      [62, 'D', 3.0, 355],   // T500 → D355 H-bond
+      [63, 'Y', 3.1,  41],   // N501 → Y41  (N501Y hotspot)
+      [67, 'R', 3.6, 393],   // Y505 → R393
     ]
   },
   {
     id: 'p53-mdm2',
     name: 'p53–MDM2',
     pdb: '1YCR',
-    desc: 'p53 is the "guardian of the genome" — it tells damaged cells to stop growing or self-destruct. MDM2 keeps p53 in check by binding and silencing it. In over half of all cancers, this balance is broken. Cancer drugs are being designed to block this exact handshake and reactivate p53.',
+    pdbChain: 'B',
+    pdbStartResi: 15,
+    partnerChain: 'A',
+    desc: 'p53 is the "guardian of the genome" - it tells damaged cells to stop growing or self-destruct. MDM2 keeps p53 in check by binding and silencing it. In over half of all cancers, this balance is broken. Cancer drugs are being designed to block this exact handshake and reactivate p53.',
     chainA: { name: 'p53', seq: 'SQETFSDLWKLLPEN', ss: 'CCCCHHHHHHHHCCC' },
     chainB: { name: 'MDM2' },
+    // [idxA, partnerAA, dist, partnerResi (on MDM2 chain A)]
     contacts: [
-      [2,  'K', 4.2],   // E17→K94  salt bridge
-      [3,  'H', 3.8],   // T18→H96  hydrogen bond
-      [4,  'I', 3.4],   // F19→I61  into hydrophobic pocket
-      [5,  'M', 4.0],   // S20→M62
-      [6,  'Q', 3.9],   // D21→Q72
-      [7,  'F', 3.5],   // L22→F55  hydrophobic
-      [8,  'L', 3.1],   // W23→L54  deepest pocket insertion
-      [9,  'L', 4.2],   // K24→L57
-      [10, 'Y', 3.6],   // L25→Y100
-      [11, 'I', 3.3],   // L26→I99  hydrophobic anchor
+      [2,  'K', 4.2,  94],   // E17→K94  salt bridge
+      [3,  'H', 3.8,  96],   // T18→H96  hydrogen bond
+      [4,  'I', 3.4,  61],   // F19→I61  into hydrophobic pocket
+      [5,  'M', 4.0,  62],   // S20→M62
+      [6,  'Q', 3.9,  72],   // D21→Q72
+      [7,  'F', 3.5,  55],   // L22→F55  hydrophobic
+      [8,  'L', 3.1,  54],   // W23→L54  deepest pocket insertion
+      [9,  'L', 4.2,  57],   // K24→L57
+      [10, 'Y', 3.6, 100],   // L25→Y100
+      [11, 'I', 3.3,  99],   // L26→I99  hydrophobic anchor
     ]
   }
 ];

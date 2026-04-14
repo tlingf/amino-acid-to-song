@@ -21,7 +21,7 @@ const alignmentsEl = document.getElementById('alignments');
    Supports:
    1. Plain sequences, one per line
    2. FASTA (>name on its own line, sequence on following lines)
-   3. TSV/CSV (name<tab>sequence or name,sequence per line — e.g. pasted from a spreadsheet)
+   3. TSV/CSV (name<tab>sequence or name,sequence per line, e.g. pasted from a spreadsheet)
 */
 function getSequences() {
   const text = seqInputEl.value.trim();
@@ -201,7 +201,7 @@ function renderAlignmentBlock(a1, a2, name1, name2, stats, mutations) {
   // Store data for re-rendering on view toggle
   block._alignData = { a1, a2, name1, name2 };
 
-  // Mutations list — plain text, comma separated
+  // Mutations list: plain text, comma separated
   if (mutations.length > 0) {
     const mutDiv = document.createElement('div');
     mutDiv.className = 'align-mutations';

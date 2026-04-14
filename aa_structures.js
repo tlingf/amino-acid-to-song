@@ -1,10 +1,10 @@
 /*
  * Amino Acid 2D Structure Data & SVG Rendering
  *
- * mkBB()            — backbone atom/bond template
- * SC                — side-chain atoms & bonds per AA
- * renderStructSVG() — full structure (backbone + side chain) for AA cards
- * renderSideChainSVG() — compact side chain only, for panel reference
+ * mkBB()            - backbone atom/bond template
+ * SC                - side-chain atoms & bonds per AA
+ * renderStructSVG() - full structure (backbone + side chain) for AA cards
+ * renderSideChainSVG() - compact side chain only, for panel reference
  */
 
 function mkBB() {

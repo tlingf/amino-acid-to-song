@@ -52,7 +52,7 @@ Three available mappings (switchable from UI):
                   Y(G#4)↔W(C#5) perfect fourth
 
 3. PHYSICOCHEMICAL
-   Residue size/polarity order — small nonpolar at low end, charged at high end.
+   Residue size/polarity order: small nonpolar at low end, charged at high end.
 
    G→C4  A→C#4  V→D4  P→D#4  L→E4  I→F4  M→F#4  S→G4  T→G#4  F→A4
    C→A#4  N→B4  Q→C5  Y→C#5  H→D5  K→D#5  W→E5  D→F5  E→F#5  R→G5
