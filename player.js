@@ -880,7 +880,7 @@ function initPdbViewer(pdbId, containerId, opts = {}) {
     applyChainStyle(viewer, c => ({ cartoon: { color: c }, stick: { color: lightenHex(c), opacity: 0.35, radius: 0.12 } }));
     viewer.zoomTo();
     viewer.render();
-    viewer.spin('y', 0.5);
+    viewer.spin('y', 0.25);
     activeViewer = viewer;
     activeViewCS = null;
     activeViewStyleIdx = 0;
@@ -1178,7 +1178,7 @@ function showFold(pdbData, seqStr) {
     viewer.setStyle({}, { cartoon: { colorscheme: foldCS }, stick: { colorscheme: foldCS, opacity: 0.35, radius: 0.12 } });
     viewer.zoomTo();
     viewer.render();
-    viewer.spin('y', 1);
+    viewer.spin('y', 0.25);
     activeViewer = viewer;
     activeViewCS = foldCS;
     activeViewStyleIdx = 0;
@@ -1518,7 +1518,7 @@ function showProteinMatch(results, activeIdx) {
       viewer.setStyle({}, { cartoon: { color: 'spectrum' }, stick: { color: 'spectrum', opacity: 0.35, radius: 0.12 } });
       viewer.zoomTo();
       viewer.render();
-      viewer.spin('y', 1);
+      viewer.spin('y', 0.25);
     } catch {
       viewerDiv.innerHTML = '<img class="info-panel-img" src="https://cdn.rcsb.org/images/structures/' + top.pdbId.toLowerCase() + '_assembly-1.jpeg" alt="structure" onerror="this.style.display=\'none\'" style="width:100%;height:100%;object-fit:cover"/>';
     }
