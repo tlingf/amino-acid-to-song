@@ -32,9 +32,9 @@ body.compose-active .compose-bar {
   background: #eee8ff;
 }
 
-h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem }
-.h1-sub { font-size: 0.85rem; font-weight: 400; color: var(--color-text-secondary); margin-left: 0.5rem }
-.blurb { font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; margin-bottom: 0.25rem; max-width: 600px }
+h1 { font-size: 1.6rem; font-weight: 600; margin-bottom: 0.25rem }
+.h1-sub { font-size: 1.05rem; font-weight: 400; color: var(--color-text-secondary); margin-left: 0.5rem }
+.blurb { font-size: 15px; color: var(--color-text-secondary); line-height: 1.5; margin-bottom: 0.25rem; max-width: 600px }
 .blurb-accent { color: #6b7fa3 }
 
 /* Layout */
