@@ -716,8 +716,11 @@ function aaFromKey(key, note) {
 }
 
 function updateKbInfo() {
-  if (kbDown.size === 0) { showAADisplay([]); return; }
   const aas = [...kbDown.entries()].map(([k, n]) => aaFromKey(k, n)).filter(Boolean);
+  for (const note of midiDown.values()) {
+    const aa = NA[note];
+    if (aa) aas.push(aa);
+  }
   showAADisplay(aas);
 }
 
@@ -767,11 +770,13 @@ function handleMIDIMessage(msg) {
     const vel = 0.4 + 0.6 * (v / 127);
     playNote(FR[note], 0.5, hySustain(aa), vel);
     document.querySelectorAll('.' + cls).forEach(el => el.classList.add('lit'));
+    updateKbInfo();
     if (!composing) toggleCompose();
     if (aa) addComposeAA(aa);
   } else if (cmd === 0x80 || (cmd === 0x90 && v === 0)) {
     midiDown.delete(n);
     document.querySelectorAll('.' + cls).forEach(el => el.classList.remove('lit'));
+    updateKbInfo();
   }
 }
 
