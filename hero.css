@@ -1,0 +1,542 @@
+/* ──────────────────────── Hero + shell styles ──────────────────────── */
+
+:root {
+  --accent-purple: #534AB7;
+  --accent-green: #3a8a5c;
+  --hero-bg: #faf8f3;
+  --hero-ink: #1a1a1a;
+  --hero-ink-soft: #4a4a4a;
+  --hero-ink-faint: #8a8a8a;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  /* App container widens; hero manages its own spacing */
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  background: var(--color-background-primary);
+}
+
+/* ───── Hero ───── */
+.hero {
+  min-height: 100vh;
+  background: var(--hero-bg);
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(83, 74, 183, 0.06) 0, transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(58, 138, 92, 0.05) 0, transparent 45%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem 2rem;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+
+.hero-inner {
+  max-width: 720px;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hero-ink-soft);
+  font-weight: 500;
+  padding: 5px 12px 5px 10px;
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: 100px;
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(4px);
+  margin-bottom: 2rem;
+}
+
+.hero-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--accent-purple);
+  box-shadow: 0 0 0 3px rgba(83,74,183,0.15);
+  animation: heroPulse 2s ease-in-out infinite;
+}
+
+@keyframes heroPulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(83,74,183,0.15); }
+  50% { box-shadow: 0 0 0 6px rgba(83,74,183,0.05); }
+}
+
+.hero-title {
+  font-size: clamp(2.4rem, 6vw, 4.2rem);
+  line-height: 1.02;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--hero-ink);
+  margin-bottom: 1.25rem;
+  text-wrap: balance;
+}
+
+.hero-accent {
+  color: var(--accent-purple);
+  font-style: italic;
+  position: relative;
+  display: inline-block;
+}
+
+.hero-accent::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0.06em;
+  height: 0.18em;
+  background: linear-gradient(90deg, rgba(83,74,183,0.2), rgba(83,74,183,0.35), rgba(83,74,183,0.2));
+  border-radius: 4px;
+  z-index: -1;
+}
+
+.hero-lede {
+  font-size: clamp(1.05rem, 1.6vw, 1.2rem);
+  line-height: 1.55;
+  color: var(--hero-ink-soft);
+  max-width: 560px;
+  margin-bottom: 2rem;
+  text-wrap: pretty;
+}
+
+.hero-lede strong {
+  color: var(--hero-ink);
+  font-weight: 600;
+}
+
+/* ───── Music/AA analogy card ───── */
+.hero-analogy {
+  background: #fff;
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem 1.4rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.02), 0 4px 16px rgba(0,0,0,0.03);
+  max-width: 560px;
+}
+
+.hero-analogy-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 14px;
+  color: var(--hero-ink-soft);
+  padding: 6px 0;
+}
+
+.hero-analogy-row + .hero-analogy-row {
+  border-top: 0.5px dashed var(--color-border-tertiary);
+}
+
+.hero-analogy-label {
+  width: 80px;
+  font-weight: 500;
+  color: var(--hero-ink-faint);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.hero-notes, .hero-aas {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.hero-notes span {
+  font-size: 20px;
+  color: var(--hero-ink-soft);
+  font-family: serif;
+}
+
+.hero-aas span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px; height: 24px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+
+.hero-notes em, .hero-aas em {
+  font-style: normal;
+  font-size: 12px;
+  color: var(--hero-ink-faint);
+  margin-left: 6px;
+}
+
+.hero-arrow {
+  text-align: center;
+  font-size: 16px;
+  color: var(--hero-ink-faint);
+  margin: 6px 0 4px;
+}
+
+.hero-analogy-punch {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--hero-ink);
+  text-align: center;
+  margin: 0;
+  font-weight: 500;
+  text-wrap: balance;
+}
+
+.hero-analogy-punch em {
+  color: var(--accent-purple);
+  font-style: italic;
+  font-weight: 600;
+}
+
+.hero-sub {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--hero-ink-soft);
+  max-width: 560px;
+  margin-bottom: 2rem;
+  text-wrap: pretty;
+}
+
+.hero-sub em {
+  color: var(--accent-purple);
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* ───── CTAs ───── */
+.hero-cta-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 3rem;
+}
+
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 22px;
+  border-radius: 100px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+  font-family: var(--font-sans);
+  border: 1px solid var(--hero-ink);
+  background: var(--hero-ink);
+  color: #fff;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+}
+
+.hero-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.hero-cta-arrow {
+  display: inline-block;
+  transition: transform 0.2s;
+}
+
+.hero-cta:hover .hero-cta-arrow {
+  transform: translateY(2px);
+}
+
+.hero-cta-alt {
+  background: transparent;
+  color: var(--hero-ink);
+  border-color: var(--color-border-secondary);
+  box-shadow: none;
+}
+
+.hero-cta-alt:hover {
+  background: #fff;
+  border-color: var(--hero-ink);
+}
+
+/* Scroll hint at bottom */
+.hero-scroll-hint {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hero-ink-faint);
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.15s;
+}
+
+.hero-scroll-hint:hover { opacity: 1; }
+
+.hero-scroll-chevron {
+  width: 12px; height: 12px;
+  border-right: 1.5px solid var(--hero-ink-faint);
+  border-bottom: 1.5px solid var(--hero-ink-faint);
+  transform: rotate(45deg);
+  animation: heroBob 1.8s ease-in-out infinite;
+}
+
+@keyframes heroBob {
+  0%, 100% { transform: rotate(45deg) translate(0,0); }
+  50% { transform: rotate(45deg) translate(3px,3px); }
+}
+
+/* ───── App wrapper ───── */
+.app-wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+  scroll-margin-top: 0;
+}
+
+/* ───── Mode tabs ───── */
+.mode-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 1rem;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  padding-bottom: 0;
+}
+
+.mode-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -0.5px;
+  font-family: var(--font-sans);
+  color: var(--hero-ink-faint);
+  text-align: left;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  border-radius: 8px 8px 0 0;
+}
+
+.mode-tab:hover {
+  background: rgba(0,0,0,0.025);
+  color: var(--hero-ink-soft);
+}
+
+.mode-tab.active {
+  color: var(--hero-ink);
+  border-bottom-color: var(--hero-ink);
+}
+
+.mode-tab#tabCompose.active {
+  border-bottom-color: var(--accent-purple);
+  color: var(--accent-purple);
+}
+
+.mode-tab-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.mode-tab-label { display: flex; flex-direction: column; gap: 1px; line-height: 1.2; }
+
+.mode-tab-title { font-size: 14px; font-weight: 600; }
+
+.mode-tab-sub {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--hero-ink-faint);
+  opacity: 0.9;
+}
+
+.mode-tab.active .mode-tab-sub { opacity: 1; }
+
+/* ───── Mode help strip ───── */
+.mode-help {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  margin-bottom: 1rem;
+  background: #f7f5ee;
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--hero-ink-soft);
+}
+
+body.compose-mode .mode-help {
+  background: #f0eeff;
+  color: #3e3590;
+}
+
+.mode-help-step { display: inline-flex; align-items: center; gap: 6px; }
+.mode-help-step b { font-weight: 700; }
+.mode-help-sep { color: var(--hero-ink-faint); }
+.mode-help kbd {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 1px 6px;
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--hero-ink);
+}
+
+/* ───── Panel labels ───── */
+.panel-label {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hero-ink-faint);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* ───── Listen-mode pickers ───── */
+.listen-pickers {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 10px 12px;
+  background: #faf8f3;
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.listen-pickers .examples-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--hero-ink-faint);
+}
+
+.seq-input-hint {
+  font-size: 11px;
+  color: var(--hero-ink-faint);
+  white-space: nowrap;
+}
+
+body.compose-mode .listen-pickers,
+body.compose-mode #seqInputRow,
+body.compose-mode .seq-mel-wrap,
+body.compose-mode #bindingCaption {
+  display: none !important;
+}
+
+/* ───── Compose empty state (first-run) ───── */
+.compose-empty {
+  background: #f6f3ff;
+  border: 1px dashed #c8c1e8;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 6px 0 10px;
+}
+
+.compose-empty-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-purple);
+  margin-bottom: 8px;
+}
+
+.compose-empty-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.compose-empty-step {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--hero-ink-soft);
+}
+
+.compose-empty-step b { color: var(--hero-ink); font-weight: 600; }
+
+.compose-empty-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--accent-purple);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.compose-empty kbd {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  padding: 1px 5px;
+  border: 0.5px solid #c8c1e8;
+  border-radius: 3px;
+  background: #fff;
+  color: var(--accent-purple);
+}
+
+/* hide in listen mode */
+body:not(.compose-mode) .compose-empty,
+body.compose-mode.has-compose-seq .compose-empty {
+  display: none !important;
+}
+
+/* body class triggers are set in shell.js */
+
+/* ───── Tighten the existing pmp grid so listen mode reads cleanly ───── */
+.pmp { margin-top: 0; padding-top: 0; }
+
+/* Raise the prominence of the main play button in listen mode */
+.controls .play-btn {
+  box-shadow: 0 2px 0 rgba(58,138,92,0.25);
+  padding: 8px 22px;
+}
+
+/* ───── Mobile ───── */
+@media (max-width: 720px) {
+  .hero {
+    min-height: auto;
+    padding: 2.5rem 1.25rem 5rem;
+  }
+  .hero-title { font-size: 2.2rem; line-height: 1.05; }
+  .hero-lede { font-size: 1rem; }
+  .hero-analogy { padding: 1rem 1.1rem; }
+  .hero-analogy-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .hero-analogy-label { width: auto; }
+  .hero-cta-row { flex-direction: column; align-items: stretch; }
+  .hero-cta { justify-content: center; }
+  .hero-scroll-hint { bottom: 14px; }
+
+  .mode-tabs { gap: 0; }
+  .mode-tab { flex: 1; padding: 10px 8px 12px; gap: 6px; }
+  .mode-tab-sub { display: none; }
+
+  .mode-help { font-size: 11px; }
+
+  .app-wrap { padding: 1rem 0.5rem 3rem; }
+}

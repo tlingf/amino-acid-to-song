@@ -3,77 +3,154 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Protein Melody Player | Turn Amino Acid Sequences into Music</title>
-<meta name="description" content="Interactive Protein Melody Player that converts amino acid sequences into music, supports harmony from protein contacts, and includes AI-assisted composition with 3D structure viewing."/>
-<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"/>
-<link rel="canonical" href="https://proteinplayer.com/"/>
-<meta property="og:type" content="website"/>
-<meta property="og:site_name" content="Protein Melody Player"/>
-<meta property="og:title" content="Protein Melody Player"/>
-<meta property="og:description" content="Turn amino acid sequences into melody, explore protein-binding harmony, and compose sequences with live 3D folding visualization."/>
-<meta property="og:url" content="https://proteinplayer.com/"/>
-<meta property="og:locale" content="en_US"/>
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Protein Melody Player"/>
-<meta name="twitter:description" content="Turn amino acid sequences into melody and explore protein structure through music."/>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "Protein Melody Player",
-  "url": "https://proteinplayer.com/",
-  "description": "A static web app that maps amino acid sequences to musical notes, supports harmony mode for binding contacts, and enables sequence composition with 3D structure visualization.",
-  "applicationCategory": "EducationalApplication",
-  "operatingSystem": "Any",
-  "inLanguage": "en",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  }
-}
-</script>
+<title>Protein Melody Player — listen to the music of life</title>
 <link rel="stylesheet" href="styles.css"/>
+<link rel="stylesheet" href="hero.css"/>
 <script src="https://3Dmol.org/build/3Dmol-min.js" defer></script>
 </head>
 <body>
-<header>
-<h1>AA Melody Player 🎵 <span class="h1-sub">Listen to your proteins, or compose them</span></h1>
-<p class="blurb">Amino acids (aa), <span class="blurb-accent">like notes in a song</span>, form sequences that fold and then bind to each other, <span class="blurb-accent">like harmony in music</span>, that create the machinery of life. Amazingly, almost every protein is built from just <span class="blurb-accent">20 amino acids</span>.</p>
-</header>
 
-<main>
+<!-- ─────────────────────────────  HERO  ───────────────────────────── -->
+<section class="hero" id="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">
+      <span class="hero-dot"></span>
+      A playful intro to proteins - core of molecular biology
+    </div>
+
+    <h1 class="hero-title">
+      What if every protein <br/>
+      was a <span class="hero-accent">song</span>?
+    </h1>
+
+    <p class="hero-lede">
+      Your body runs on <strong>proteins</strong>: tiny molecular machines that
+      carry oxygen, fight viruses, read your DNA. Each one is a chain of
+      <strong>amino acids</strong>, picked from just
+      <strong>20 options</strong>, represented as letters.
+    </p>
+
+    <div class="hero-analogy">
+      <div class="hero-analogy-row">
+        <span class="hero-analogy-label">Music has</span>
+        <span class="hero-notes">
+          <span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span>
+          <em>12 notes in an octave</em>
+        </span>
+      </div>
+      <div class="hero-analogy-row">
+        <span class="hero-analogy-label">Life has</span>
+        <span class="hero-aas">
+          <span style="background:#EFD8C0;color:#8B5A2B">A</span>
+          <span style="background:#D5E5CC;color:#3A6B35">S</span>
+          <span style="background:#E6D3EA;color:#6B3F8E">W</span>
+          <span style="background:#F4CFCF;color:#A03838">K</span>
+          <span style="background:#D0DCEF;color:#355A8C">E</span>
+          <em>20 amino acids</em>
+        </span>
+      </div>
+      <div class="hero-arrow">↓</div>
+      <p class="hero-analogy-punch">
+        So if we give each amino acid a note,
+        we can <em>hear</em> any protein as a melody.
+      </p>
+    </div>
+
+    <p class="hero-sub">
+      Play famous proteins like hemoglobin. Hear how two proteins
+      <em>harmonize</em> when they bind. Or compose your own sequence and
+      watch it fold into a 3D shape.
+    </p>
+
+    <div class="hero-cta-row">
+      <button class="hero-cta" onclick="scrollToApp()">
+        <span>Start listening</span>
+        <span class="hero-cta-arrow">↓</span>
+      </button>
+      <button class="hero-cta hero-cta-alt" onclick="scrollToApp('compose')">
+        <span>Or compose your own</span>
+      </button>
+    </div>
+
+    <div class="hero-scroll-hint" onclick="scrollToApp()">
+      <span>scroll to begin</span>
+      <div class="hero-scroll-chevron"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────  APP  ───────────────────────────── -->
+<main class="app-wrap" id="app">
+
+  <!-- Mode switcher (replaces the old in-controls 'compose mode' button) -->
+  <nav class="mode-tabs" role="tablist" aria-label="Mode">
+    <button class="mode-tab active" id="tabListen" role="tab" aria-selected="true" onclick="switchTab('listen')">
+      <span class="mode-tab-icon">🎵</span>
+      <span class="mode-tab-label">
+        <span class="mode-tab-title">Listen</span>
+        <span class="mode-tab-sub">Play real proteins &amp; binding pairs</span>
+      </span>
+    </button>
+    <button class="mode-tab" id="tabCompose" role="tab" aria-selected="false" onclick="switchTab('compose')">
+      <span class="mode-tab-icon">🎹</span>
+      <span class="mode-tab-label">
+        <span class="mode-tab-title">Compose</span>
+        <span class="mode-tab-sub">Build a sequence &amp; fold it in 3D</span>
+      </span>
+    </button>
+  </nav>
+
+  <!-- Per-mode helper strip -->
+  <div class="mode-help" id="modeHelp">
+    <span class="mode-help-step"><b>1.</b> Pick a protein below</span>
+    <span class="mode-help-sep">→</span>
+    <span class="mode-help-step"><b>2.</b> Press <kbd>play sequence</kbd></span>
+    <span class="mode-help-sep">→</span>
+    <span class="mode-help-step"><b>3.</b> Watch it light up in 3D</span>
+  </div>
+
 <div class="pmp">
+<!-- LEFT: mapping panel -->
 <div class="mapping-panel">
-  <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px">Choose key mapping</div>
+  <div class="panel-label">Key mapping</div>
   <div class="presets" id="mappingBtns"></div>
   <div class="legend" id="legend"></div>
-  <div class="detail-toggle" id="detailToggle" onclick="toggleDetails()">show details</div>
+  <div class="detail-toggle" id="detailToggle" onclick="toggleDetails()">show all 20 mappings</div>
   <div id="panelRef" style="display:none"></div>
 </div>
+
+<!-- CENTER: main panel -->
 <div class="main-panel">
-  <div class="examples-row">
+
+  <!-- LISTEN-mode pickers (shown in listen mode) -->
+  <div class="listen-pickers" id="listenPickers">
     <div id="harmonyWrap" class="examples-group">
-      <span class="examples-label">binding</span>
+      <span class="examples-label">binding pair</span>
       <div class="presets" id="harmonyBtns"></div>
     </div>
     <div class="examples-group">
-      <span class="examples-label">proteins</span>
+      <span class="examples-label">protein</span>
       <div class="presets" id="presets"></div>
     </div>
   </div>
-  <div class="seq-input-row">
-    <input type="text" id="seqInput" placeholder="Paste amino acid sequence (one-letter codes)..." maxlength="300" oninput="onSeqInput()" onkeydown="if(event.key==='Enter')loadAndPlay()"/>
+
+  <div class="seq-input-row" id="seqInputRow">
+    <span class="seq-input-hint">or paste:</span>
+    <input type="text" id="seqInput" placeholder="e.g. MVHLTPEEKSAVTALWGKVNV..." maxlength="300" oninput="onSeqInput()" onkeydown="if(event.key==='Enter')loadAndPlay()"/>
     <button type="button" onclick="loadAndPlay()">submit</button>
   </div>
+
   <div id="bindingCaption" class="binding-caption" style="display:none"></div>
+
   <div class="seq-mel-wrap">
     <div class="seq-row-labels" id="seqRowLabels"></div>
     <div class="seq-mel" id="seqMel"></div>
   </div>
+
   <div class="controls">
     <button class="play-btn" id="playBtn" onclick="togglePlay()">🎵 play sequence</button>
-    <button class="compose-btn" id="composeBtn" onclick="toggleCompose()">🎹 compose mode</button>
+    <!-- Original compose-mode button retained but hidden; tabs now control mode -->
+    <button class="compose-btn" id="composeBtn" onclick="toggleCompose()" style="display:none">🎹 compose mode</button>
     <div class="tempo-row">
       <span>tempo</span>
       <input type="range" min="40" max="300" value="120" step="1" id="tempoSlider" style="width:100px" oninput="document.getElementById('tempoOut').textContent=this.value"/>
@@ -83,6 +160,7 @@
       <span class="rhythm-ss-hint" id="rhythmHint"></span>
     </label>
   </div>
+
   <div class="compose-bar" id="composeBar" style="display:none">
     <span class="compose-label">composing</span>
     <span class="compose-count" id="composeCount">0 aa</span>
@@ -92,6 +170,29 @@
     <button class="compose-action compose-back" id="backComposeBtn" onclick="backToComposing()" style="display:none">← back to composing</button>
     <button class="compose-fold" id="foldBtn" onclick="foldSequence()" disabled style="margin-left:auto">fold it!</button>
   </div>
+
+  <!-- COMPOSE empty-state: visible before any keys pressed in compose mode -->
+  <div class="compose-empty" id="composeEmpty" style="display:none">
+    <div class="compose-empty-title">Compose a protein, note by note</div>
+    <div class="compose-empty-body">
+      <div class="compose-empty-step">
+        <span class="compose-empty-num">1</span>
+        <span><b>Press keys on the piano</b> (or your computer keyboard).
+          Each key is an amino acid.</span>
+      </div>
+      <div class="compose-empty-step">
+        <span class="compose-empty-num">2</span>
+        <span><b>Follow the glowing keys</b> — they suggest residues that are
+          statistically likely to come next in real proteins.</span>
+      </div>
+      <div class="compose-empty-step">
+        <span class="compose-empty-num">3</span>
+        <span><b>Once you have 20+ residues</b>, hit <kbd>fold it!</kbd> to
+          predict a 3D structure with ESMFold.</span>
+      </div>
+    </div>
+  </div>
+
   <div class="piano-area">
     <div class="compose-seq" id="composeSeq"></div>
     <div class="key-tooltip" id="keyTooltip"></div>
@@ -102,23 +203,24 @@
   <div class="aa-display" id="aaDisplay"></div>
   <span id="midiStatus" style="display:none;position:absolute;top:8px;right:12px;font-size:12px;color:var(--color-text-secondary);pointer-events:none"></span>
 </div>
+
+<!-- RIGHT: info panel -->
 <div class="info-panel" id="infoPanel">
-  <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px">protein info</div>
+  <div class="panel-label">What you're hearing</div>
   <div id="infoPanelContent">
-    <div class="info-panel-placeholder">select a preset or harmony complex</div>
+    <div class="info-panel-placeholder">select a preset or binding pair</div>
   </div>
 </div>
 </div>
-</main>
 
-<footer>
-<p class="footer-blurb"><a href="align.html">Try the Protein Sequence Aligner</a> · Have more ideas? <a href="https://github.com/tlingf/amino-acid-to-song" target="_blank" rel="noopener">Contribute on GitHub</a></p>
-</footer>
+<p class="footer-blurb">Have more ideas? <a href="https://github.com/tlingf/amino-acid-to-song" target="_blank" rel="noopener">Contribute on GitHub</a></p>
+</main>
 
 <script src="aa_mapping.js"></script>
 <script src="aa_structures.js"></script>
 <script src="aa_bigrams.js"></script>
 <script src="pdb_data.js"></script>
 <script src="player.js"></script>
+<script src="shell.js"></script>
 </body>
 </html>
