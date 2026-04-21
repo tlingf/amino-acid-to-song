@@ -6,20 +6,7 @@
 <title>Protein Melody Player — listen to the music of life</title>
 <link rel="stylesheet" href="styles.css"/>
 <link rel="stylesheet" href="hero.css"/>
-<link rel="stylesheet" href="styles_v2.css?v=5"/>
 <script src="https://3Dmol.org/build/3Dmol-min.js" defer></script>
-<script>
-/* v2: don't request Web MIDI at all. Keeps the console quiet AND avoids the
-   browser permission surface for users who don't have a MIDI keyboard.
-   (The app will still accept MIDI if the user explicitly enables it elsewhere,
-   but by default we short-circuit with an empty access object.) */
-(function() {
-  if (!navigator.requestMIDIAccess) return;
-  navigator.requestMIDIAccess = function() {
-    return Promise.resolve({ inputs: new Map(), outputs: new Map(), onstatechange: null });
-  };
-})();
-</script>
 </head>
 <body>
 
@@ -64,8 +51,8 @@
       </div>
       <div class="hero-arrow">↓</div>
       <p class="hero-analogy-punch">
-        If we mapped each amino acid to a note,
-        what would it sound like?
+        So if we give each amino acid a note,
+        we can <em>hear</em> any protein as a melody.
       </p>
     </div>
 
@@ -101,14 +88,14 @@
       <span class="mode-tab-icon">🎵</span>
       <span class="mode-tab-label">
         <span class="mode-tab-title">Listen</span>
-        <span class="mode-tab-sub">Hear real proteins as music</span>
+        <span class="mode-tab-sub">Play real proteins &amp; binding pairs</span>
       </span>
     </button>
     <button class="mode-tab" id="tabCompose" role="tab" aria-selected="false" onclick="switchTab('compose')">
       <span class="mode-tab-icon">🎹</span>
       <span class="mode-tab-label">
         <span class="mode-tab-title">Compose</span>
-        <span class="mode-tab-sub">Write your own &amp; fold it in 3D</span>
+        <span class="mode-tab-sub">Build a sequence &amp; fold it in 3D</span>
       </span>
     </button>
   </nav>
@@ -123,22 +110,13 @@
   </div>
 
 <div class="pmp">
-<!-- LEFT: mapping panel (collapsed by default for non-expert users) -->
-<div class="mapping-panel mapping-panel-collapsed" id="mappingPanel">
-  <button class="mapping-disclosure" id="mappingDisclosure" onclick="toggleMappingPanel()" aria-expanded="false">
-    <span class="mapping-disclosure-icon">▸</span>
-    <span class="mapping-disclosure-label">
-      <span class="mapping-disclosure-title">How does this work?</span>
-      <span class="mapping-disclosure-sub">See how amino acids become notes</span>
-    </span>
-  </button>
-  <div class="mapping-panel-content" id="mappingPanelContent">
-    <div class="panel-label">Key mapping</div>
-    <div class="presets" id="mappingBtns"></div>
-    <div class="legend" id="legend"></div>
-    <div class="detail-toggle" id="detailToggle" onclick="toggleDetails()">show all 20 mappings</div>
-    <div id="panelRef" style="display:none"></div>
-  </div>
+<!-- LEFT: mapping panel -->
+<div class="mapping-panel">
+  <div class="panel-label">Key mapping</div>
+  <div class="presets" id="mappingBtns"></div>
+  <div class="legend" id="legend"></div>
+  <div class="detail-toggle" id="detailToggle" onclick="toggleDetails()">show all 20 mappings</div>
+  <div id="panelRef" style="display:none"></div>
 </div>
 
 <!-- CENTER: main panel -->
@@ -175,19 +153,19 @@
     <button class="compose-btn" id="composeBtn" onclick="toggleCompose()" style="display:none">🎹 compose mode</button>
     <div class="tempo-row">
       <span>tempo</span>
-      <input type="range" min="40" max="300" value="120" step="1" id="tempoSlider" style="width:100px" oninput="onTempoChange(this.value)"/>
-      <span id="tempoOut" class="tempo-out" style="min-width:96px;font-weight:500;color:var(--color-text-primary)"><span class="tempo-word">medium</span> <span class="tempo-num">♪ = 120</span></span>
+      <input type="range" min="40" max="300" value="120" step="1" id="tempoSlider" style="width:100px" oninput="document.getElementById('tempoOut').textContent=this.value"/>
+      <span id="tempoOut" style="min-width:36px;font-weight:500;color:var(--color-text-primary)">120</span>
     </div>
     <label class="rhythm-toggle" id="rhythmToggle" style="display:none" title="Helix = 3/4 waltz, Strand = 4/4 march, Coil = free tempo">
       <span class="rhythm-ss-hint" id="rhythmHint"></span>
     </label>
   </div>
 
-  <!-- Compose toolbar: revealed only after the first keypress (see body.has-compose-seq) -->
   <div class="compose-bar" id="composeBar" style="display:none">
     <span class="compose-label">composing</span>
     <span class="compose-count" id="composeCount">0 aa</span>
-    <button class="compose-action compose-clear" onclick="clearCompose()">clear</button>
+    <button class="compose-action" onclick="undoCompose()">undo</button>
+    <button class="compose-action" onclick="clearCompose()">clear</button>
     <button class="compose-action" id="composePlayBtn" onclick="togglePlay()" disabled>▶ play</button>
     <button class="compose-action compose-back" id="backComposeBtn" onclick="backToComposing()" style="display:none">← back to composing</button>
     <button class="compose-fold" id="foldBtn" onclick="foldSequence()" disabled style="margin-left:auto">fold it!</button>
@@ -204,13 +182,13 @@
       </div>
       <div class="compose-empty-step">
         <span class="compose-empty-num">2</span>
-        <span><b>Follow the glowing keys</b> if you like — they suggest letters
-          that are statistically likely to come next in real proteins.</span>
+        <span><b>Follow the glowing keys</b> — they suggest residues that are
+          statistically likely to come next in real proteins.</span>
       </div>
       <div class="compose-empty-step">
         <span class="compose-empty-num">3</span>
-        <span><b>Once you have 20+ letters</b>, hit <kbd>fold it!</kbd> to
-          predict a 3D shape with an AI model (ESMFold).</span>
+        <span><b>Once you have 20+ residues</b>, hit <kbd>fold it!</kbd> to
+          predict a 3D structure with ESMFold.</span>
       </div>
     </div>
   </div>
@@ -230,7 +208,7 @@
 <div class="info-panel" id="infoPanel">
   <div class="panel-label">What you're hearing</div>
   <div id="infoPanelContent">
-    <div class="info-panel-placeholder">Pick a protein to hear its melody.</div>
+    <div class="info-panel-placeholder">select a preset or binding pair</div>
   </div>
 </div>
 </div>
@@ -243,6 +221,6 @@
 <script src="aa_bigrams.js"></script>
 <script src="pdb_data.js"></script>
 <script src="player.js"></script>
-<script src="shell_v2.js?v=8"></script>
+<script src="shell.js"></script>
 </body>
 </html>
