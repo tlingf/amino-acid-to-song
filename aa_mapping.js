@@ -207,7 +207,7 @@ const COMPLEXES = [
     pdbChain: 'E',
     pdbStartResi: 438,
     partnerChain: 'A',
-    desc: 'The SARS-CoV-2 spike protein grabs human cells via the ACE2 receptor: the molecular handshake that started the COVID-19 pandemic. This interface was the bullseye for vaccine design and the mutation site (N501Y, E484K, L452R\u2026) that drove each pandemic wave.',
+    desc: 'The 70-residue receptor-binding motif (RBM) shown here is the contact zone within the receptor-binding domain, itself a subdomain of the full 1,273-residue spike protein. The SARS-CoV-2 spike protein grabs human cells via the ACE2 receptor: the molecular handshake that started the COVID-19 pandemic. This interface was the bullseye for vaccine design and the mutation site (N501Y, E484K, L452R\u2026) that drove each pandemic wave.',
     chainA: { name: 'Spike RBM', seq: 'SNNLDSKVGGNYNYLYRLFRKSNLKPFERDISTEIYQAGSTPCNGVEGFNCYFPLQSYGFQPTNGVGYQPY', ss: 'CCCCCCCCEEEEEECHHHHCCCCCECCCEEECCCCCHHHCCCCCCCCHHEECCCCCCCCCCECCEECCEEE' },
     chainB: { name: 'ACE2' },
     // indices are 0-indexed into the RBM (seq starts at spike residue S438)
@@ -232,7 +232,7 @@ const COMPLEXES = [
     pdbChain: 'B',
     pdbStartResi: 15,
     partnerChain: 'A',
-    desc: 'p53 is the "guardian of the genome" - it tells damaged cells to stop growing or self-destruct. MDM2 keeps p53 in check by binding and silencing it. In over half of all cancers, this balance is broken. Cancer drugs are being designed to block this exact handshake and reactivate p53.',
+    desc: 'The 15 residues shown are the exact helix from p53\'s transactivation domain that MDM2 grabs to silence it: a peptide fragment of a 393-residue tumor suppressor. p53, the \u201Cguardian of the genome,\u201D triggers cell-cycle arrest or apoptosis in response to DNA damage; MDM2 binds this helix and marks p53 for degradation. p53 is mutated or functionally silenced in the majority of human cancers, making this interface a top drug target: MDM2 inhibitors in clinical trials aim to free p53 and reactivate it.',
     chainA: { name: 'p53', seq: 'SQETFSDLWKLLPEN', ss: 'CCCCHHHHHHHHCCC' },
     chainB: { name: 'MDM2' },
     // [idxA, partnerAA, dist, partnerResi (on MDM2 chain A)]

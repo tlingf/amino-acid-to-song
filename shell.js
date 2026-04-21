@@ -1,8 +1,8 @@
 /* ─────────────────────────────────────────────────────────────────
-   Shell — hero scroll + tabs + UX refinements
+   Shell: hero scroll + tabs + UX refinements
    ───────────────────────────────────────────────────────────────── */
 
-/* Suppress the benign "[MIDI] access denied" console noise — fired by
+/* Suppress the benign "[MIDI] access denied" console noise, fired by
    player.js whenever a browser denies Web MIDI (the default). Must run
    before the MIDI promise rejects, so it's at the top of the file. */
 (function silenceMIDIConsole() {
@@ -154,15 +154,14 @@ window.onTempoChange = onTempoChange;
       if (cap.style.display === 'none') return;
       if (typeof activeComplex === 'undefined' || !activeComplex) return;
       // Only rewrite if the caption doesn't already contain our friendly copy
-      if (cap.innerHTML.includes('stick together')) return;
+      if (cap.innerHTML.includes('bind together')) return;
       rewriting = true;
       const a = activeComplex.chainA.name, b = activeComplex.chainB.name;
       cap.classList.add('friendly');
       cap.innerHTML =
-        `<strong>These two proteins stick together.</strong> `
-      + `The rows below show which letters of <em>${a}</em> touch which letters of <em>${b}</em> — `
-      + `the spots where they physically clasp on to each other. `
-      + `When you play, both melodies sound at once: they <em>harmonize</em> at the contact points.`;
+        `<strong>These two proteins bind together.</strong> `
+      + `The rows below show which letters of <em>${a}</em> are close to which letters of <em>${b}</em>. `
+      + `<em>${a}</em> plays, and you hear <em>${b}</em> notes when they contact.`;
       setTimeout(() => { rewriting = false; }, 0);
     };
     const mo = new MutationObserver(rewrite);
@@ -240,7 +239,7 @@ window.toggleMappingPanel = toggleMappingPanel;
   } else if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', install);
   } else {
-    // DOM is ready but containers missing — retry shortly (player.js may be mid-render)
+    // DOM is ready but containers missing, retry shortly (player.js may be mid-render)
     setTimeout(install, 50);
     setTimeout(install, 200);
   }
@@ -249,7 +248,7 @@ window.toggleMappingPanel = toggleMappingPanel;
 /* ---------- MIDI banner: only show when a device is connected ---------- */
 /* Replace initMIDI entirely: the original logs "access denied" to console.error
    whenever browsers block MIDI (the default state). For normal users this is
-   noise — they don't have a MIDI keyboard anyway. Our replacement silently
+   noise, they don't have a MIDI keyboard anyway. Our replacement silently
    ignores denial and only surfaces the banner if a device is connected. */
 (function wireMIDIVisibility() {
   function install() {

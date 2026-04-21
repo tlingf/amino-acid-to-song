@@ -3,7 +3,14 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Protein Melody Player — listen to the music of life</title>
+<title>Protein Piano: play and hear any protein sequence as music</title>
+<meta name="description" content="Turn any protein amino acid sequence into music. The protein piano maps all 20 amino acids to notes so you can play, compose, and hear what proteins sound like."/>
+<meta property="og:title" content="Protein Piano: play and hear any protein sequence as music"/>
+<meta property="og:description" content="Turn any protein amino acid sequence into music. Maps all 20 amino acids to notes so you can play, compose, and hear what proteins sound like."/>
+<meta property="og:type" content="website"/>
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Protein Piano: play and hear any protein sequence as music"/>
+<meta name="twitter:description" content="Turn any protein amino acid sequence into music. Maps all 20 amino acids to notes so you can play, compose, and hear what proteins sound like."/>
 <link rel="stylesheet" href="styles.css"/>
 <link rel="stylesheet" href="hero.css"/>
 <script src="https://3Dmol.org/build/3Dmol-min.js" defer></script>
@@ -64,7 +71,7 @@
       <div class="hero-arrow">↓</div>
       <p class="hero-analogy-punch">
         If we mapped each amino acid to a note,
-        what would it sound like? What would binding proteins sound like?
+        what would it sound like?
       </p>
     </div>
 
@@ -134,6 +141,7 @@
   <div class="mapping-panel-content" id="mappingPanelContent">
     <div class="panel-label">Key mapping</div>
     <div class="presets" id="mappingBtns"></div>
+    <p style="font-size:11px;color:var(--color-text-tertiary);margin:2px 0 8px;font-style:italic">Note assignments are an artistic choice; no physical law links amino acids to musical pitches.</p>
     <div class="legend" id="legend"></div>
     <div class="detail-toggle" id="detailToggle" onclick="toggleDetails()">show all 20 mappings</div>
     <div id="panelRef" style="display:none"></div>
@@ -177,9 +185,6 @@
       <input type="range" min="40" max="300" value="120" step="1" id="tempoSlider" style="width:100px" oninput="onTempoChange(this.value)"/>
       <span id="tempoOut" class="tempo-out" style="min-width:96px;font-weight:500;color:var(--color-text-primary)"><span class="tempo-word">medium</span> <span class="tempo-num">♪ = 120</span></span>
     </div>
-    <label class="rhythm-toggle" id="rhythmToggle" style="display:none" title="Helix = 3/4 waltz, Strand = 4/4 march, Coil = free tempo">
-      <span class="rhythm-ss-hint" id="rhythmHint"></span>
-    </label>
   </div>
 
   <!-- Compose toolbar: revealed only after the first keypress (see body.has-compose-seq) -->
@@ -203,7 +208,7 @@
       </div>
       <div class="compose-empty-step">
         <span class="compose-empty-num">2</span>
-        <span><b>Follow the glowing keys</b> if you like — they suggest letters
+        <span><b>Follow the glowing keys</b> if you like: they suggest letters
           that are statistically likely to come next in real proteins.</span>
       </div>
       <div class="compose-empty-step">

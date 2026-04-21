@@ -5,10 +5,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Coding guidelines
 Don't save to /tmp. Save to a tmp dir in the project repo
 
+## Design guidelines
+Don't use emdashes. Use colons or commas instead.
+
 ## Project Overview
 
-Protein Melody Player: a static web app that converts protein amino acid sequences into music. Four mapping strategies assign the 20 standard amino acids to notes (chromatic C4–G5 or pentatonic C3–A6). Supports melody playback, real-time keyboard input, harmony mode (binding contacts play simultaneously), compose mode (build sequences with bigram-guided suggestions and fold via ESMFold), and 3D structure visualization.
-
+Protein Melody Player: a static web app that converts protein amino acid sequences into music.
 ## Running
 
 Open `index.html` directly in a browser. No build step, no bundler, no npm. Vanilla JS + Web Audio API. Deployed to GitHub Pages via `.github/workflows/deploy.yml` on push to main.

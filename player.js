@@ -26,7 +26,7 @@ const WO_NI = {}; WO_WN.forEach((n, i) => WO_NI[n] = i);
 const AF = { L: 9.66, A: 8.25, G: 7.07, V: 6.87, E: 6.75, S: 6.56, I: 5.96, K: 5.84, R: 5.53, D: 5.45, T: 5.34, P: 4.70, N: 4.06, Q: 3.93, F: 3.86, Y: 2.92, M: 2.42, H: 2.27, C: 1.37, W: 1.08 };
 
 const PS = [
-  { name: 'hemoglobin', seq: 'VHLTPEEKSAVTALWGKVNVDEVGGEALGRLLVVYPWTQRFFESFGDLSTPDAVMGNPKVKAHGKKVLGAFSDGLAHLDNLKGTFATLSELHCDKLHVDP', ss: 'CCCCHHHHHHHHHHHCCCCHHHHHHHHHHHHHHHCHHHHHHCHHHCCCCCHHHHHHCHHHHHHHHHHHHHHHHHHCCHHHHHHHHHHHHHHHHHHHCCCC', pdb: '4HHB', desc: 'Hemoglobin \u03B2 (100aa): the oxygen carrier that colors your blood red', significance: 'Hemoglobin is the protein in red blood cells that carries oxygen from your lungs to every tissue in your body. Its \u03B2-chain contains the classic globin fold: eight alpha-helices wrapping around a heme group that binds O\u2082. A single mutation in this chain (E6V) causes sickle-cell disease, the first \u201Cmolecular disease\u201D ever identified. Max Perutz solved hemoglobin\'s structure in 1959 and earned the 1962 Nobel Prize, one of the first protein structures determined by X-ray crystallography.' },
+  { name: 'hemoglobin', snippet: true, seq: 'VHLTPEEKSAVTALWGKVNVDEVGGEALGRLLVVYPWTQRFFESFGDLSTPDAVMGNPKVKAHGKKVLGAFSDGLAHLDNLKGTFATLSELHCDKLHVDP', ss: 'CCCCHHHHHHHHHHHCCCCHHHHHHHHHHHHHHHCHHHHHHCHHHCCCCCHHHHHHCHHHHHHHHHHHHHHHHHHCCHHHHHHHHHHHHHHHHHHHCCCC', pdb: '4HHB', pdbChain: 'B', pdbStartResi: 1, desc: 'Hemoglobin \u03B2 (first 100 of 146 aa): the oxygen carrier that colors your blood red', significance: 'Hemoglobin is the protein in red blood cells that carries oxygen from your lungs to every tissue in your body. Its \u03B2-chain contains the classic globin fold: eight alpha-helices wrapping around a heme group that binds O\u2082. A single mutation in this chain (E6V) causes sickle-cell disease, the first \u201Cmolecular disease\u201D ever identified. Max Perutz solved hemoglobin\'s structure in 1959 and earned the 1962 Nobel Prize, one of the first protein structures determined by X-ray crystallography.' },
   { name: 'VHH nanobody', seq: 'DVQLVESGGGSVQAGGSLRLSCAASGYIASINYLGWFRQAPGKEREGVAAVSPAGGTPYYADSVKGRFTVSLDNAENTVYLQMNSLKPEDTALYYCAAARQGWYIPLNSYGYNYWGQGTQVTVS', ss: 'CEEEEEECCEEECCCCCEEEEEEEEECHHHEEEEEEEEECCCCCCEEEEEECCCCCCEEECCCCECCEEEEEECCCCEEEEEECCCCHHHCEEEEEEEEECCCCCCCCHHHEEEECCCEEEEEC', pdb: '1ZVH', desc: 'VHH nanobody (124aa): a complete single-domain antibody from a llama', significance: 'Camelids (llamas, camels, alpacas) produce unique heavy-chain-only antibodies. The VHH domain, or nanobody, is their single variable region containing four framework regions (FR1\u2013FR4) that form a \u03B2-sandwich scaffold, and three hypervariable CDR loops that determine antigen specificity. At only ~15 kDa, nanobodies are the smallest known antigen-binding fragments. They are prized for their stability, ease of engineering, and ability to access hidden epitopes that conventional antibodies cannot reach, now used as research tools, diagnostics, and FDA-approved therapeutics (e.g. caplacizumab).' }
 ];
 
@@ -134,30 +134,6 @@ function getActiveSS() {
   if (activeComplex && activeComplex.chainA.ss) return activeComplex.chainA.ss;
   if (presetActive) { const p = PS.find(p => p.name === presetActive); if (p) return p.playSS || p.ss || null; }
   return null;
-}
-
-function toggleRhythm() {
-  updateSSBadges();
-}
-
-function updateRhythmUI() {
-  const ss = getActiveSS();
-  const toggle = document.getElementById('rhythmToggle');
-  const hint = document.getElementById('rhythmHint');
-  if (!toggle) return;
-  if (ss) {
-    toggle.style.display = 'flex';
-    const nH = (ss.match(/H/g) || []).length;
-    const nE = (ss.match(/E/g) || []).length;
-    const nC = (ss.match(/C/g) || []).length;
-    const parts = [];
-    if (nH) parts.push(nH + 'H');
-    if (nE) parts.push(nE + 'E');
-    if (nC) parts.push(nC + 'C');
-    hint.textContent = parts.join(' ');
-  } else {
-    toggle.style.display = 'none';
-  }
 }
 
 function updateSSBadges() {
@@ -599,7 +575,7 @@ function loadPreset(p) {
   seq = playable.toUpperCase().split('').filter(aa => AM[aa]);
   renderPresets(); renderSeqMel();
   const ib1 = document.getElementById('infoBar'); if (ib1) ib1.textContent = `${p.name} (${p.seq.length} aa)`;
-  renderInfoPanel(); updateRhythmUI(); updateSSBadges();
+  renderInfoPanel(); updateSSBadges();
 }
 
 function loadPresetClear(p) {
@@ -612,7 +588,7 @@ function loadCustom() {
   seq = document.getElementById('seqInput').value.toUpperCase().split('').filter(aa => AM[aa]);
   renderPresets(); renderHarmonyBtns(); renderSeqMel();
   const ib2 = document.getElementById('infoBar'); if (ib2) ib2.textContent = seq.length ? `${seq.length} amino acids loaded` : 'no valid amino acids found';
-  renderInfoPanel(); updateRhythmUI(); updateSSBadges();
+  renderInfoPanel(); updateSSBadges();
 }
 
 function onSeqInput() {
@@ -706,7 +682,7 @@ function loadComplex(cx) {
   if (ib3) ib3.innerHTML = `<span style="font-weight:500">${cx.name}</span> `
     + `<span style="color:var(--color-text-tertiary)">(${cx.pdb})</span> `
     + `<span style="color:var(--color-text-secondary);font-size:12px">${cx.contacts.length} contacts</span>`;
-  renderInfoPanel(); updateRhythmUI(); updateSSBadges();
+  renderInfoPanel(); updateSSBadges();
 }
 
 /* ── Keyboard ── */
@@ -913,8 +889,11 @@ function highlightViewerResidue(idx) {
   const isPlaying = idx >= 0 && idx < activeResiMap.length;
   const wasCartoon = activeViewStyleIdx === 0;
   const style = isPlaying ? VIEW_STYLES[0] : VIEW_STYLES[activeViewStyleIdx];
-  // Re-apply base style (faded when playing) so the yellow highlight dominates.
-  style.apply(activeViewer, activeViewCS, isPlaying, isPlaying && !wasCartoon);
+  // Cartoon mode: keep the cartoon at full opacity during playback so it stays
+  // the main thing on screen, with the yellow active residue popping on top.
+  // Other modes: render a grey faded cartoon as the backdrop.
+  const dim = isPlaying && !wasCartoon;
+  style.apply(activeViewer, activeViewCS, dim, dim);
   if (isPlaying) {
     const resi = activeResiMap[idx];
     // Highlight the active residue + pop its side chain so it's visible against
