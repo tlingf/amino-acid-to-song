@@ -261,7 +261,7 @@ window.toggleMappingPanel = toggleMappingPanel;
         attach();
         updateMIDIStatus(access);
         access.onstatechange = () => { attach(); updateMIDIStatus(access); };
-      }).catch(() => { /* denied — fine, stay silent */ });
+      }).catch(() => { /* denied, fine, stay silent */ });
     };
 
     window.updateMIDIStatus = function(access) {
@@ -304,7 +304,7 @@ window.toggleMappingPanel = toggleMappingPanel;
         foldBtn.textContent = 'folding';
       }
 
-      // 2. Info panel overlay — replaces the plain "folding..." placeholder
+      // 2. Info panel overlay, replaces the plain "folding..." placeholder
       // Build the AI-blurb HTML once so we can write it both now AND after
       // orig.foldSequence clobbers innerHTML with its own "folding..." placeholder.
       const aiBlurbHTML = `
@@ -318,14 +318,14 @@ window.toggleMappingPanel = toggleMappingPanel;
             <div class="fold-progress-body">
               This is a small miracle of modern AI. For 50 years, figuring out
               how a protein folds from its sequence was biology's grand
-              challenge — a single structure could take a PhD student years in
+              challenge: a single structure could take a PhD student years in
               the lab. In 2020, DeepMind's <strong>AlphaFold</strong> cracked
               it with deep learning; in 2024 its creators won the
               <strong>Nobel Prize in Chemistry</strong>.
               <br/><br/>
               Right now, <strong>ESMFold</strong> (Meta AI's open-source
               cousin) is reading your sequence and predicting its shape in
-              seconds — something unthinkable before 2020.
+              seconds, something unthinkable before 2020.
             </div>
             <div class="fold-progress-aside" id="foldProgressTip">This usually takes 10–30 seconds…</div>
           </div>
@@ -342,8 +342,8 @@ window.toggleMappingPanel = toggleMappingPanel;
         'A decade ago, this took a PhD student years in a lab…',
         'Exploring billions of possible 3D conformations…',
         'The AI has seen ~200 million known protein structures…',
-        'Almost there — finalizing the atoms…',
-        'Still working — some sequences are trickier than others…'
+        'Almost there, finalizing the atoms…',
+        'Still working, some sequences are trickier than others…'
       ];
       function startTipTimer() {
         if (window.__foldTipTimer) clearInterval(window.__foldTipTimer);
@@ -375,7 +375,7 @@ window.toggleMappingPanel = toggleMappingPanel;
           startTipTimer();
         });
         await p;
-        // Fold succeeded — append the AI blurb below the results so it persists
+        // Fold succeeded, append the AI blurb below the results so it persists
         const elAfter = document.getElementById('infoPanelContent');
         if (elAfter && document.getElementById('matchResults')) {
           const blurbDiv = document.createElement('div');
