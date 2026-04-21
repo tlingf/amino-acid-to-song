@@ -1,0 +1,28 @@
+# Protein Melody Player
+
+> Interactive web app that maps amino acid sequences to music and supports sequence alignment.
+
+## Project URL
+- https://proteinplayer.com/
+
+## Important Pages
+- Home app: https://proteinplayer.com/
+- Sequence aligner: https://proteinplayer.com/align.html
+- Source code: https://github.com/tlingf/amino-acid-to-song
+
+## What This Project Does
+- Converts one-letter amino acid sequences into musical melodies.
+- Supports multiple amino acid-to-note mapping strategies.
+- Includes harmony mode based on known protein binding contacts.
+- Provides compose mode with next-residue suggestions from bigram statistics.
+- Supports folding composed sequences with ESMFold and viewing structures in 3D.
+- Includes browser-based Needleman-Wunsch global sequence alignment.
+
+## Tech Summary
+- Static site (HTML/CSS/Vanilla JavaScript)
+- Web Audio API for synthesis
+- 3Dmol.js for molecular visualization
+- ESMFold API for structure prediction
+
+## Canonical Documentation
+- README: https://github.com/tlingf/amino-acid-to-song/blob/main/README.md

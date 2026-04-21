@@ -3,14 +3,46 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>AA Melody Player 🎵</title>
+<title>Protein Melody Player | Turn Amino Acid Sequences into Music</title>
+<meta name="description" content="Interactive Protein Melody Player that converts amino acid sequences into music, supports harmony from protein contacts, and includes AI-assisted composition with 3D structure viewing."/>
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"/>
+<link rel="canonical" href="https://proteinplayer.com/"/>
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="Protein Melody Player"/>
+<meta property="og:title" content="Protein Melody Player"/>
+<meta property="og:description" content="Turn amino acid sequences into melody, explore protein-binding harmony, and compose sequences with live 3D folding visualization."/>
+<meta property="og:url" content="https://proteinplayer.com/"/>
+<meta property="og:locale" content="en_US"/>
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Protein Melody Player"/>
+<meta name="twitter:description" content="Turn amino acid sequences into melody and explore protein structure through music."/>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Protein Melody Player",
+  "url": "https://proteinplayer.com/",
+  "description": "A static web app that maps amino acid sequences to musical notes, supports harmony mode for binding contacts, and enables sequence composition with 3D structure visualization.",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
 <link rel="stylesheet" href="styles.css"/>
 <script src="https://3Dmol.org/build/3Dmol-min.js" defer></script>
 </head>
 <body>
+<header>
 <h1>AA Melody Player 🎵 <span class="h1-sub">Listen to your proteins, or compose them</span></h1>
 <p class="blurb">Amino acids (aa), <span class="blurb-accent">like notes in a song</span>, form sequences that fold and then bind to each other, <span class="blurb-accent">like harmony in music</span>, that create the machinery of life. Amazingly, almost every protein is built from just <span class="blurb-accent">20 amino acids</span>.</p>
+</header>
 
+<main>
 <div class="pmp">
 <div class="mapping-panel">
   <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px">Choose key mapping</div>
@@ -77,8 +109,11 @@
   </div>
 </div>
 </div>
+</main>
 
-<p class="footer-blurb">Have more ideas? <a href="https://github.com/tlingf/amino-acid-to-song" target="_blank" rel="noopener">Contribute on GitHub</a></p>
+<footer>
+<p class="footer-blurb"><a href="align.html">Try the Protein Sequence Aligner</a> · Have more ideas? <a href="https://github.com/tlingf/amino-acid-to-song" target="_blank" rel="noopener">Contribute on GitHub</a></p>
+</footer>
 
 <script src="aa_mapping.js"></script>
 <script src="aa_structures.js"></script>
