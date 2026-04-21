@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect width="64" height="64" rx="14" fill="#534AB7"></rect>
+  <g stroke="#ffffff" stroke-width="1.2" opacity="0.4" stroke-linecap="round">
+    <line x1="8" y1="24" x2="56" y2="24"></line>
+    <line x1="8" y1="28" x2="56" y2="28"></line>
+    <line x1="8" y1="32" x2="56" y2="32"></line>
+    <line x1="8" y1="36" x2="56" y2="36"></line>
+    <line x1="8" y1="40" x2="56" y2="40"></line>
+  </g>
+  
+  <g stroke="#ffffff" stroke-width="0.9" opacity="0.5" stroke-linecap="round">
+    <line x1="12.2" y1="25.3" x2="12.2" y2="38.7"></line>
+    <line x1="17.333" y1="32" x2="17.333" y2="32"></line>
+    <line x1="22.466" y1="38.7" x2="22.466" y2="25.3"></line>
+    <line x1="26.866" y1="25.3" x2="26.866" y2="38.7"></line>
+    <line x1="32" y1="32" x2="32" y2="32"></line>
+    <line x1="37.133" y1="38.7" x2="37.133" y2="25.3"></line>
+    <line x1="41.533" y1="25.3" x2="41.533" y2="38.7"></line>
+    <line x1="46.666" y1="32" x2="46.666" y2="32"></line>
+    <line x1="51.8" y1="38.7" x2="51.8" y2="25.3"></line>
+  </g>
+  
+  <path d="M 10 32 Q 13.666 24, 17.333 32 Q 21 40, 24.666 32 Q 28.333 24, 32 32 Q 35.666 40, 39.333 32 Q 43 24, 46.666 32 Q 50.333 40, 54 32" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
